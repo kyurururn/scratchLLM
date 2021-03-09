@@ -14,7 +14,7 @@ declare function require(path: 'text-encoding'): { TextEncoder: typeof TextEncod
 const defaultProject = (translator?: TranslatorFunction) => {
     let _TextEncoder: typeof TextEncoder;
     if (typeof TextEncoder === 'undefined') {
-        _TextEncoder = require('text-encoding').TextEncoder;
+        _TextEncoder = require('fastestsmallesttextencoderdecoder').TextEncoder;
     } else {
         _TextEncoder = TextEncoder;
     }
