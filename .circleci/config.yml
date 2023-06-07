@@ -1,6 +1,7 @@
 version: 2.1
 
 orbs:
+  commitlint: conventional-changelog/commitlint@1.0.0
   node: circleci/node@5.1.0
 
 executors:
@@ -18,6 +19,15 @@ commands:
       - node/install-packages
 
 workflows:
+  commitlint:
+    jobs:
+      - commitlint/lint:
+          target-branch: develop
+          filters:
+            branches:
+              ignore:
+                - develop
+                - main
   build-test:
     jobs:
       - build_test
