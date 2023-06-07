@@ -1,0 +1,29 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5.1.0
+
+executors:
+  default-executor:
+    docker:
+      - image: "cimg/node:16.20.0-browsers"
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
+
+commands:
+  setup:
+    steps:
+      - checkout
+      - node/install-packages
+
+workflows:
+  build-test:
+    jobs:
+      - build_test
+
+jobs:
+  build_test:
+    executor: default-executor
+    steps:
+      - setup
