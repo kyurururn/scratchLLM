@@ -19,7 +19,7 @@ add_repo_to_monorepo () {
     #
 
     # reference = go faster
-    git -C tmp clone --recursive --single-branch --reference "$MY_REPOS"/"$REPO_NAME" "git@github.com:${ORG_AND_REPO_NAME}.git"
+    git -C tmp clone --single-branch --reference "$MY_REPOS"/"$REPO_NAME" "git@github.com:${ORG_AND_REPO_NAME}.git"
     # get ready to disconnect reference repo
     git -C "tmp/${REPO_NAME}" repack -a
     # actually disconnect the reference repo
@@ -31,9 +31,20 @@ add_repo_to_monorepo () {
 
     # make filter-repo accept this as a fresh clone
     git -C "tmp/${REPO_NAME}" gc
+
     # rewrite history as if all this work happened in a subdirectory
     # "git mv" is simpler but makes history less visible unless you explicitly use "--follow"
-    git -C "tmp/${REPO_NAME}" filter-repo --to-subdirectory-filter "packages/$REPO_NAME"
+    if [ ! -f "tmp/${REPO_NAME}/.gitmodules" ]; then
+        # this is significantly faster than the special case below
+        git -C "tmp/${REPO_NAME}" filter-repo --to-subdirectory-filter "packages/$REPO_NAME"
+    else
+        # the .gitmodules file must stay in the repository root, but the paths inside it must be rewritten
+        # this is complicated for the reasons described here: https://github.com/newren/git-filter-repo/issues/158
+        # this is also slow, so we only do it for repositories that have submodules
+        git -C "tmp/${REPO_NAME}" filter-repo \
+            --filename-callback "return filename if filename == b'.gitmodules' else b'packages/${REPO_NAME}/'+filename" \
+            --blob-callback "if blob.data.startswith(b'[submodule '): blob.data = blob.data.replace(b'path = ', b'path = packages/${REPO_NAME}/')"
+    fi
 
     #
     # Merge it in
