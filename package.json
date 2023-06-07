@@ -12,6 +12,11 @@
   "scripts": {
     "prepare": "husky install"
   },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
   "workspaces": [
     "packages/*"
   ],
