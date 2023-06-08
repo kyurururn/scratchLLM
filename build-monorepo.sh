@@ -8,6 +8,14 @@ MY_REPOS="$HOME/GitHub"
 # All repositories are assumed to be hosted in this GitHub org
 GITHUB_ORG="scratchfoundation"
 
+# Thanks to https://stackoverflow.com/a/17841619
+join_args () {
+    local d=${1-} f=${2-}
+    if shift 2; then
+        printf %s "$f" "${@/#/$d}"
+    fi
+}
+
 add_repo_to_monorepo () {
     REPO_NAME="$1"
     ORG_AND_REPO_NAME="${GITHUB_ORG}/${REPO_NAME}"
@@ -88,11 +96,29 @@ done
 # submodules could be necessary for build/test scripts
 git submodule update --init --recursive
 
+# remove repository-level configuration and dependencies, like commitlint
+# do not remove configuration and dependencies that could vary between packages, like semantic-release
+# some of these files only make sense in the root of the repository
+# others could be in subdirectories, like .editorconfig, but centralizing them makes consistency easier
 # it would be nice to merge all the package-lock.json files into one but it's not clear how to do that
+# just remove the package-lock.json files for now, and build a new one with "npm i" later
 rm -rf packages/*/{.circleci,.editorconfig,.gitattributes,.github,.husky,package-lock.json,renovate.json*}
-git commit packages -m "chore: remove redundant repo config files from packages/*"
+for REPO in $ALL_REPOS; do
+    jq -f <(join_args ' | ' \
+        'if .scripts.prepare == "husky install" then del(.scripts.prepare) else . end' \
+        'if .scripts == {} then del(.scripts.prepare) else . end' \
+        'del(.config.commitizen)' \
+        'if .config == {} then del(.config) else . end' \
+        'del(.devDependencies."@commitlint/cli")' \
+        'del(.devDependencies."@commitlint/config-conventional")' \
+        'del(.devDependencies."@commitlint/travis-cli")' \
+        'del(.devDependencies."cz-conventional-changelog")' \
+        'del(.devDependencies."husky")' \
+        'if .devDependencies == {} then del(.devDependencies) else . end' \
+    ) "packages/${REPO}/package.json" | sponge "packages/${REPO}/package.json"
+done
+git commit packages -m "chore: remove repo-level configuration and deps from packages/*"
 
-# just let "npm install" do its thing
 npm i
 git add package.json package-lock.json
 git commit -m "chore(deps): update package-lock.json"
