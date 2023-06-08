@@ -40,7 +40,8 @@ add_repo_to_monorepo () {
     else
         # the .gitmodules file must stay in the repository root, but the paths inside it must be rewritten
         # this is complicated for the reasons described here: https://github.com/newren/git-filter-repo/issues/158
-        # this is also slow, so we only do it for repositories that have submodules
+        # this is also slower, so we only do it for repositories that have submodules
+        # if we have more than one, this will cause merge conflicts
         git -C "tmp/${REPO_NAME}" filter-repo \
             --filename-callback "return filename if filename == b'.gitmodules' else b'packages/${REPO_NAME}/'+filename" \
             --blob-callback "if blob.data.startswith(b'[submodule '): blob.data = blob.data.replace(b'path = ', b'path = packages/${REPO_NAME}/')"
@@ -59,7 +60,7 @@ add_repo_to_monorepo () {
     rm -rf "tmp/${REPO_NAME}"
 }
 
-for REPO in \
+ALL_REPOS="
     scratch-audio \
     scratch-blocks \
     scratch-desktop \
@@ -76,12 +77,22 @@ for REPO in \
     scratch-vm \
     eslint-config-scratch \
     paper.js \
-    ;
-do
+"
+
+for REPO in $ALL_REPOS; do
     add_repo_to_monorepo "$REPO"
 done
 
 (rmdir tmp || true) 2> /dev/null
 
-git rm -r packages/*/{.circleci,.editorconfig,.gitattributes,.github,.husky,renovate.json*}
-git commit -m "chore: remove redundant repo config files from packages/*"
+# submodules could be necessary for build/test scripts
+git submodule update --init --recursive
+
+# it would be nice to merge all the package-lock.json files into one but it's not clear how to do that
+rm -rf packages/*/{.circleci,.editorconfig,.gitattributes,.github,.husky,package-lock.json,renovate.json*}
+git commit packages -m "chore: remove redundant repo config files from packages/*"
+
+# just let "npm install" do its thing
+npm i
+git add package.json package-lock.json
+git commit -m "chore(deps): update package-lock.json"
