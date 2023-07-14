@@ -44,15 +44,15 @@ add_repo_to_monorepo () {
     # "git mv" is simpler but makes history less visible unless you explicitly use "--follow"
     if [ ! -f "tmp/${REPO_NAME}/.gitmodules" ]; then
         # this is significantly faster than the special case below
-        git -C "tmp/${REPO_NAME}" filter-repo --to-subdirectory-filter "packages/$REPO_NAME"
+        git -C "tmp/${REPO_NAME}" filter-repo --to-subdirectory-filter "workspaces/$REPO_NAME"
     else
         # the .gitmodules file must stay in the repository root, but the paths inside it must be rewritten
         # this is complicated for the reasons described here: https://github.com/newren/git-filter-repo/issues/158
         # this is also slower, so we only do it for repositories that have submodules
         # if we have more than one, this will cause merge conflicts
         git -C "tmp/${REPO_NAME}" filter-repo \
-            --filename-callback "return filename if filename == b'.gitmodules' else b'packages/${REPO_NAME}/'+filename" \
-            --blob-callback "if blob.data.startswith(b'[submodule '): blob.data = blob.data.replace(b'path = ', b'path = packages/${REPO_NAME}/')"
+            --filename-callback "return filename if filename == b'.gitmodules' else b'workspaces/${REPO_NAME}/'+filename" \
+            --blob-callback "if blob.data.startswith(b'[submodule '): blob.data = blob.data.replace(b'path = ', b'path = workspaces/${REPO_NAME}/')"
     fi
 
     #
@@ -63,7 +63,7 @@ add_repo_to_monorepo () {
 
     git remote add "temp-$REPO_NAME" "tmp/${REPO_NAME}"
     git fetch --no-tags "temp-$REPO_NAME"
-    git merge --allow-unrelated-histories --no-verify -m "chore(deps): add packages/$REPO_NAME" "temp-$REPO_NAME/$BRANCH"
+    git merge --allow-unrelated-histories --no-verify -m "chore(deps): add workspaces/$REPO_NAME" "temp-$REPO_NAME/$BRANCH"
     git remote remove "temp-$REPO_NAME"
     rm -rf "tmp/${REPO_NAME}"
 }
@@ -102,7 +102,7 @@ git submodule update --init --recursive
 # others could be in subdirectories, like .editorconfig, but centralizing them makes consistency easier
 # it would be nice to merge all the package-lock.json files into one but it's not clear how to do that
 # just remove the package-lock.json files for now, and build a new one with "npm i" later
-rm -rf packages/*/{.circleci,.editorconfig,.gitattributes,.github,.husky,package-lock.json,renovate.json*}
+rm -rf workspaces/*/{.circleci,.editorconfig,.gitattributes,.github,.husky,package-lock.json,renovate.json*}
 for REPO in $ALL_REPOS; do
     jq -f <(join_args ' | ' \
         'if .scripts.prepare == "husky install" then del(.scripts.prepare) else . end' \
@@ -115,10 +115,11 @@ for REPO in $ALL_REPOS; do
         'del(.devDependencies."cz-conventional-changelog")' \
         'del(.devDependencies."husky")' \
         'if .devDependencies == {} then del(.devDependencies) else . end' \
-    ) "packages/${REPO}/package.json" | sponge "packages/${REPO}/package.json"
+    ) "workspaces/${REPO}/package.json" | sponge "workspaces/${REPO}/package.json"
 done
-git commit packages -m "chore: remove repo-level configuration and deps from packages/*"
+git commit -m "chore: remove repo-level configuration and deps from workspaces/*" \
+    workspaces
 
 npm i
-git add package.json package-lock.json
-git commit -m "chore(deps): update package-lock.json"
+git commit -m "chore(deps): build initial real package-lock.json" \
+    package.json package-lock.json
