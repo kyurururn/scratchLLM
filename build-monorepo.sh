@@ -49,6 +49,8 @@ add_repo_to_monorepo () {
     # Clone
     #
 
+    # refresh the cache
+    git -C "${MY_REPOS}/${REPO_NAME}" fetch --all
     # reference = go faster
     git -C tmp clone --single-branch --reference "$MY_REPOS"/"$REPO_NAME" "git@github.com:${ORG_AND_REPO_NAME}.git"
     # get ready to disconnect reference repo
