@@ -1,3 +1,8 @@
+# build-monorepo.sh
+/monorepo.out
+/monorepo.tmp
+/monorepo.cache
+
 # Logs
 logs
 *.log
