@@ -124,3 +124,47 @@ npm i
 npm i --package-lock-only # sometimes this is necessary to get a consistent package-lock.json
 git commit -m "chore(deps): build initial real package-lock.json" \
     package.json package-lock.json
+
+for REPO in $ALL_REPOS; do
+    REMOVEDEPS=""
+    DEPS=""
+    DEVDEPS=""
+    OPTDEPS=""
+    PEERDEPS=""
+    for DEP in $ALL_REPOS; do
+        if jq -e .dependencies.\"$DEP\" "workspaces/${REPO}/package.json" > /dev/null; then
+            REMOVEDEPS="$REMOVEDEPS $DEP"
+            DEPS="$DEPS $DEP@*"
+        fi
+        if jq -e .devDependencies.\"$DEP\" "workspaces/${REPO}/package.json" > /dev/null; then
+            REMOVEDEPS="$REMOVEDEPS $DEP"
+            DEVDEPS="$DEVDEPS $DEP@*"
+        fi
+        if jq -e .optionalDependencies.\"$DEP\" "workspaces/${REPO}/package.json" > /dev/null; then
+            REMOVEDEPS="$REMOVEDEPS $DEP"
+            OPTDEPS="$OPTDEPS $DEP@*"
+        fi
+        if jq -e .peerDependencies.\"$DEP\" "workspaces/${REPO}/package.json" > /dev/null; then
+            REMOVEDEPS="$REMOVEDEPS $DEP"
+            PEERDEPS="$PEERDEPS $DEP@*"
+        fi
+    done
+    if [ -n "$REMOVEDEPS" ]; then
+        npm uninstall $REMOVEDEPS -w $REPO
+        if [ -n "$DEPS" ]; then
+            npm i  --save --save-exact $DEPS -w $REPO
+        fi
+        if [ -n "$DEVDEPS" ]; then
+            npm i --save-dev --save-exact $DEVDEPS -w $REPO
+        fi
+        if [ -n "$OPTDEPS" ]; then
+            npm i --save-optional --save-exact $OPTDEPS -w $REPO
+        fi
+        if [ -n "$PEERDEPS" ]; then
+            npm i --save-peer --save-exact $PEERDEPS -w $REPO
+        fi
+    fi
+done
+
+git commit -m "chore(deps): use workspace versions of all local packages" \
+    package.json package-lock.json workspaces/*/package.json
