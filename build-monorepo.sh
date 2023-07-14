@@ -121,5 +121,6 @@ git commit -m "chore: remove repo-level configuration and deps from workspaces/*
     workspaces
 
 npm i
+npm i --package-lock-only # sometimes this is necessary to get a consistent package-lock.json
 git commit -m "chore(deps): build initial real package-lock.json" \
     package.json package-lock.json
