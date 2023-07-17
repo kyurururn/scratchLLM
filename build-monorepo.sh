@@ -73,8 +73,7 @@ join_args () {
 init_monorepo () {
     git init "$BUILD_OUT"
     git -C "$BUILD_OUT" remote add origin "git@github.com:${GITHUB_ORG}/${BASE_REPO}.git"
-    git -C "$BUILD_OUT" fetch --all
-    git -C "$BUILD_OUT" checkout -b develop "$BASE_COMMIT"
+    git -C "$BUILD_OUT" fetch --all # to make sure BASE_COMMIT is available
 }
 
 add_repo_to_monorepo () {
@@ -89,7 +88,7 @@ add_repo_to_monorepo () {
     # refresh the cache
     git -C "${BUILD_CACHE}/${REPO_NAME}" fetch --all
     # reference = go faster
-    git -C "$BUILD_TMP" clone --single-branch --reference "$(realpath "$BUILD_CACHE")/${REPO_NAME}" "git@github.com:${ORG_AND_REPO_NAME}.git"
+    git -C "$BUILD_TMP" clone --bare --dissociate --reference "$(realpath "$BUILD_CACHE")/${REPO_NAME}" "git@github.com:${ORG_AND_REPO_NAME}.git" "${REPO_NAME}"
     # get ready to disconnect reference repo
     git -C "${BUILD_TMP}/${REPO_NAME}" repack -a
     # actually disconnect the reference repo
@@ -102,12 +101,23 @@ add_repo_to_monorepo () {
     # make filter-repo accept this as a fresh clone
     git -C "${BUILD_TMP}/${REPO_NAME}" gc
 
+    HAS_SUBMODULES=$(
+        git -C "${BUILD_TMP}/${REPO_NAME}" branch --format="%(refname:short)" | while read BRANCH; do
+            if git -C "${BUILD_TMP}/${REPO_NAME}" cat-file -e "${BRANCH}:.gitmodules" &> /dev/null; then
+                echo "yep"
+                break;
+            fi
+        done
+    )
+
     # rewrite history as if all this work happened in a subdirectory
-    # "git mv" is simpler but makes history less visible unless you explicitly use "--follow"
-    if [ ! -f "${BUILD_TMP}/${REPO_NAME}/.gitmodules" ]; then
+    # "git mv" is simpler but makes history much less visible
+    if [ "$HAS_SUBMODULES" != "yep" ]; then
+        echo "Repository ${REPO_NAME} does NOT have submodules"
         # this is significantly faster than the special case below
         git -C "${BUILD_TMP}/${REPO_NAME}" filter-repo --to-subdirectory-filter "workspaces/$REPO_NAME"
     else
+        echo "Repository ${REPO_NAME} DOES have submodules"
         # the .gitmodules file must stay in the repository root, but the paths inside it must be rewritten
         # this is complicated for the reasons described here: https://github.com/newren/git-filter-repo/issues/158
         # this is also slower, so we only do it for repositories that have submodules
@@ -118,19 +128,74 @@ add_repo_to_monorepo () {
     fi
 
     #
-    # Merge it in
+    # Merge branches in
     #
 
-    BRANCH="$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --format="%(refname:short)")"
+    REMOTE_NAME="temp-$REPO_NAME"
+    git -C "$BUILD_OUT" remote add "$REMOTE_NAME" "$(realpath "${BUILD_TMP}")/${REPO_NAME}"
+    git -C "$BUILD_OUT" fetch --no-tags "$REMOTE_NAME"
 
-    git -C "$BUILD_OUT" remote add "temp-$REPO_NAME" "$(realpath "${BUILD_TMP}")/${REPO_NAME}"
-    git -C "$BUILD_OUT" fetch --no-tags "temp-$REPO_NAME"
-    git -C "$BUILD_OUT" merge --allow-unrelated-histories --no-verify -m "chore(deps): add workspaces/$REPO_NAME" "temp-$REPO_NAME/$BRANCH"
-    git -C "$BUILD_OUT" remote remove "temp-$REPO_NAME"
+    git -C "${BUILD_TMP}/${REPO_NAME}" branch --format="%(refname:short)" | while read BRANCH; do
+        case "$BRANCH" in
+            dependabot/*|greenkeeper/*|renovate/*)
+                continue # ignore these branches
+                ;;
+            develop)
+                if [ "$REPO_NAME" = "scratch-android" ]; then
+                    DEST_BRANCH="scratch-android"
+                elif [ "$REPO_NAME" = "scratch-desktop" ]; then
+                    DEST_BRANCH="scratch-desktop"
+                else
+                    DEST_BRANCH="$BRANCH"
+                fi
+                ;;
+            master)
+                # some repos use "master" and some use "main" -- let's make it consistent
+                DEST_BRANCH="main"
+                ;;
+            native)
+                if [ "$REPO_NAME" = "scratch-gui" ]; then
+                    DEST_BRANCH="scratch-android"
+                else
+                    DEST_BRANCH="$BRANCH"
+                fi
+                ;;
+            *)
+                DEST_BRANCH="$BRANCH"
+                ;;
+        esac
+
+        # checkout needs `-f` to get past CRLF problems
+        if [ -z "$(git -C "$BUILD_OUT" branch --list "$DEST_BRANCH")" ]; then
+            # create the destination branch if it doesn't exist
+            git -C "$BUILD_OUT" checkout -f --no-guess -b "$DEST_BRANCH" "$BASE_COMMIT"
+        else
+            # switch to existing branch
+            git -C "$BUILD_OUT" checkout -f --no-guess "$DEST_BRANCH"
+        fi
+
+        MERGE_MESSAGE="chore(deps): add ${REPO_NAME}#${BRANCH} as workspaces/${REPO_NAME}"
+        git -C "$BUILD_OUT" merge --no-ff --allow-unrelated-histories "${REMOTE_NAME}/${BRANCH}" -m "$MERGE_MESSAGE"
+    done
+
+    git -C "$BUILD_OUT" remote remove "$REMOTE_NAME"
     rm -rf "${BUILD_TMP}/${REPO_NAME}"
 }
 
-fixup_current_branch () {
+optimize_git_repo () {
+    du -sh "$BUILD_OUT"
+    git -C "$BUILD_OUT" gc --prune=now --aggressive
+    du -sh "$BUILD_OUT"
+}
+
+# Perform monorepo fixups on a branch.
+# Mostly: remove "global" files from subdirectories and localize dependencies.
+#   $1: the name of the branch to fix up
+fixup_branch () {
+    BRANCH="$1"
+
+    git -C "$BUILD_OUT" checkout -f --no-guess "$BRANCH"
+
     # submodules could be necessary for build/test scripts
     git -C "$BUILD_OUT" submodule update --init --recursive
 
@@ -142,6 +207,11 @@ fixup_current_branch () {
     # just remove the package-lock.json files for now, and build a new one with "npm i" later
     rm -rf "$BUILD_OUT"/workspaces/*/{.circleci,.editorconfig,.gitattributes,.github,.husky,package-lock.json,renovate.json*}
     for REPO in $ALL_REPOS; do
+        if [ ! -r "${BUILD_OUT}/workspaces/${REPO}/package.json" ]; then
+            # This repository doesn't exist in this branch
+            continue
+        fi
+
         jq -f <(join_args ' | ' \
             'if .scripts.prepare == "husky install" then del(.scripts.prepare) else . end' \
             'if .scripts == {} then del(.scripts.prepare) else . end' \
@@ -164,6 +234,11 @@ fixup_current_branch () {
         package.json package-lock.json
 
     for REPO in $ALL_REPOS; do
+        if [ ! -r "${BUILD_OUT}/workspaces/${REPO}/package.json" ]; then
+            # This repository doesn't exist in this branch
+            continue
+        fi
+
         REMOVEDEPS=""
         DEPS=""
         DEVDEPS=""
@@ -190,16 +265,16 @@ fixup_current_branch () {
         if [ -n "$REMOVEDEPS" ]; then
             npm -C $BUILD_OUT uninstall $REMOVEDEPS -w "$REPO"
             if [ -n "$DEPS" ]; then
-                npm -C "$BUILD_OUT" i  --save --save-exact $DEPS -w "$REPO"
+                npm -C "$BUILD_OUT" i  --save --save-exact $DEPS -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEPS"
             fi
             if [ -n "$DEVDEPS" ]; then
-                npm -C "$BUILD_OUT" i --save-dev --save-exact $DEVDEPS -w "$REPO"
+                npm -C "$BUILD_OUT" i --save-dev --save-exact $DEVDEPS -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEVDEPS"
             fi
             if [ -n "$OPTDEPS" ]; then
-                npm -C "$BUILD_OUT" i --save-optional --save-exact $OPTDEPS -w "$REPO"
+                npm -C "$BUILD_OUT" i --save-optional --save-exact $OPTDEPS -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$OPTDEPS"
             fi
             if [ -n "$PEERDEPS" ]; then
-                npm -C "$BUILD_OUT" i --save-peer --save-exact $PEERDEPS -w "$REPO"
+                npm -C "$BUILD_OUT" i --save-peer --save-exact $PEERDEPS -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$PEERDEPS"
             fi
         fi
     done
@@ -208,18 +283,47 @@ fixup_current_branch () {
         package.json package-lock.json workspaces/*/package.json
 }
 
+# Report that replacing dependencies with their local monorepo versions failed
+# $1: the name of the repository
+# $2: the branch that was being built
+# $3: the dependencies that failed to install
+package_replacement_error () {
+    echo "***ERROR***"
+    echo "Error installing local dependencies for $1 in branch $2"
+    echo "Tried to install: $3"
+    echo "Please update $1 to use the latest version of these dependencies, then try again."
+    exit 1
+}
+
 ### Do the things! ###
 
-init_monorepo
+echo "Depending on your CPU, RAM, drives, and network, this may take more than 30 minutes."
+echo "Make sure you have ~2x the size of the monorepo free on your drive."
+echo "Press Ctrl-C now to cancel!"
+echo "Starting in 15 seconds..."
+sleep 15
 
 mkdir -p "$BUILD_TMP"
+
+init_monorepo
 
 for REPO in $ALL_REPOS; do
     add_repo_to_monorepo "$REPO"
 done
 
+if [ ! -f "$BUILD_OUT/package.json" ]; then
+    echo "Something went wrong: $BUILD_OUT/package.json does not exist!"
+    exit 1
+fi
+
 rmdir "$BUILD_TMP"
 
-fixup_current_branch
+for BRANCH in main develop; do
+    fixup_branch "$BRANCH"
+done
+
+git -C "$BUILD_OUT" checkout -f --no-guess develop
+
+optimize_git_repo
 
 echo "All done!"
