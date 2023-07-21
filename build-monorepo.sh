@@ -24,6 +24,7 @@ ALL_REPOS="
     eslint-config-scratch \
     paper.js \
 "
+#ALL_REPOS="scratch-audio eslint-config-scratch"
 
 # This is the directory where you have a copy of all the repositories you want to merge.
 # This script will run `git fetch` on these repos, but otherwise will not modify them.
@@ -262,48 +263,49 @@ fixup_branch () {
                 PEERDEPS="$PEERDEPS $DEP@*"
             fi
         done
-        if [ -n "$REMOVEDEPS" ]; then
-            npm -C $BUILD_OUT uninstall $REMOVEDEPS -w "$REPO"
-            if [ -n "$DEPS" ]; then
-                npm -C "$BUILD_OUT" i  --save --save-exact $DEPS -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEPS"
-            fi
-            if [ -n "$DEVDEPS" ]; then
-                npm -C "$BUILD_OUT" i --save-dev --save-exact $DEVDEPS -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEVDEPS"
-            fi
-            if [ -n "$OPTDEPS" ]; then
-                npm -C "$BUILD_OUT" i --save-optional --save-exact $OPTDEPS -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$OPTDEPS"
-            fi
-            if [ -n "$PEERDEPS" ]; then
-                npm -C "$BUILD_OUT" i --save-peer --save-exact $PEERDEPS -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$PEERDEPS"
-            fi
-        fi
+        for DEP in $DEPS; do
+            npm -C "$BUILD_OUT" install --force --save --save-exact "$DEP" -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEP"
+        done
+        for DEP in $DEVDEPS; do
+            npm -C "$BUILD_OUT" install --force --save-dev --save-exact "$DEP" -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEVDEPS"
+        done
+        for DEP in $OPTDEPS; do
+            npm -C "$BUILD_OUT" install --force --save-optional --save-exact "$DEP" -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$OPTDEPS"
+        done
+        for DEP in $PEERDEPS; do
+            npm -C "$BUILD_OUT" install --force --save-peer --save-exact "$DEP" -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$PEERDEPS"
+        done
     done
 
-    git -C "$BUILD_OUT" commit -m "chore(deps): use workspace versions of all local packages" \
-        package.json package-lock.json workspaces/*/package.json
+    if ! git -C "$BUILD_OUT" diff --quiet package.json package-lock.json workspaces/*/package.json; then
+        git -C "$BUILD_OUT" commit -m "chore(deps): use workspace versions of all local packages" \
+            package.json package-lock.json workspaces/*/package.json
+    fi
 }
 
-# Report that replacing dependencies with their local monorepo versions failed
+# Report that replacing a dependency with the local monorepo version failed
 # $1: the name of the repository
 # $2: the branch that was being built
-# $3: the dependencies that failed to install
+# $3: the dependency that failed to install
 package_replacement_error () {
     echo "***ERROR***"
-    echo "Error installing local dependencies for $1 in branch $2"
-    echo "Tried to install: $3"
-    echo "Please update $1 to use the latest version of these dependencies, then try again."
-    exit 1
+    echo "Could not replace a dependency with the local monorepo version."
+    echo "Failed to replace $3 in $1#$2" | tee -a "monorepo.errors.log"
+    #exit 1 # uncomment this to make it a fatal error
+    echo "Attempting to continue anyway..."
 }
 
 ### Do the things! ###
 
 echo "Depending on your CPU, RAM, drives, and network, this may take more than 30 minutes."
-echo "Make sure you have ~2x the size of the monorepo free on your drive."
+echo "Make sure you have at least 10GB or so free on your drive."
 echo "Press Ctrl-C now to cancel!"
 echo "Starting in 15 seconds..."
 sleep 15
 
 mkdir -p "$BUILD_TMP"
+
+#set -x
 
 init_monorepo
 
