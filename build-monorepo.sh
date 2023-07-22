@@ -333,7 +333,7 @@ fi
 
 rmdir "$BUILD_TMP"
 
-for BRANCH in main develop; do
+for BRANCH in develop; do
     fixup_branch "$BRANCH"
 done
 
