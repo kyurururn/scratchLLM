@@ -40,6 +40,19 @@ BUILD_TMP="./monorepo.tmp"
 BASE_COMMIT="$(git rev-parse develop)"
 BASE_REPO="scratch-editor"
 
+# Limit the threads and memory used by git repack & git gc. This script only uses these values in final optimization.
+# If you see "error: pack-objects died of signal 9" or an out-of-memory error, try reducing one or both.
+# In my experiments, the maximum memory used was around 2.2 * GIT_PACK_THREADS * GIT_PACK_WINDOW_MEMORY.
+# Values above 512m did not seem to improve compression in my tests. The cutoff is somewhere between 256m and 512m.
+# See git documentation for pack.threads and pack.windowMemory for more information.
+# Increasing threads speeds up the operation, but uses more CPU and memory.
+# Increasing windowMemory may compress the .git directory better, but takes more time and uses more memory.
+# Setting threads to zero will tell git to detect your CPU count.
+# Setting window memory to zero will remove the limit.
+# WARNING: on some configurations, window memory is stored in a signed 32-bit integer, so the maximum value is ~2047m.
+GIT_PACK_THREADS="8"
+GIT_PACK_WINDOW_MEMORY="512m"
+
 ### End configuration ###
 
 set -e
@@ -185,7 +198,7 @@ add_repo_to_monorepo () {
 
 optimize_git_repo () {
     du -sh "$BUILD_OUT"
-    git -C "$BUILD_OUT" gc --prune=now --aggressive
+    git -C "$BUILD_OUT" -c pack.threads="$GIT_PACK_THREADS" -c pack.windowMemory="$GIT_PACK_WINDOW_MEMORY" gc --prune=now --aggressive
     du -sh "$BUILD_OUT"
 }
 
@@ -297,7 +310,7 @@ package_replacement_error () {
 
 ### Do the things! ###
 
-echo "Depending on your CPU, RAM, drives, and network, this may take more than 30 minutes."
+echo "Depending on your CPU, RAM, drives, and network, this may take about an hour."
 echo "Make sure you have at least 10GB or so free on your drive."
 echo "Press Ctrl-C now to cancel!"
 echo "Starting in 15 seconds..."
