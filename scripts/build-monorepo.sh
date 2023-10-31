@@ -226,13 +226,12 @@ fixup_branch () {
     # submodules could be necessary for build/test scripts
     git -C "$BUILD_OUT" submodule update --init --recursive
 
-    # remove repository-level configuration and dependencies, like commitlint
+    # remove repository-level configuration and dependencies, like Renovate and Husky
     # do not remove configuration and dependencies that could vary between packages, like semantic-release
-    # some of these files only make sense in the root of the repository
-    # others could be in subdirectories, like .editorconfig, but centralizing them makes consistency easier
+    # do not remove content like .github/ that may be useful as reference when building the monorepo equivalent
     # it would be nice to merge all the package-lock.json files into one but it's not clear how to do that
     # just remove the package-lock.json files for now, and build a new one with "npm i" later
-    rm -rf "$BUILD_OUT"/workspaces/*/{.circleci,.editorconfig,.gitattributes,.github,.husky,package-lock.json,renovate.json*}
+    rm -rf "$BUILD_OUT"/workspaces/*/{.husky,package-lock.json,renovate.json*}
     for REPO in $ALL_REPOS; do
         if [ ! -r "${BUILD_OUT}/workspaces/${REPO}/package.json" ]; then
             # This repository doesn't exist in this branch
@@ -355,3 +354,5 @@ git -C "$BUILD_OUT" checkout -f --no-guess develop
 optimize_git_repo
 
 echo "All done!"
+echo "You'll need to manually fix up any CI/CD workflows."
+echo "The monorepo is in: $BUILD_OUT"
