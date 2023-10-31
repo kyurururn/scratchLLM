@@ -57,6 +57,19 @@ GIT_PACK_WINDOW_MEMORY="512m"
 
 set -e
 
+if ! git filter-repo --help &> /dev/null; then
+    echo "Please install git-filter-repo. One of these commands might work:"
+    echo "- brew install git-filter-repo"
+    echo "- sudo apt install git-filter-repo"
+    exit 1
+fi
+
+if ! sponge --help &> /dev/null; then
+    echo "Please install the 'sponge' command."
+    echo "You may want: sudo apt install moreutils"
+    exit 1
+fi
+
 if [ ! -d "$BUILD_CACHE" ]; then
     echo "Please link $BUILD_CACHE to a directory with a copy of all the repositories you want to merge."
     echo "For example, if you have ~/GitHub/scratch-audio, ~/GitHub/scratch-blocks, etc., then run:"
