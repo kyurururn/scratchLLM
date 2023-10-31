@@ -108,6 +108,10 @@ function generateWorkflow(sortedWorkspaces: WorkspaceList, workspaces: Workspace
         '  push:',
         '  workflow_dispatch:',
         '',
+        'concurrency:',
+        '  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"',
+        '  cancel-in-progress: true',
+        '',
         'jobs:'
     ];
 
@@ -133,10 +137,11 @@ function generateChangesJob(workflowLines: string[], sortedWorkspaces: Workspace
     workflowLines.push('          filters: |');
     for (let workspace of sortedWorkspaces) {
         workflowLines.push(`            ${workspace.yamlName}:`);
+        workflowLines.push(`              - ".github/workflows/workspace-${workspace.yamlName}.yml"`);
         workflowLines.push(...workspace
             .deepDependencies
             .sort()
-            .map(dep => `              - ${workspaces[dep].location}/**`)
+            .map(dep => `              - "${workspaces[dep].location}/**"`)
         );
     }
 }
@@ -166,7 +171,6 @@ const main = async () => {
     const workspaces = calculateDependencies(packages, [DependencyType.Dependencies]);
     console.log('Sorting modules in dependency order...');
     const sortedWorkspaces = sortWorkspaces(workspaces);
-    console.dir(sortedWorkspaces, {depth: null});
     console.log('Generating workflow...');
     const workflow = generateWorkflow(sortedWorkspaces, workspaces);
     console.log('Writing workflow to stdout...');
