@@ -10,8 +10,9 @@
     "url": "https://github.com/scratchfoundation/scratch-editor.git"
   },
   "scripts": {
-    "prepare": "husky install",
-    "build-gh-workflow": "ts-node scripts/build-gha-workflow.ts"
+    "build-gh-workflow": "ts-node scripts/build-gha-workflow.ts",
+    "build-monorepo": "bash ./scripts/build-monorepo.sh",
+    "prepare": "husky install"
   },
   "config": {
     "commitizen": {
