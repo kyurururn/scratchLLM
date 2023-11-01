@@ -18,6 +18,13 @@ const mainWorkflowMeta: WorkflowMeta = {
     displayName: 'CI/CD',
 };
 
+function getWorkspaceWorkflowMeta(workspace: Workspace): WorkflowMeta {
+    return {
+        filename: `workspace-${workspace.yamlName}.yml`,
+        displayName: `${workspace.name} (placeholder)`,
+    };
+}
+
 // END CONFIGURATION
 
 import {exec} from 'child_process';
@@ -153,6 +160,7 @@ function generateChangesJob(workflowStream: fs.WriteStream, sortedWorkspaces: Wo
     }
     workflowStream.write([
         '    steps:',
+        '      - uses: actions/checkout@v4 # TODO: skip this for PRs',
         `      - uses: ${pathsFilterAction}`,
         '        id: filter',
         '        with:',
@@ -186,6 +194,35 @@ function generateCalls(workflowStream: fs.WriteStream, sortedWorkspaces: Workspa
     }
 }
 
+async function generateWorkspaceWorkflow(workspace: Workspace): Promise<void> {
+    const workflowMeta = getWorkspaceWorkflowMeta(workspace);
+    const workflowPath = path.join('.github', 'workflows', workflowMeta.filename);
+    if (fs.existsSync(workflowPath)) {
+        console.log(`Not overwriting existing workflow: ${workflowMeta.filename}`);
+        return;
+    }
+    let workflowFileHandle: fs.promises.FileHandle | undefined;
+    try {
+        workflowFileHandle = await fs.promises.open(workflowPath, 'w');
+        workflowFileHandle.write(Buffer.from([
+            `name: ${workflowMeta.displayName}`,
+            '',
+            'on:',
+            '  workflow_call:',
+            '  workflow_dispatch:',
+            '',
+            'jobs:',
+            '  placeholder:',
+            '    name: Placeholder',
+            '    runs-on: ubuntu-latest',
+            '    steps:',
+            '      - run: "# TODO: Implement this workflow"',
+        ].join('\n') + '\n'));
+    } finally {
+        workflowFileHandle?.close();
+    }
+}
+
 const main = async () => {
     console.log('Querying workspaces...');
     const packages = JSON.parse((await execAsync('npm query .workspace')).stdout) as Array<PackageJson>;
@@ -194,7 +231,11 @@ const main = async () => {
     console.log('Sorting modules in dependency order...');
     const sortedWorkspaces = sortWorkspaces(workspaces);
     console.log('Generating main workflow...');
-    generateWorkflow(sortedWorkspaces, workspaces);
+    await generateWorkflow(sortedWorkspaces, workspaces);
+    console.log('Generating stub workflows for workspaces...');
+    for (let workspace of sortedWorkspaces) {
+        await generateWorkspaceWorkflow(workspace);
+    }
 };
 
 main().then(
