@@ -10,7 +10,7 @@
     "url": "https://github.com/scratchfoundation/scratch-editor.git"
   },
   "scripts": {
-    "refresh-gh-workflow": "ts-node scripts/build-gha-workflow.ts > .github/workflows/ci-cd.yml",
+    "refresh-gh-workflow": "ts-node scripts/build-gha-workflow.ts",
     "build-monorepo": "bash ./scripts/build-monorepo.sh",
     "prepare": "husky install"
   },

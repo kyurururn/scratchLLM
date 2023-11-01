@@ -4,15 +4,28 @@
 // See https://circleci.com/docs/using-dynamic-configuration/
 // See https://github.com/circle-makotom/circle-advanced-setup-workflow
 
+type WorkflowMeta = {
+    filename: string;
+    displayName: string;
+}
+
 // BEGIN CONFIGURATION
 
 const pathsFilterAction = 'dorny/paths-filter@v2';
 
+const mainWorkflowMeta: WorkflowMeta = {
+    filename: 'ci-cd.yml',
+    displayName: 'CI/CD',
+};
+
 // END CONFIGURATION
 
 import {exec} from 'child_process';
+import fs from 'fs';
 import {promisify} from 'util';
 import path from 'path';
+
+const execAsync = promisify(exec);
 
 enum DependencyType {
     Dependencies = 'dependencies',
@@ -40,8 +53,6 @@ type Workspace = {
 
 type WorkspaceMap = {[name: string]: Workspace}
 type WorkspaceList = Workspace[];
-
-const execAsync = promisify(exec);
 
 /**
  * Calculate dependencies between workspaces in this repository.
@@ -101,66 +112,77 @@ function sortWorkspaces(workspaces: WorkspaceMap): WorkspaceList {
     return sortedWorkspaces;
 }
 
-function generateWorkflow(sortedWorkspaces: WorkspaceList, workspaces: WorkspaceMap): string {
-    const workflowLines = [
-        'name: CI/CD',
-        'on:',
-        '  push:',
-        '  workflow_dispatch:',
-        '',
-        'concurrency:',
-        '  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"',
-        '  cancel-in-progress: true',
-        '',
-        'jobs:'
-    ];
+async function generateWorkflow(sortedWorkspaces: WorkspaceList, workspaces: WorkspaceMap): Promise<void> {
+    let workflowFileHandle: fs.promises.FileHandle | undefined;
+    let workflowStream: fs.WriteStream | undefined;
+    try {
+        workflowFileHandle = await fs.promises.open(path.join('.github', 'workflows', mainWorkflowMeta.filename), 'w');
+        workflowStream = workflowFileHandle.createWriteStream();
+        workflowStream.write([
+            `name: ${mainWorkflowMeta.displayName}`,
+            'on:',
+            '  push:',
+            '  workflow_dispatch:',
+            '',
+            'concurrency:',
+            '  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"',
+            '  cancel-in-progress: true',
+            '',
+            'jobs:',
+        ].join('\n') + '\n');
 
-    generateChangesJob(workflowLines, sortedWorkspaces, workspaces);
+        generateChangesJob(workflowStream, sortedWorkspaces, workspaces);
 
-    generateCalls(workflowLines, sortedWorkspaces, workspaces);
-
-    return workflowLines.join('\n');
-}
-
-function generateChangesJob(workflowLines: string[], sortedWorkspaces: WorkspaceList, workspaces: WorkspaceMap) {
-    workflowLines.push('  changes:');
-    workflowLines.push('    name: Detect affected workspaces');
-    workflowLines.push('    runs-on: ubuntu-latest');
-    workflowLines.push('    outputs:');
-    for (let workspace of sortedWorkspaces) {
-        workflowLines.push(`      ${workspace.yamlName}: \${{ steps.filter.outputs.${workspace.yamlName} }}`);
-    }
-    workflowLines.push('    steps:');
-    workflowLines.push(`      - uses: ${pathsFilterAction}`);
-    workflowLines.push('        id: filter');
-    workflowLines.push('        with:');
-    workflowLines.push('          filters: |');
-    for (let workspace of sortedWorkspaces) {
-        workflowLines.push(`            ${workspace.yamlName}:`);
-        workflowLines.push(`              - ".github/workflows/workspace-${workspace.yamlName}.yml"`);
-        workflowLines.push(...workspace
-            .deepDependencies
-            .sort()
-            .map(dep => `              - "${workspaces[dep].location}/**"`)
-        );
+        generateCalls(workflowStream, sortedWorkspaces, workspaces);
+    } finally {
+        workflowStream?.end();
+        workflowStream?.close();
+        await workflowFileHandle?.close();
     }
 }
 
-function generateCalls(workflowLines: string[], sortedWorkspaces: WorkspaceList, workspaces: WorkspaceMap) {
+function generateChangesJob(workflowStream: fs.WriteStream, sortedWorkspaces: WorkspaceList, workspaces: WorkspaceMap) {
+    workflowStream.write([
+        '  changes:',
+        '    name: Detect affected workspaces',
+        '    runs-on: ubuntu-latest',
+        '    outputs:',
+    ].join('\n') + '\n');
     for (let workspace of sortedWorkspaces) {
-        workflowLines.push(`  ${workspace.yamlName}:`);
-        workflowLines.push(`    uses: ./.github/workflows/workspace-${workspace.yamlName}.yml`);
-        // By default, this job will only run if the jobs it 'needs' have succeeded.
-        // Instead, run even if some of those jobs are skipped, but not if they failed or if the workflow was cancelled.
-        workflowLines.push(`    if: \${{ !failure() && !cancelled() && needs.changes.outputs.${workspace.yamlName} == 'true' }}`);
+        workflowStream.write(`      ${workspace.yamlName}: \${{ steps.filter.outputs.${workspace.yamlName} }}\n`);
+    }
+    workflowStream.write([
+        '    steps:',
+        `      - uses: ${pathsFilterAction}`,
+        '        id: filter',
+        '        with:',
+        '          filters: |',
+    ].join('\n') + '\n');
+    for (let workspace of sortedWorkspaces) {
+        workflowStream.write(`            ${workspace.yamlName}:\n`);
+        workflowStream.write(`              - ".github/workflows/workspace-${workspace.yamlName}.yml"\n`);
+        for (let dep of workspace.deepDependencies.sort()) {
+            workflowStream.write(`              - "${workspaces[dep].location}/**"\n`);
+        }
+    }
+}
+
+function generateCalls(workflowStream: fs.WriteStream, sortedWorkspaces: WorkspaceList, workspaces: WorkspaceMap) {
+    for (let workspace of sortedWorkspaces) {
+        workflowStream.write([
+            `  ${workspace.yamlName}:`,
+            `    uses: ./.github/workflows/workspace-${workspace.yamlName}.yml`,
+            // By default, this job will only run if the jobs it 'needs' have succeeded.
+            // Instead, run even if some of those are skipped, but not if they failed or if the workflow was cancelled.
+            `    if: \${{ !failure() && !cancelled() && needs.changes.outputs.${workspace.yamlName} == 'true' }}`,
+            '    needs:',
+            '      - changes',
+        ].join('\n') + '\n');
         const deps = workspace.deepDependencies;
-        workflowLines.push('    needs:');
-        workflowLines.push('      - changes');
-        workflowLines.push(...deps
-            .sort()
-            .filter(dep => dep != workspace.name)
-            .map(dep => `      - ${workspaces[dep].yamlName}`)
-        );
+        for (let dep of deps.sort()) {
+            if (dep == workspace.name) continue;
+            workflowStream.write(`      - ${workspaces[dep].yamlName}\n`);
+        }
     }
 }
 
@@ -171,19 +193,17 @@ const main = async () => {
     const workspaces = calculateDependencies(packages, [DependencyType.Dependencies]);
     console.log('Sorting modules in dependency order...');
     const sortedWorkspaces = sortWorkspaces(workspaces);
-    console.log('Generating workflow...');
-    const workflow = generateWorkflow(sortedWorkspaces, workspaces);
-    console.log('Writing workflow to stdout...');
-    console.log(workflow);
-    console.log('Done.');
+    console.log('Generating main workflow...');
+    generateWorkflow(sortedWorkspaces, workspaces);
 };
 
 main().then(
     () => {
-        process.exit(0);
+        console.log('Done.');
+        process.exitCode = 0;
     },
     e => {
         console.error(e);
-        process.exit(1);
+        process.exitCode = 1;
     }
 );
