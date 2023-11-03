@@ -215,6 +215,9 @@ async function generateWorkspaceWorkflow(workspace: Workspace): Promise<void> {
             '  placeholder:',
             '    name: Placeholder',
             '    runs-on: ubuntu-latest',
+            '    defaults:',
+            '      run:',
+            `        working-directory: ./${ workspace.location }`,
             '    steps:',
             '      - run: "# TODO: Implement this workflow"',
         ].join('\n') + '\n'));
