@@ -351,6 +351,8 @@ done
 
 git -C "$BUILD_OUT" checkout -f --no-guess develop
 
+npm -C "$BUILD_OUT" run refresh-gh-workflow
+
 optimize_git_repo
 
 echo "All done!"
