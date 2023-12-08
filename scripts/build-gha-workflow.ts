@@ -61,6 +61,8 @@ type Workspace = {
 type WorkspaceMap = {[name: string]: Workspace}
 type WorkspaceList = Workspace[];
 
+const workspaceTemplate = fs.readFileSync(path.join(__dirname, 'workspace-template.yml'), 'utf8');
+
 /**
  * Calculate dependencies between workspaces in this repository.
  * @param workspaces The result of `npm query .workspace`.
@@ -127,6 +129,7 @@ async function generateWorkflow(sortedWorkspaces: WorkspaceList, workspaces: Wor
         workflowStream = workflowFileHandle.createWriteStream();
         workflowStream.write([
             `name: ${mainWorkflowMeta.displayName}`,
+            '',
             'on:',
             '  push:',
             '  workflow_dispatch:',
@@ -204,23 +207,10 @@ async function generateWorkspaceWorkflow(workspace: Workspace): Promise<void> {
     let workflowFileHandle: fs.promises.FileHandle | undefined;
     try {
         workflowFileHandle = await fs.promises.open(workflowPath, 'w');
-        workflowFileHandle.write(Buffer.from([
-            `name: ${workflowMeta.displayName}`,
-            '',
-            'on:',
-            '  workflow_call:',
-            '  workflow_dispatch:',
-            '',
-            'jobs:',
-            '  placeholder:',
-            '    name: Placeholder',
-            '    runs-on: ubuntu-latest',
-            '    defaults:',
-            '      run:',
-            `        working-directory: ./${ workspace.location }`,
-            '    steps:',
-            '      - run: "# TODO: Implement this workflow"',
-        ].join('\n') + '\n'));
+        const workspaceWorkflow = workspaceTemplate
+            .replace(/WS_NAME/g, workspace.name)
+            .replace(/WS_LOCATION/g, workspace.location);
+        workflowFileHandle.write(Buffer.from(workspaceWorkflow, 'utf8'));
     } finally {
         workflowFileHandle?.close();
     }
