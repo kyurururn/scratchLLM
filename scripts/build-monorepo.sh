@@ -209,10 +209,12 @@ add_repo_to_monorepo () {
     rm -rf "${BUILD_TMP}/${REPO_NAME}"
 }
 
+# Repack the local git repository to save space, for example 4.4 GB -> 3.1GB.
+# This does not affect the remote repository, so if local size is not a major concern, you can skip this step.
 optimize_git_repo () {
     du -sh "$BUILD_OUT"
-    git -C "$BUILD_OUT" -c pack.threads="$GIT_PACK_THREADS" -c pack.windowMemory="$GIT_PACK_WINDOW_MEMORY" gc --prune=now --aggressive
-    du -sh "$BUILD_OUT"
+    #git -C "$BUILD_OUT" -c pack.threads="$GIT_PACK_THREADS" -c pack.windowMemory="$GIT_PACK_WINDOW_MEMORY" gc --prune=now --aggressive
+    #du -sh "$BUILD_OUT"
 }
 
 # Perform monorepo fixups on a branch.
