@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  group: 'WS_NAME @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
 
 permissions:
   contents: write # publish a GitHub release

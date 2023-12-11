@@ -355,6 +355,9 @@ git -C "$BUILD_OUT" checkout -f --no-guess develop
 
 npm -C "$BUILD_OUT" run refresh-gh-workflow
 
+git -C "$BUILD_OUT" add .github/workflows
+git -C "$BUILD_OUT" commit -m "ci: populate workspace workflows"
+
 optimize_git_repo
 
 echo "All done!"
