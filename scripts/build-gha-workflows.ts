@@ -224,6 +224,7 @@ const main = async () => {
     console.log('Sorting modules in dependency order...');
     const sortedWorkspaces = sortWorkspaces(workspaces);
     console.log('Generating main workflow...');
+    fs.mkdirSync(path.join('.github', 'workflows'), {recursive: true});
     await generateWorkflow(sortedWorkspaces, workspaces);
     console.log('Generating stub workflows for workspaces...');
     for (let workspace of sortedWorkspaces) {

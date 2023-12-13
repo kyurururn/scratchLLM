@@ -322,6 +322,14 @@ package_replacement_error () {
     echo "Attempting to continue anyway..."
 }
 
+setup_github_actions () {
+    cp -a .github/actions "$BUILD_OUT/.github/"
+    npm -C "$BUILD_OUT" run refresh-gh-workflow
+
+    git -C "$BUILD_OUT" add .github/
+    git -C "$BUILD_OUT" commit -m "ci: populate workspace workflows"
+}
+
 ### Do the things! ###
 
 echo "Depending on your CPU, RAM, drives, and network, this may take about an hour."
@@ -353,10 +361,7 @@ done
 
 git -C "$BUILD_OUT" checkout -f --no-guess develop
 
-npm -C "$BUILD_OUT" run refresh-gh-workflow
-
-git -C "$BUILD_OUT" add .github/workflows
-git -C "$BUILD_OUT" commit -m "ci: populate workspace workflows"
+setup_github_actions # TODO: should we do this on every branch?
 
 optimize_git_repo
 
