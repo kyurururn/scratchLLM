@@ -162,7 +162,13 @@ add_repo_to_monorepo () {
     git -C "$BUILD_OUT" remote add "$REMOTE_NAME" "$(realpath "${BUILD_TMP}")/${REPO_NAME}"
     git -C "$BUILD_OUT" fetch --no-tags "$REMOTE_NAME"
 
-    git -C "${BUILD_TMP}/${REPO_NAME}" branch --format="%(refname:short)" | while read BRANCH; do
+    (
+        # some repos use "master" and some use "main" -- 'sed' is here to make it consistent
+        git -C "${BUILD_TMP}/${REPO_NAME}" branch --format="%(refname:short)" | sed 's/^master$/main/'
+        # guarantee we have these branches
+        echo develop
+        echo main
+    ) | sort -u | while read BRANCH; do
         case "$BRANCH" in
             dependabot/*|greenkeeper/*|renovate/*)
                 continue # ignore these branches
@@ -175,10 +181,26 @@ add_repo_to_monorepo () {
                 else
                     DEST_BRANCH="$BRANCH"
                 fi
+                # Some repos don't have a develop branch. In that case, create it from main or master.
+                if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
+                    echo "Branch $BRANCH not found. Trying main..."
+                    BRANCH="main"
+                    if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
+                        echo "Branch $BRANCH not found. Trying master..."
+                        BRANCH="master"
+                    fi
+                fi
                 ;;
-            master)
-                # some repos use "master" and some use "main" -- let's make it consistent
-                DEST_BRANCH="main"
+            main)
+                # Some repos don't have a develop branch. In that case, create it from master or develop.
+                if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
+                    echo "Branch $BRANCH not found. Trying master..."
+                    BRANCH="master"
+                    if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
+                        echo "Branch $BRANCH not found. Trying develop..."
+                        BRANCH="develop"
+                    fi
+                fi
                 ;;
             native)
                 if [ "$REPO_NAME" = "scratch-gui" ]; then
