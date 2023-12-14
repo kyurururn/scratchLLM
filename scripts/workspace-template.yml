@@ -55,9 +55,7 @@ jobs:
           GitHub head ref: ${{ github.head_ref }}
           Working directory: $(pwd)
           EOF
-      - uses: ./.github/actions/install-libraries
-      - name: Install NPM dependencies
-        run: npm ci
+      - uses: ./.github/actions/install-dependencies
       - name: Build
         run: npm run build
       - name: Test

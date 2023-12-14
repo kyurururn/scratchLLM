@@ -168,14 +168,28 @@ function generateChangesJob(workflowStream: fs.WriteStream, sortedWorkspaces: Wo
         '        id: filter',
         '        with:',
         '          filters: |',
+        '            any-workspace:',
+        '              - ".github/workflows/workspace-*.yml"',
+        '              - "workspaces/**"',
     ].join('\n') + '\n');
     for (let workspace of sortedWorkspaces) {
-        workflowStream.write(`            ${workspace.yamlName}:\n`);
-        workflowStream.write(`              - ".github/workflows/workspace-${workspace.yamlName}.yml"\n`);
+        workflowStream.write([
+            `            ${workspace.yamlName}:`,
+            `              - ".github/workflows/workspace-${workspace.yamlName}.yml"`,
+        ].join('\n') + '\n');
         for (let dep of workspace.deepDependencies.sort()) {
             workflowStream.write(`              - "${workspaces[dep].location}/**"\n`);
         }
     }
+    workflowStream.write([
+        "      - if: ${{ steps.filter.outputs.any-workspace == 'true' }}",
+        '        uses: actions/setup-node@v3',
+        '        with:',
+        '          cache: npm',
+        '          node-version-file: .nvmrc',
+        "      - if: ${{ steps.filter.outputs.any-workspace == 'true' }}",
+        '        uses: ./.github/actions/install-dependencies',
+    ].join('\n') + '\n');
 }
 
 function generateCalls(workflowStream: fs.WriteStream, sortedWorkspaces: WorkspaceList, workspaces: WorkspaceMap) {
