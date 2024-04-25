@@ -6,9 +6,9 @@
 GITHUB_ORG="scratchfoundation"
 
 # This is the list of repositories to merge into the monorepo
+# Current thinking: this should be all Scratch Editor repos excluding forks
 ALL_REPOS="
     scratch-audio \
-    scratch-blocks \
     scratch-desktop \
     scratch-gui \
     scratch-l10n \
@@ -22,7 +22,6 @@ ALL_REPOS="
     scratch-translate-extension-languages \
     scratch-vm \
     eslint-config-scratch \
-    paper.js \
 "
 #ALL_REPOS="scratch-audio eslint-config-scratch"
 
