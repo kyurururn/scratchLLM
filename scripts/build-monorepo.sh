@@ -52,6 +52,9 @@ BASE_REPO="scratch-editor"
 GIT_PACK_THREADS="8"
 GIT_PACK_WINDOW_MEMORY="512m"
 
+# Options to speed up `npm install` during the fixup phase
+NPM_QUICK_OPTS="--prefer-offline --no-audit --no-fund"
+
 ### End configuration ###
 
 set -e
@@ -312,16 +315,16 @@ fixup_branch () {
             fi
         done
         for DEP in $DEPS; do
-            npm -C "$BUILD_OUT" install --force --save --save-exact "$DEP" -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEP"
+            npm -C "$BUILD_OUT" install --force --save --save-exact "$DEP" -w "$REPO" $NPM_QUICK_OPTS || package_replacement_error "$REPO" "$BRANCH" "$DEP"
         done
         for DEP in $DEVDEPS; do
-            npm -C "$BUILD_OUT" install --force --save-dev --save-exact "$DEP" -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEVDEPS"
+            npm -C "$BUILD_OUT" install --force --save-dev --save-exact "$DEP" -w "$REPO" $NPM_QUICK_OPTS || package_replacement_error "$REPO" "$BRANCH" "$DEVDEPS"
         done
         for DEP in $OPTDEPS; do
-            npm -C "$BUILD_OUT" install --force --save-optional --save-exact "$DEP" -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$OPTDEPS"
+            npm -C "$BUILD_OUT" install --force --save-optional --save-exact "$DEP" -w "$REPO" $NPM_QUICK_OPTS || package_replacement_error "$REPO" "$BRANCH" "$OPTDEPS"
         done
         for DEP in $PEERDEPS; do
-            npm -C "$BUILD_OUT" install --force --save-peer --save-exact "$DEP" -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$PEERDEPS"
+            npm -C "$BUILD_OUT" install --force --save-peer --save-exact "$DEP" -w "$REPO" $NPM_QUICK_OPTS || package_replacement_error "$REPO" "$BRANCH" "$PEERDEPS"
         done
     done
 
