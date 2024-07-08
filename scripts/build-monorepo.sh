@@ -8,26 +8,24 @@ GITHUB_ORG="scratchfoundation"
 # This is the list of repositories to merge into the monorepo
 # Current thinking: this should be all Scratch Editor repos excluding forks
 ALL_REPOS="
-    scratch-audio \
-    scratch-desktop \
     scratch-gui \
-    scratch-l10n \
-    scratch-paint \
-    scratch-parser \
     scratch-render \
-    scratch-sb1-converter \
-    scratch-semantic-release-config \
-    scratch-storage \
     scratch-svg-renderer \
-    scratch-translate-extension-languages \
     scratch-vm \
-    eslint-config-scratch \
+"
+
+DEST_BRANCHES="
+    develop \
+    main \
+    scratch-android \
+    scratch-desktop \
+    test-integration \
 "
 #ALL_REPOS="scratch-audio eslint-config-scratch"
 
 # This is the directory where you have a copy of all the repositories you want to merge.
 # This script will run `git fetch` on these repos, but otherwise will not modify them.
-BUILD_CACHE="./monorepo.cache"
+BUILD_CACHE="./.."
 
 # The monorepo will be built here. Delete it to start over.
 BUILD_OUT="./monorepo.out"
@@ -56,7 +54,7 @@ GIT_PACK_WINDOW_MEMORY="512m"
 
 set -e
 
-if ! git filter-repo --help &> /dev/null; then
+if ! git filter-repo -h &> /dev/null; then
     echo "Please install git-filter-repo. One of these commands might work:"
     echo "- brew install git-filter-repo"
     echo "- sudo apt install git-filter-repo"
@@ -161,55 +159,33 @@ add_repo_to_monorepo () {
     git -C "$BUILD_OUT" remote add "$REMOTE_NAME" "$(realpath "${BUILD_TMP}")/${REPO_NAME}"
     git -C "$BUILD_OUT" fetch --no-tags "$REMOTE_NAME"
 
-    (
-        # some repos use "master" and some use "main" -- 'sed' is here to make it consistent
-        git -C "${BUILD_TMP}/${REPO_NAME}" branch --format="%(refname:short)" | sed 's/^master$/main/'
-        # guarantee we have these branches
-        echo develop
-        echo main
-    ) | sort -u | while read BRANCH; do
-        case "$BRANCH" in
-            dependabot/*|greenkeeper/*|renovate/*)
-                continue # ignore these branches
-                ;;
-            develop)
-                if [ "$REPO_NAME" = "scratch-android" ]; then
-                    DEST_BRANCH="scratch-android"
-                elif [ "$REPO_NAME" = "scratch-desktop" ]; then
-                    DEST_BRANCH="scratch-desktop"
+    for DEST_BRANCH in $DEST_BRANCHES; do
+        BRANCH=""
+        case "$DEST_BRANCH" in
+            develop|main|test-integration)
+                if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$DEST_BRANCH")" ]; then
+                    BRANCH=$(default_branch)
                 else
-                    DEST_BRANCH="$BRANCH"
-                fi
-                # Some repos don't have a develop branch. In that case, create it from main or master.
-                if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
-                    echo "Branch $BRANCH not found. Trying main..."
-                    BRANCH="main"
-                    if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
-                        echo "Branch $BRANCH not found. Trying master..."
-                        BRANCH="master"
-                    fi
+                    BRANCH="$DEST_BRANCH"
                 fi
                 ;;
-            main)
-                # Some repos don't have a develop branch. In that case, create it from master or develop.
-                if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
-                    echo "Branch $BRANCH not found. Trying master..."
-                    BRANCH="master"
-                    if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
-                        echo "Branch $BRANCH not found. Trying develop..."
-                        BRANCH="develop"
-                    fi
-                fi
-                ;;
-            native)
+            scratch-android)
                 if [ "$REPO_NAME" = "scratch-gui" ]; then
-                    DEST_BRANCH="scratch-android"
+                    BRANCH="native"
+                elif [ "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "develop")" ]; then
+                    BRANCH="develop"
                 else
-                    DEST_BRANCH="$BRANCH"
+                    BRANCH=$(default_branch)
                 fi
                 ;;
-            *)
-                DEST_BRANCH="$BRANCH"
+            scratch-desktop)
+                if [ "$REPO_NAME" = "scratch-gui" ]; then
+                    BRANCH="$DEST_BRANCH"
+                elif [ "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "develop")" ]; then
+                    BRANCH="develop"
+                else
+                    BRANCH=$(default_branch)
+                fi
                 ;;
         esac
 
@@ -236,6 +212,24 @@ optimize_git_repo () {
     du -sh "$BUILD_OUT"
     #git -C "$BUILD_OUT" -c pack.threads="$GIT_PACK_THREADS" -c pack.windowMemory="$GIT_PACK_WINDOW_MEMORY" gc --prune=now --aggressive
     #du -sh "$BUILD_OUT"
+}
+
+default_branch () {
+    BRANCH=""
+    
+    if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
+        BRANCH="master"
+
+        if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
+            BRANCH="main"
+
+            if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
+                BRANCH="develop"
+            fi
+        fi
+    fi
+
+    echo "$BRANCH"
 }
 
 # Perform monorepo fixups on a branch.
@@ -295,19 +289,19 @@ fixup_branch () {
         PEERDEPS=""
         for DEP in $ALL_REPOS; do
             if jq -e .dependencies.\"$DEP\" "${BUILD_OUT}/workspaces/${REPO}/package.json" > /dev/null; then
-                REMOVEDEPS="$REMOVEDEPS $DEP"
+                jq  "del(.dependencies.\"$DEP\")" "${BUILD_OUT}/workspaces/${REPO}/package.json"  | sponge "${BUILD_OUT}/workspaces/${REPO}/package.json"
                 DEPS="$DEPS $DEP@*"
             fi
             if jq -e .devDependencies.\"$DEP\" "${BUILD_OUT}/workspaces/${REPO}/package.json" > /dev/null; then
-                REMOVEDEPS="$REMOVEDEPS $DEP"
+                jq  "del(.devDependencies.\"$DEP\")" "${BUILD_OUT}/workspaces/${REPO}/package.json"  | sponge "${BUILD_OUT}/workspaces/${REPO}/package.json"
                 DEVDEPS="$DEVDEPS $DEP@*"
             fi
             if jq -e .optionalDependencies.\"$DEP\" "${BUILD_OUT}/workspaces/${REPO}/package.json" > /dev/null; then
-                REMOVEDEPS="$REMOVEDEPS $DEP"
+                jq  "del(.optionalDependencies.\"$DEP\")" "${BUILD_OUT}/workspaces/${REPO}/package.json"  | sponge "${BUILD_OUT}/workspaces/${REPO}/package.json"
                 OPTDEPS="$OPTDEPS $DEP@*"
             fi
             if jq -e .peerDependencies.\"$DEP\" "${BUILD_OUT}/workspaces/${REPO}/package.json" > /dev/null; then
-                REMOVEDEPS="$REMOVEDEPS $DEP"
+                jq  "del(.peerDependencies.\"$DEP\")" "${BUILD_OUT}/workspaces/${REPO}/package.json"  | sponge "${BUILD_OUT}/workspaces/${REPO}/package.json"
                 PEERDEPS="$PEERDEPS $DEP@*"
             fi
         done
@@ -351,6 +345,61 @@ setup_github_actions () {
     git -C "$BUILD_OUT" commit -m "ci: populate workspace workflows"
 }
 
+build_scratch_render () {
+    echo "Attempting to generate all prerequisite files and to build scratch-render"
+
+    cd ./monorepo.out/workspaces/scratch-render
+    process_workspace_webpack_config "." ".jsdoc.json"
+    process_workspace_webpack_config "./test/integration" "cpu-render.html"
+    process_workspace_webpack_config "./test/integration" "index.html"
+    process_workspace_webpack_config "." "webpack.config.js"
+    npm run build
+    cd -
+}
+
+build_scratch_svg_renderer () {
+    echo "Attempting to generate all prerequisite files and to build scratch-svg-renderer"
+
+    cd ./monorepo.out/workspaces/scratch-svg-renderer
+    process_workspace_webpack_config "." "webpack.config.js"
+    npm run build
+    cd -
+}
+
+build_scratch_vm () {
+    echo "Attempting to generate all prerequisite files and to build scratch-scratch-vm"
+
+    cd ./monorepo.out/workspaces/scratch-vm
+    process_workspace_webpack_config "." "webpack.config.js"
+    npm run build
+    cd -
+}
+
+build_scratch_gui () {
+    echo "Attempting to generate all prerequisite files and to build scratch-scratch-gui"
+
+    cd ./monorepo.out/workspaces/scratch-gui
+    process_workspace_webpack_config "." "webpack.config.js"
+    npm run prepublish
+    npm run build
+    cd -
+}
+
+process_workspace_webpack_config () {
+    FILE_PATH="$1"
+    FILE_NAME="$2"
+
+    PACKAGE_PATHS="$(egrep -o "[\.\/]*node_modules\/[^\"']*" "${FILE_PATH}/${FILE_NAME}" | uniq)"
+
+    for PACKAGE_PATH in $PACKAGE_PATHS; do
+        PATH_FROM_CURRENT_DIR="${FILE_PATH}/${PACKAGE_PATH}"
+
+        if [ ! -d $PATH_FROM_CURRENT_DIR ] && [ ! -f $PATH_FROM_CURRENT_DIR ]; then
+            sed -i -e "s:$PACKAGE_PATH:../../${PACKAGE_PATH}:g" "${FILE_PATH}/${FILE_NAME}"
+        fi
+    done
+}
+
 ### Do the things! ###
 
 echo "Depending on your CPU, RAM, drives, and network, this may take about an hour."
@@ -376,8 +425,13 @@ fi
 
 rmdir "$BUILD_TMP"
 
-for BRANCH in develop; do
+for BRANCH in $DEST_BRANCHES; do
     fixup_branch "$BRANCH"
+    
+    build_scratch_render
+    build_scratch_svg_renderer
+    build_scratch_vm
+    build_scratch_gui
 done
 
 git -C "$BUILD_OUT" checkout -f --no-guess develop
