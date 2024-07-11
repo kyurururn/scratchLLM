@@ -21,7 +21,21 @@ DEST_BRANCHES="
     scratch-desktop \
     test-integration \
 "
-#ALL_REPOS="scratch-audio eslint-config-scratch"
+#ALL_REPOS="scratch-audio \
+#     scratch-desktop \
+#     scratch-gui \
+#     scratch-l10n \
+#     scratch-paint \
+#     scratch-parser \
+#     scratch-render \
+#     scratch-sb1-converter \
+#     scratch-semantic-release-config \
+#     scratch-storage \
+#     scratch-svg-renderer \
+#     scratch-translate-extension-languages \
+#     scratch-vm \
+#     eslint-config-scratch \
+# "
 
 # This is the directory where you have a copy of all the repositories you want to merge.
 # This script will run `git fetch` on these repos, but otherwise will not modify them.
@@ -105,51 +119,9 @@ add_repo_to_monorepo () {
     ORG_AND_REPO_NAME="${GITHUB_ORG}/${REPO_NAME}"
     echo "Working on $ORG_AND_REPO_NAME"
 
-    #
-    # Clone
-    #
+    clone_repository $REPO_NAME
 
-    # refresh the cache
-    git -C "${BUILD_CACHE}/${REPO_NAME}" fetch --all
-    # reference = go faster
-    git -C "$BUILD_TMP" clone --bare --dissociate --reference "$(realpath "$BUILD_CACHE")/${REPO_NAME}" "git@github.com:${ORG_AND_REPO_NAME}.git" "${REPO_NAME}"
-    # get ready to disconnect reference repo
-    git -C "${BUILD_TMP}/${REPO_NAME}" repack -a
-    # actually disconnect the reference repo
-    rm -f "${BUILD_TMP}/${REPO_NAME}/.git/objects/info/alternates"
-
-    #
-    # Move to subdirectory
-    #
-
-    # make filter-repo accept this as a fresh clone
-    git -C "${BUILD_TMP}/${REPO_NAME}" gc
-
-    HAS_SUBMODULES=$(
-        git -C "${BUILD_TMP}/${REPO_NAME}" branch --format="%(refname:short)" | while read BRANCH; do
-            if git -C "${BUILD_TMP}/${REPO_NAME}" cat-file -e "${BRANCH}:.gitmodules" &> /dev/null; then
-                echo "yep"
-                break;
-            fi
-        done
-    )
-
-    # rewrite history as if all this work happened in a subdirectory
-    # "git mv" is simpler but makes history much less visible
-    if [ "$HAS_SUBMODULES" != "yep" ]; then
-        echo "Repository ${REPO_NAME} does NOT have submodules"
-        # this is significantly faster than the special case below
-        git -C "${BUILD_TMP}/${REPO_NAME}" filter-repo --to-subdirectory-filter "workspaces/$REPO_NAME"
-    else
-        echo "Repository ${REPO_NAME} DOES have submodules"
-        # the .gitmodules file must stay in the repository root, but the paths inside it must be rewritten
-        # this is complicated for the reasons described here: https://github.com/newren/git-filter-repo/issues/158
-        # this is also slower, so we only do it for repositories that have submodules
-        # if we have more than one, this will cause merge conflicts
-        git -C "${BUILD_TMP}/${REPO_NAME}" filter-repo \
-            --filename-callback "return filename if filename == b'.gitmodules' else b'workspaces/${REPO_NAME}/'+filename" \
-            --blob-callback "if blob.data.startswith(b'[submodule '): blob.data = blob.data.replace(b'path = ', b'path = workspaces/${REPO_NAME}/')"
-    fi
+    move_repository_subdirectory $REPO_NAME "workspaces/$REPO_NAME"
 
     #
     # Merge branches in
@@ -206,6 +178,45 @@ add_repo_to_monorepo () {
     rm -rf "${BUILD_TMP}/${REPO_NAME}"
 }
 
+add_gh_pages () {
+    REPO_NAME="$1"
+    ORG_AND_REPO_NAME="${GITHUB_ORG}/${REPO_NAME}"
+    echo "Working on $ORG_AND_REPO_NAME"
+
+    GH_PAGES_BRANCH="gh-pages"
+
+    clone_repository $REPO_NAME
+
+    move_repository_subdirectory $REPO_NAME "${REPO_NAME}/"
+
+    #
+    # Merge branches in
+    #
+
+    REMOTE_NAME="temp-$REPO_NAME"
+    git -C "$BUILD_OUT" remote add "$REMOTE_NAME" "$(realpath "${BUILD_TMP}")/${REPO_NAME}"
+    git -C "$BUILD_OUT" fetch --no-tags "$REMOTE_NAME"
+
+    if [ -z "$(git -C "$BUILD_OUT" branch --list "$GH_PAGES_BRANCH")" ]; then
+        # create the destination branch if it doesn't exist
+        git -C "$BUILD_OUT" symbolic-ref HEAD "refs/heads/${GH_PAGES_BRANCH}"
+        rm -rf "${BUILD_OUT}/.git/index"
+        git -C "$BUILD_OUT" clean -fdx
+        git -C "$BUILD_OUT" checkout develop .gitignore
+        git -C "$BUILD_OUT" add .
+        git -C "$BUILD_OUT" commit --allow-empty -m "Initial commit for github pages"
+    else
+        # switch to existing branch
+        git -C "$BUILD_OUT" checkout -f --no-guess "$GH_PAGES_BRANCH"
+    fi
+
+    MERGE_MESSAGE="chore(deps): add ${REPO_NAME}#${GH_PAGES_BRANCH} as ${REPO_NAME}"
+    git -C "$BUILD_OUT" merge --no-ff --allow-unrelated-histories "${REMOTE_NAME}/${GH_PAGES_BRANCH}" -m "$MERGE_MESSAGE"
+
+    git -C "$BUILD_OUT" remote remove "$REMOTE_NAME"
+    rm -rf "${BUILD_TMP}/${REPO_NAME}"
+}
+
 # Repack the local git repository to save space, for example 4.4 GB -> 3.1GB.
 # This does not affect the remote repository, so if local size is not a major concern, you can skip this step.
 optimize_git_repo () {
@@ -214,18 +225,70 @@ optimize_git_repo () {
     #du -sh "$BUILD_OUT"
 }
 
+clone_repository() {
+    REPO_NAME="$1"
+    ORG_AND_REPO_NAME="${GITHUB_ORG}/${REPO_NAME}"
+
+    #
+    # Clone
+    #
+
+    # refresh the cache
+    git -C "${BUILD_CACHE}/${REPO_NAME}" fetch --all
+    # reference = go faster
+    git -C "$BUILD_TMP" clone --bare --dissociate --reference "$(realpath "$BUILD_CACHE")/${REPO_NAME}" "git@github.com:${ORG_AND_REPO_NAME}.git" "${REPO_NAME}"
+    # get ready to disconnect reference repo
+    git -C "${BUILD_TMP}/${REPO_NAME}" repack -a
+    # actually disconnect the reference repo
+    rm -f "${BUILD_TMP}/${REPO_NAME}/.git/objects/info/alternates"
+}
+
+move_repository_subdirectory() {
+    REPO_NAME="$1"
+    SUBDIRECTORY="$2"
+
+    #
+    # Move to subdirectory
+    #
+
+    # make filter-repo accept this as a fresh clone
+    git -C "${BUILD_TMP}/${REPO_NAME}" gc
+
+    HAS_SUBMODULES=$(
+        git -C "${BUILD_TMP}/${REPO_NAME}" branch --format="%(refname:short)" | while read BRANCH; do
+            if git -C "${BUILD_TMP}/${REPO_NAME}" cat-file -e "${BRANCH}:.gitmodules" &> /dev/null; then
+                echo "yep"
+                break;
+            fi
+        done
+    )
+
+    # rewrite history as if all this work happened in a subdirectory
+    # "git mv" is simpler but makes history much less visible
+    if [ "$HAS_SUBMODULES" != "yep" ]; then
+        echo "Repository ${REPO_NAME} does NOT have submodules"
+        # this is significantly faster than the special case below
+        git -C "${BUILD_TMP}/${REPO_NAME}" filter-repo --to-subdirectory-filter $SUBDIRECTORY
+    else
+        echo "Repository ${REPO_NAME} DOES have submodules"
+        # the .gitmodules file must stay in the repository root, but the paths inside it must be rewritten
+        # this is complicated for the reasons described here: https://github.com/newren/git-filter-repo/issues/158
+        # this is also slower, so we only do it for repositories that have submodules
+        # if we have more than one, this will cause merge conflicts
+        git -C "${BUILD_TMP}/${REPO_NAME}" filter-repo \
+            --filename-callback "return filename if filename == b'.gitmodules' else b'${$SUBDIRECTORY}'+filename" \
+            --blob-callback "if blob.data.startswith(b'[submodule '): blob.data = blob.data.replace(b'path = ', b'path = ${$SUBDIRECTORY}')"
+    fi
+}
+
 default_branch () {
-    BRANCH=""
-    
+    BRANCH="master"
+
     if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
-        BRANCH="master"
+        BRANCH="main"
 
         if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
-            BRANCH="main"
-
-            if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$BRANCH")" ]; then
-                BRANCH="develop"
-            fi
+            BRANCH="develop"
         fi
     fi
 
@@ -416,7 +479,10 @@ init_monorepo
 
 for REPO in $ALL_REPOS; do
     add_repo_to_monorepo "$REPO"
+    add_gh_pages "$REPO"
 done
+
+git -C "$BUILD_OUT" checkout -f --no-guess develop
 
 if [ ! -f "$BUILD_OUT/package.json" ]; then
     echo "Something went wrong: $BUILD_OUT/package.json does not exist!"
@@ -433,8 +499,6 @@ for BRANCH in $DEST_BRANCHES; do
     build_scratch_vm
     build_scratch_gui
 done
-
-git -C "$BUILD_OUT" checkout -f --no-guess develop
 
 setup_github_actions # TODO: should we do this on every branch?
 
