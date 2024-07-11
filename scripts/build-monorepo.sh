@@ -19,7 +19,6 @@ DEST_BRANCHES="
     main \
     scratch-android \
     scratch-desktop \
-    test-integration \
 "
 #ALL_REPOS="scratch-audio \
 #     scratch-desktop \
