@@ -120,7 +120,7 @@ add_repo_to_monorepo () {
 
     clone_repository $REPO_NAME
 
-    move_repository_subdirectory $REPO_NAME "workspaces/$REPO_NAME"
+    move_repository_subdirectory $REPO_NAME "workspaces/${REPO_NAME}"
 
     #
     # Merge branches in
@@ -275,8 +275,8 @@ move_repository_subdirectory() {
         # this is also slower, so we only do it for repositories that have submodules
         # if we have more than one, this will cause merge conflicts
         git -C "${BUILD_TMP}/${REPO_NAME}" filter-repo \
-            --filename-callback "return filename if filename == b'.gitmodules' else b'${$SUBDIRECTORY}'+filename" \
-            --blob-callback "if blob.data.startswith(b'[submodule '): blob.data = blob.data.replace(b'path = ', b'path = ${$SUBDIRECTORY}')"
+            --filename-callback "return filename if filename == b'.gitmodules' else b'${SUBDIRECTORY}'+filename" \
+            --blob-callback "if blob.data.startswith(b'[submodule '): blob.data = blob.data.replace(b'path = ', b'path = ${SUBDIRECTORY}')"
     fi
 }
 
