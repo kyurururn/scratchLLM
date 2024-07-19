@@ -133,7 +133,7 @@ add_repo_to_monorepo () {
     for DEST_BRANCH in $DEST_BRANCHES; do
         BRANCH=""
         case "$DEST_BRANCH" in
-            develop|main|test-integration)
+            develop|main)
                 if [ -z "$(git -C "${BUILD_TMP}/${REPO_NAME}" branch --list "$DEST_BRANCH")" ]; then
                     BRANCH=$(default_branch)
                 else
