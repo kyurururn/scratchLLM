@@ -16,7 +16,6 @@ ALL_REPOS="
 
 DEST_BRANCHES="
     develop \
-    main \
     scratch-android \
     scratch-desktop \
 "
@@ -497,6 +496,9 @@ for BRANCH in $DEST_BRANCHES; do
     build_scratch_svg_renderer
     build_scratch_vm
     build_scratch_gui
+
+    git -C "$BUILD_OUT" add .
+    git -C "$BUILD_OUT" commit -m "refactor: fixed paths to work with new project structure"
 done
 
 setup_github_actions # TODO: should we do this on every branch?
