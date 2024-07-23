@@ -406,22 +406,24 @@ setup_github_actions () {
     git -C "$BUILD_OUT" commit -m "ci: populate workspace workflows"
 }
 
-build_scratch_render () {
-    echo "Attempting to generate all prerequisite files and to build scratch-render"
+build_scratch_svg_renderer () {
+    echo "Attempting to generate all prerequisite files and to build scratch-svg-renderer"
 
-    cd ./monorepo.out/workspaces/scratch-render
-    process_workspace_webpack_config "." ".jsdoc.json"
-    process_workspace_webpack_config "./test/integration" "cpu-render.html"
-    process_workspace_webpack_config "./test/integration" "index.html"
+    cd ./monorepo.out/workspaces/scratch-svg-renderer
+    use_node_version_from_nvmrc
     process_workspace_webpack_config "." "webpack.config.js"
     npm run build
     cd -
 }
 
-build_scratch_svg_renderer () {
-    echo "Attempting to generate all prerequisite files and to build scratch-svg-renderer"
+build_scratch_render () {
+    echo "Attempting to generate all prerequisite files and to build scratch-render"
 
-    cd ./monorepo.out/workspaces/scratch-svg-renderer
+    cd ./monorepo.out/workspaces/scratch-render
+    use_node_version_from_nvmrc
+    process_workspace_webpack_config "." ".jsdoc.json"
+    process_workspace_webpack_config "./test/integration" "cpu-render.html"
+    process_workspace_webpack_config "./test/integration" "index.html"
     process_workspace_webpack_config "." "webpack.config.js"
     npm run build
     cd -
@@ -431,6 +433,7 @@ build_scratch_vm () {
     echo "Attempting to generate all prerequisite files and to build scratch-scratch-vm"
 
     cd ./monorepo.out/workspaces/scratch-vm
+    use_node_version_from_nvmrc
     process_workspace_webpack_config "." "webpack.config.js"
     npm run build
     cd -
@@ -440,6 +443,7 @@ build_scratch_gui () {
     echo "Attempting to generate all prerequisite files and to build scratch-scratch-gui"
 
     cd ./monorepo.out/workspaces/scratch-gui
+    use_node_version_from_nvmrc
     process_workspace_webpack_config "." "webpack.config.js"
     npm run prepublish
     npm run build
@@ -459,6 +463,12 @@ process_workspace_webpack_config () {
             sed -i -e "s:$PACKAGE_PATH:../../${PACKAGE_PATH}:g" "${FILE_PATH}/${FILE_NAME}"
         fi
     done
+}
+
+use_node_version_from_nvmrc () {
+    source ~/.nvm/nvm.sh
+    nvm install < .nvmrc
+    nvm use < .nvmrc
 }
 
 ### Do the things! ###
@@ -492,8 +502,8 @@ rmdir "$BUILD_TMP"
 for BRANCH in $DEST_BRANCHES; do
     fixup_branch "$BRANCH"
     
-    build_scratch_render
     build_scratch_svg_renderer
+    build_scratch_render
     build_scratch_vm
     build_scratch_gui
 
