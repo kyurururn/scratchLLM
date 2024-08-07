@@ -2,10 +2,14 @@ DEST_BRANCHES="
     develop,250 \
     scratch-android,250 \
     scratch-desktop,250 \
+    main,250 \
     gh-pages,1 \
 "
 
 BUILD_OUT="./monorepo.out"
+
+GITHUB_ORG="scratchfoundation"
+BASE_REPO="scratch-editor"
 
 # https://gist.github.com/spenserhale/19a2abd03c0558449202a1d7bcc64ed7
 batch_push_branch () {
@@ -36,6 +40,8 @@ batch_push_branch () {
     # push the final partial batch
     git -C "$BUILD_OUT" push $REMOTE HEAD:refs/heads/$BRANCH --force
 }
+
+git -C "$BUILD_OUT" remote set-url origin "git@github.com:${GITHUB_ORG}/${BASE_REPO}.git"
 
 for BRANCH_DATA in $DEST_BRANCHES; do
     IFS=, read -r BRANCH_NAME BATCH_SIZE <<< "$BRANCH_DATA"

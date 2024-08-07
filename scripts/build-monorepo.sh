@@ -511,6 +511,9 @@ for BRANCH in $DEST_BRANCHES; do
     git -C "$BUILD_OUT" commit -m "refactor: fixed paths to work with new project structure"
 done
 
+git -C "$BUILD_OUT" checkout -f --no-guess develop
+git -C "$BUILD_OUT" checkout -b main
+
 setup_github_actions # TODO: should we do this on every branch?
 
 optimize_git_repo
