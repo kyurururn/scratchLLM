@@ -298,6 +298,7 @@ default_branch () {
 #   $1: the name of the branch to fix up
 fixup_branch () {
     BRANCH="$1"
+    NPM_ORGANIZATION="@scratch"
 
     git -C "$BUILD_OUT" checkout -f --no-guess "$BRANCH"
 
@@ -316,7 +317,8 @@ fixup_branch () {
             continue
         fi
 
-        jq -f <(join_args ' | ' \
+        jq -f --arg PACKAGE_NAME "$NPM_ORGANIZATION/$REPO" <(join_args ' | ' \
+            '.name |= $PACKAGE_NAME' \
             'if .scripts.prepare == "husky install" then del(.scripts.prepare) else . end' \
             'if .scripts == {} then del(.scripts.prepare) else . end' \
             'del(.config.commitizen)' \
@@ -367,16 +369,16 @@ fixup_branch () {
             fi
         done
         for DEP in $DEPS; do
-            npm -C "$BUILD_OUT" install --force --save --save-exact "$DEP" -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEP"
+            npm -C "$BUILD_OUT" install --force --save --save-exact "$NPM_ORGANIZATION/$DEP" -w "$NPM_ORGANIZATION/$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEP"
         done
         for DEP in $DEVDEPS; do
-            npm -C "$BUILD_OUT" install --force --save-dev --save-exact "$DEP" -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEVDEPS"
+            npm -C "$BUILD_OUT" install --force --save-dev --save-exact "$NPM_ORGANIZATION/$DEP" -w "$NPM_ORGANIZATION/$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEVDEPS"
         done
         for DEP in $OPTDEPS; do
-            npm -C "$BUILD_OUT" install --force --save-optional --save-exact "$DEP" -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$OPTDEPS"
+            npm -C "$BUILD_OUT" install --force --save-optional --save-exact "$NPM_ORGANIZATION/$DEP" -w "$NPM_ORGANIZATION/$REPO" || package_replacement_error "$REPO" "$BRANCH" "$OPTDEPS"
         done
         for DEP in $PEERDEPS; do
-            npm -C "$BUILD_OUT" install --force --save-peer --save-exact "$DEP" -w "$REPO" || package_replacement_error "$REPO" "$BRANCH" "$PEERDEPS"
+            npm -C "$BUILD_OUT" install --force --save-peer --save-exact "$NPM_ORGANIZATION/$DEP" -w "$NPM_ORGANIZATION/$REPO" || package_replacement_error "$REPO" "$BRANCH" "$PEERDEPS"
         done
     done
 
@@ -510,9 +512,6 @@ for BRANCH in $DEST_BRANCHES; do
     git -C "$BUILD_OUT" add .
     git -C "$BUILD_OUT" commit -m "refactor: fixed paths to work with new project structure"
 done
-
-git -C "$BUILD_OUT" checkout -f --no-guess develop
-git -C "$BUILD_OUT" checkout -b main
 
 setup_github_actions # TODO: should we do this on every branch?
 
