@@ -8,7 +8,8 @@ DEST_BRANCHES="
 
 BUILD_OUT="./monorepo.out"
 
-GITHUB_ORG="scratchfoundation"
+# set organization to where you have forked the repository
+GITHUB_ORG=""
 BASE_REPO="scratch-editor"
 
 # https://gist.github.com/spenserhale/19a2abd03c0558449202a1d7bcc64ed7
@@ -35,10 +36,10 @@ batch_push_branch () {
         # get the hash of the commit to push
         h=$(git -C "$BUILD_OUT" log --first-parent --reverse --format=format:%H --skip $i -n1)
         echo "Pushing $h..."
-        git -C "$BUILD_OUT" push $REMOTE ${h}:refs/heads/$BRANCH --force
+        git -C "$BUILD_OUT" push $REMOTE ${h}:refs/heads/$BRANCH
     done
     # push the final partial batch
-    git -C "$BUILD_OUT" push $REMOTE HEAD:refs/heads/$BRANCH --force
+    git -C "$BUILD_OUT" push $REMOTE HEAD:refs/heads/$BRANCH
 }
 
 git -C "$BUILD_OUT" remote set-url origin "git@github.com:${GITHUB_ORG}/${BASE_REPO}.git"

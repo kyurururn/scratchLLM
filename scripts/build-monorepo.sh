@@ -469,8 +469,8 @@ process_workspace_webpack_config () {
 
 use_node_version_from_nvmrc () {
     source ~/.nvm/nvm.sh
-    nvm install < .nvmrc
-    nvm use < .nvmrc
+    nvm install
+    nvm use
 }
 
 ### Do the things! ###
