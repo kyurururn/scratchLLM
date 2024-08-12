@@ -62,6 +62,9 @@ BASE_REPO="scratch-editor"
 GIT_PACK_THREADS="8"
 GIT_PACK_WINDOW_MEMORY="512m"
 
+# Options to speed up `npm install` during the fixup phase
+NPM_QUICK_OPTS="--prefer-offline --no-audit --no-fund"
+
 ### End configuration ###
 
 set -e
