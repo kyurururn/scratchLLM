@@ -122,7 +122,7 @@ add_repo_to_monorepo () {
 
     clone_repository $REPO_NAME
 
-    move_repository_subdirectory $REPO_NAME "workspaces/${REPO_NAME}"
+    move_repository_subdirectory $REPO_NAME "packages/${REPO_NAME}"
 
     #
     # Merge branches in
@@ -171,7 +171,7 @@ add_repo_to_monorepo () {
             git -C "$BUILD_OUT" checkout -f --no-guess "$DEST_BRANCH"
         fi
 
-        MERGE_MESSAGE="chore(deps): add ${REPO_NAME}#${BRANCH} as workspaces/${REPO_NAME}"
+        MERGE_MESSAGE="chore(deps): add ${REPO_NAME}#${BRANCH} as packages/${REPO_NAME}"
         git -C "$BUILD_OUT" merge --no-ff --allow-unrelated-histories "${REMOTE_NAME}/${BRANCH}" -m "$MERGE_MESSAGE"
     done
 
@@ -313,9 +313,9 @@ fixup_branch () {
     # do not remove content like .github/ that may be useful as reference when building the monorepo equivalent
     # it would be nice to merge all the package-lock.json files into one but it's not clear how to do that
     # just remove the package-lock.json files for now, and build a new one with "npm i" later
-    rm -rf "$BUILD_OUT"/workspaces/*/{.husky,package-lock.json,renovate.json*}
+    rm -rf "$BUILD_OUT"/packages/*/{.husky,package-lock.json,renovate.json*}
     for REPO in $ALL_REPOS; do
-        if [ ! -r "${BUILD_OUT}/workspaces/${REPO}/package.json" ]; then
+        if [ ! -r "${BUILD_OUT}/packages/${REPO}/package.json" ]; then
             # This repository doesn't exist in this branch
             continue
         fi
@@ -332,10 +332,10 @@ fixup_branch () {
             'del(.devDependencies."cz-conventional-changelog")' \
             'del(.devDependencies."husky")' \
             'if .devDependencies == {} then del(.devDependencies) else . end' \
-        ) "${BUILD_OUT}/workspaces/${REPO}/package.json" | sponge "${BUILD_OUT}/workspaces/${REPO}/package.json"
+        ) "${BUILD_OUT}/packages/${REPO}/package.json" | sponge "${BUILD_OUT}/packages/${REPO}/package.json"
     done
-    git -C "$BUILD_OUT" commit -m "chore: remove repo-level configuration and deps from workspaces/*" \
-        workspaces
+    git -C "$BUILD_OUT" commit -m "chore: remove repo-level configuration and deps from packages/*" \
+        packages
 
     npm -C "$BUILD_OUT" i
     npm -C "$BUILD_OUT" i --package-lock-only # sometimes this is necessary to get a consistent package-lock.json
@@ -343,7 +343,7 @@ fixup_branch () {
         package.json package-lock.json
 
     for REPO in $ALL_REPOS; do
-        if [ ! -r "${BUILD_OUT}/workspaces/${REPO}/package.json" ]; then
+        if [ ! -r "${BUILD_OUT}/packages/${REPO}/package.json" ]; then
             # This repository doesn't exist in this branch
             continue
         fi
@@ -354,20 +354,20 @@ fixup_branch () {
         OPTDEPS=""
         PEERDEPS=""
         for DEP in $ALL_REPOS; do
-            if jq -e .dependencies.\"$DEP\" "${BUILD_OUT}/workspaces/${REPO}/package.json" > /dev/null; then
-                jq  "del(.dependencies.\"$DEP\")" "${BUILD_OUT}/workspaces/${REPO}/package.json"  | sponge "${BUILD_OUT}/workspaces/${REPO}/package.json"
+            if jq -e .dependencies.\"$DEP\" "${BUILD_OUT}/packages/${REPO}/package.json" > /dev/null; then
+                jq  "del(.dependencies.\"$DEP\")" "${BUILD_OUT}/packages/${REPO}/package.json"  | sponge "${BUILD_OUT}/packages/${REPO}/package.json"
                 DEPS="$DEPS $DEP@*"
             fi
-            if jq -e .devDependencies.\"$DEP\" "${BUILD_OUT}/workspaces/${REPO}/package.json" > /dev/null; then
-                jq  "del(.devDependencies.\"$DEP\")" "${BUILD_OUT}/workspaces/${REPO}/package.json"  | sponge "${BUILD_OUT}/workspaces/${REPO}/package.json"
+            if jq -e .devDependencies.\"$DEP\" "${BUILD_OUT}/packages/${REPO}/package.json" > /dev/null; then
+                jq  "del(.devDependencies.\"$DEP\")" "${BUILD_OUT}/packages/${REPO}/package.json"  | sponge "${BUILD_OUT}/packages/${REPO}/package.json"
                 DEVDEPS="$DEVDEPS $DEP@*"
             fi
-            if jq -e .optionalDependencies.\"$DEP\" "${BUILD_OUT}/workspaces/${REPO}/package.json" > /dev/null; then
-                jq  "del(.optionalDependencies.\"$DEP\")" "${BUILD_OUT}/workspaces/${REPO}/package.json"  | sponge "${BUILD_OUT}/workspaces/${REPO}/package.json"
+            if jq -e .optionalDependencies.\"$DEP\" "${BUILD_OUT}/packages/${REPO}/package.json" > /dev/null; then
+                jq  "del(.optionalDependencies.\"$DEP\")" "${BUILD_OUT}/packages/${REPO}/package.json"  | sponge "${BUILD_OUT}/packages/${REPO}/package.json"
                 OPTDEPS="$OPTDEPS $DEP@*"
             fi
-            if jq -e .peerDependencies.\"$DEP\" "${BUILD_OUT}/workspaces/${REPO}/package.json" > /dev/null; then
-                jq  "del(.peerDependencies.\"$DEP\")" "${BUILD_OUT}/workspaces/${REPO}/package.json"  | sponge "${BUILD_OUT}/workspaces/${REPO}/package.json"
+            if jq -e .peerDependencies.\"$DEP\" "${BUILD_OUT}/packages/${REPO}/package.json" > /dev/null; then
+                jq  "del(.peerDependencies.\"$DEP\")" "${BUILD_OUT}/packages/${REPO}/package.json"  | sponge "${BUILD_OUT}/packages/${REPO}/package.json"
                 PEERDEPS="$PEERDEPS $DEP@*"
             fi
         done
@@ -383,11 +383,17 @@ fixup_branch () {
         for DEP in $PEERDEPS; do
             npm -C "$BUILD_OUT" install --force --save-peer --save-exact "$NPM_ORGANIZATION/$DEP" -w "$NPM_ORGANIZATION/$REPO" || package_replacement_error "$REPO" "$BRANCH" "$PEERDEPS"
         done
+
+        # replace the name of the package with the prefixed one
+        find "$BUILD_OUT" -type f -exec sed -i -e "s:\(require([\'\"]\|from\s[\'\"]\|resolve([\'\"]\|node_modules/\\)$REPO\([\'\"]\):\1$NPM_ORGANIZATION/$REPO\2:g" {} \;
     done
 
-    if ! git -C "$BUILD_OUT" diff --quiet package.json package-lock.json workspaces/*/package.json; then
+    npm -C "$BUILD_OUT" i
+    npm -C "$BUILD_OUT" i --package-lock-only # sometimes this is necessary to get a consistent package-lock.json
+
+    if ! git -C "$BUILD_OUT" diff --quiet package.json package-lock.json packages/*/package.json; then
         git -C "$BUILD_OUT" commit -m "chore(deps): use workspace versions of all local packages" \
-            package.json package-lock.json workspaces/*/package.json
+            package.json package-lock.json packages/*/package.json
     fi
 }
 
@@ -414,7 +420,7 @@ setup_github_actions () {
 build_scratch_svg_renderer () {
     echo "Attempting to generate all prerequisite files and to build scratch-svg-renderer"
 
-    cd ./monorepo.out/workspaces/scratch-svg-renderer
+    cd ./monorepo.out/packages/scratch-svg-renderer
     use_node_version_from_nvmrc
     process_workspace_webpack_config "." "webpack.config.js"
     npm run build
@@ -424,7 +430,7 @@ build_scratch_svg_renderer () {
 build_scratch_render () {
     echo "Attempting to generate all prerequisite files and to build scratch-render"
 
-    cd ./monorepo.out/workspaces/scratch-render
+    cd ./monorepo.out/packages/scratch-render
     use_node_version_from_nvmrc
     process_workspace_webpack_config "." ".jsdoc.json"
     process_workspace_webpack_config "./test/integration" "cpu-render.html"
@@ -437,7 +443,7 @@ build_scratch_render () {
 build_scratch_vm () {
     echo "Attempting to generate all prerequisite files and to build scratch-scratch-vm"
 
-    cd ./monorepo.out/workspaces/scratch-vm
+    cd ./monorepo.out/packages/scratch-vm
     use_node_version_from_nvmrc
     process_workspace_webpack_config "." "webpack.config.js"
     npm run build
@@ -447,7 +453,7 @@ build_scratch_vm () {
 build_scratch_gui () {
     echo "Attempting to generate all prerequisite files and to build scratch-scratch-gui"
 
-    cd ./monorepo.out/workspaces/scratch-gui
+    cd ./monorepo.out/packages/scratch-gui
     use_node_version_from_nvmrc
     process_workspace_webpack_config "." "webpack.config.js"
     npm run prepublish
@@ -492,7 +498,7 @@ init_monorepo
 
 for REPO in $ALL_REPOS; do
     add_repo_to_monorepo "$REPO"
-    add_gh_pages "$REPO"
+    # add_gh_pages "$REPO"
 done
 
 git -C "$BUILD_OUT" checkout -f --no-guess develop
