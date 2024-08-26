@@ -48,6 +48,7 @@ BUILD_TMP="./monorepo.tmp"
 # Use ${BASE_COMMIT} from ${BASE_REPO} as the starting point for the monorepo.
 BASE_COMMIT="$(git rev-parse develop)"
 BASE_REPO="scratch-editor"
+MONOREPO_URL="https://github.com/scratchfoundation/scratch-editor.git"
 
 # Limit the threads and memory used by git repack & git gc. This script only uses these values in final optimization.
 # If you see "error: pack-objects died of signal 9" or an out-of-memory error, try reducing one or both.
@@ -320,8 +321,9 @@ fixup_branch () {
             continue
         fi
 
-        jq -f --arg PACKAGE_NAME "$NPM_ORGANIZATION/$REPO" <(join_args ' | ' \
+        jq -f --arg PACKAGE_NAME "$NPM_ORGANIZATION/$REPO" --arg MONOREPO_URL "$MONOREPO_URL" <(join_args ' | ' \
             '.name |= $PACKAGE_NAME' \
+            '.repository.url |= $MONOREPO_URL' \
             'if .scripts.prepare == "husky install" then del(.scripts.prepare) else . end' \
             'if .scripts == {} then del(.scripts.prepare) else . end' \
             'del(.config.commitizen)' \
@@ -338,9 +340,6 @@ fixup_branch () {
         packages
 
     npm -C "$BUILD_OUT" i
-    npm -C "$BUILD_OUT" i --package-lock-only # sometimes this is necessary to get a consistent package-lock.json
-    git -C "$BUILD_OUT" commit -m "chore(deps): build initial real package-lock.json" \
-        package.json package-lock.json
 
     for REPO in $ALL_REPOS; do
         if [ ! -r "${BUILD_OUT}/packages/${REPO}/package.json" ]; then
@@ -370,6 +369,8 @@ fixup_branch () {
                 jq  "del(.peerDependencies.\"$DEP\")" "${BUILD_OUT}/packages/${REPO}/package.json"  | sponge "${BUILD_OUT}/packages/${REPO}/package.json"
                 PEERDEPS="$PEERDEPS $DEP@*"
             fi
+
+            npm -C "$BUILD_OUT" uninstall "$DEP"
         done
         for DEP in $DEPS; do
             npm -C "$BUILD_OUT" install --force --save --save-exact "$NPM_ORGANIZATION/$DEP" -w "$NPM_ORGANIZATION/$REPO" || package_replacement_error "$REPO" "$BRANCH" "$DEP"
@@ -384,11 +385,10 @@ fixup_branch () {
             npm -C "$BUILD_OUT" install --force --save-peer --save-exact "$NPM_ORGANIZATION/$DEP" -w "$NPM_ORGANIZATION/$REPO" || package_replacement_error "$REPO" "$BRANCH" "$PEERDEPS"
         done
 
-        # replace the name of the package with the prefixed one
-        find "$BUILD_OUT" -type f -exec sed -i -e "s:\(require([\'\"]\|from\s[\'\"]\|resolve([\'\"]\|node_modules/\\)$REPO\([\'\"]\):\1$NPM_ORGANIZATION/$REPO\2:g" {} \;
+        # replace the name of the package with the organozation prefixed one
+        find "$BUILD_OUT" -type f -exec sed -i -e "s:\(require(\|from\s\|resolve(\|node_modules\)\(['\"/]\)$REPO\(['\"/]\):\1\2$NPM_ORGANIZATION/$REPO\3:g" {} \;
     done
 
-    npm -C "$BUILD_OUT" i
     npm -C "$BUILD_OUT" i --package-lock-only # sometimes this is necessary to get a consistent package-lock.json
 
     if ! git -C "$BUILD_OUT" diff --quiet package.json package-lock.json packages/*/package.json; then
@@ -498,7 +498,7 @@ init_monorepo
 
 for REPO in $ALL_REPOS; do
     add_repo_to_monorepo "$REPO"
-    # add_gh_pages "$REPO"
+    add_gh_pages "$REPO"
 done
 
 git -C "$BUILD_OUT" checkout -f --no-guess develop
