@@ -385,7 +385,7 @@ fixup_branch () {
             npm -C "$BUILD_OUT" install --force --save-peer --save-exact "$NPM_ORGANIZATION/$DEP" -w "$NPM_ORGANIZATION/$REPO" || package_replacement_error "$REPO" "$BRANCH" "$PEERDEPS"
         done
 
-        # replace the name of the package with the organozation prefixed one
+        # replace the name of the package with the organization prefixed one
         find "$BUILD_OUT" -type f -exec sed -i -e "s:\(require(\|from\s\|resolve(\|node_modules\)\(['\"/]\)$REPO\(['\"/]\):\1\2$NPM_ORGANIZATION/$REPO\3:g" {} \;
     done
 
