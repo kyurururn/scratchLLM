@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Detect affected packages, build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 # TODO: skip this for PRs
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+      - uses: wagoid/commitlint-github-action@v5
+      - name: Debug info
+        run: |
+          cat <<EOF
+          Scratch environment: ${{ vars.SCRATCH_ENV || '<none>' }}
+          Node version: $(node --version)
+          NPM version: $(npm --version)
+          GitHub ref: ${{ github.ref }}
+          GitHub head ref: ${{ github.head_ref }}
+          Working directory: $(pwd)
+          EOF
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            any-workspace:
+              - ".github/workflows/ci.yml"
+              - "packages/**"
+            scratch-svg-renderer:
+              - ".github/workflows/ci.yml"
+              - "packages/scratch-svg-renderer/**"
+            scratch-render:
+              - ".github/workflows/ci.yml"
+              - "packages/scratch-render/**"
+              - "packages/scratch-svg-renderer/**"
+            scratch-vm:
+              - ".github/workflows/ci.yml"
+              - "packages/scratch-render/**"
+              - "packages/scratch-svg-renderer/**"
+              - "packages/scratch-vm/**"
+            scratch-gui:
+              - ".github/workflows/ci.yml"
+              - "packages/scratch-gui/**"
+              - "packages/scratch-render/**"
+              - "packages/scratch-svg-renderer/**"
+              - "packages/scratch-vm/**"
+              
+      - if: ${{ steps.filter.outputs.any-workspace == 'true' }}
+        uses: ./.github/actions/install-dependencies
+
+      - name: Build scratch-svg-renderer
+        working-directory: ./packages/scratch-svg-renderer
+        run: npm run build
+      - name: Build scratch-render
+        working-directory: ./packages/scratch-render
+        run: npm run build
+      - name: Build scrathc-vm
+        working-directory: ./packages/scratch-vm
+        run: npm run build
+      - name: Build scrathc-gui
+        working-directory: ./packages/scratch-gui
+        run: |
+          npm run prepublish
+          npm run build
+
+      - name: Test scratch-svg-renderer
+        if: ${{ (success() || failure()) && steps.filter.outputs.scratch-svg-renderer == 'true' }}
+        uses: ./.github/actions/test-package
+        with:
+          package_name: scratch-svg-renderer
+      - name: Test scratch-render
+        if: ${{ (success() || failure()) && steps.filter.outputs.scratch-render == 'true' }}
+        uses: ./.github/actions/test-package
+        with:
+          package_name: scratch-render
+      - name: Test scratch-vm
+        if: ${{ (success() || failure()) && steps.filter.outputs.scratch-vm == 'true' }}
+        uses: ./.github/actions/test-package
+        with:
+          package_name: scratch-vm
+      - name: Test scratch-gui
+        if: ${{ (success() || failure()) && steps.filter.outputs.scratch-gui == 'true' }}
+        uses: ./.github/actions/test-package
+        with:
+          package_name: scratch-gui
+ 

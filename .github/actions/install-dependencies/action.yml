@@ -25,22 +25,22 @@ runs:
         fi
     # When the main workflow calls many workspace workflows, we can reuse this cache for all of them.
     # Since this is caching the node_modules directory, DO NOT add partial-match restore keys!
-    - uses: actions/cache/restore@v3
+    - uses: actions/cache/restore@v4
       id: restore-node-modules-cache
       with:
         path: |
           node_modules
-          workspaces/*/node_modules
+          packages/*/node_modules
         key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
     - if: steps.restore-node-modules-cache.outputs.cache-hit != 'true'
       name: Install NPM dependencies
       working-directory: .
       shell: bash
       run: NODE_ENV=development npm ci
-    - uses: actions/cache/save@v3
+    - uses: actions/cache/save@v4
       if: steps.restore-node-modules-cache.outputs.cache-hit != 'true'
       with:
         path: |
           node_modules
-          workspaces/*/node_modules
+          packages/*/node_modules
         key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
