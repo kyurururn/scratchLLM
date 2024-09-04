@@ -1,3 +1,5 @@
+#!/bin/bash
+
 DEST_BRANCHES="
     develop,250 \
     scratch-android,250 \
