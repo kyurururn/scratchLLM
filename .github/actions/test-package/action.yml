@@ -21,7 +21,7 @@ runs:
         mkdir -p test-results
         npm run test | tee -a ./test-results/${{ inputs.package_name }}-test-results.txt
     - name: Store Test Results
-      if: success() || failure()
+      if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.package_name }}-test-output

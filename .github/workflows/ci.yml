@@ -13,7 +13,7 @@ jobs:
     name: Detect affected packages, build and test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # TODO: skip this for PRs
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           cache: 'npm'
@@ -65,33 +65,32 @@ jobs:
       - name: Build scratch-render
         working-directory: ./packages/scratch-render
         run: npm run build
-      - name: Build scrathc-vm
+      - name: Build scratch-vm
         working-directory: ./packages/scratch-vm
         run: npm run build
-      - name: Build scrathc-gui
+      - name: Build scratch-gui
         working-directory: ./packages/scratch-gui
         run: |
           npm run prepublish
           npm run build
 
       - name: Test scratch-svg-renderer
-        if: ${{ (success() || failure()) && steps.filter.outputs.scratch-svg-renderer == 'true' }}
+        if: ${{ !cancelled() && steps.filter.outputs.scratch-svg-renderer == 'true' }}
         uses: ./.github/actions/test-package
         with:
           package_name: scratch-svg-renderer
       - name: Test scratch-render
-        if: ${{ (success() || failure()) && steps.filter.outputs.scratch-render == 'true' }}
+        if: ${{ !cancelled() && steps.filter.outputs.scratch-render == 'true' }}
         uses: ./.github/actions/test-package
         with:
           package_name: scratch-render
       - name: Test scratch-vm
-        if: ${{ (success() || failure()) && steps.filter.outputs.scratch-vm == 'true' }}
+        if: ${{ !cancelled() && steps.filter.outputs.scratch-vm == 'true' }}
         uses: ./.github/actions/test-package
         with:
           package_name: scratch-vm
       - name: Test scratch-gui
-        if: ${{ (success() || failure()) && steps.filter.outputs.scratch-gui == 'true' }}
+        if: ${{ !cancelled() && steps.filter.outputs.scratch-gui == 'true' }}
         uses: ./.github/actions/test-package
         with:
           package_name: scratch-gui
- 
