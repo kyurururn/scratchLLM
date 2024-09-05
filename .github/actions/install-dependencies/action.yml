@@ -31,6 +31,7 @@ runs:
         path: |
           node_modules
           packages/*/node_modules
+          packages/*/src/generated
         key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
     - if: steps.restore-node-modules-cache.outputs.cache-hit != 'true'
       name: Install NPM dependencies
@@ -43,4 +44,5 @@ runs:
         path: |
           node_modules
           packages/*/node_modules
+          packages/*/src/generated
         key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
