@@ -82,7 +82,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./playground
+          publish_dir: ./packages/scratch-svg-renderer/playground
           destination_dir: scratch-svg-renderer
           full_commit_message: "Build for ${{ github.sha }} ${{ github.event.head_commit.message }}"
 
@@ -90,7 +90,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./playground
+          publish_dir: ./packages/scratch-render/playground
           destination_dir: scratch-render
           full_commit_message: "Build for ${{ github.sha }} ${{ github.event.head_commit.message }}"
 
@@ -98,7 +98,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./playground
+          publish_dir: ./packages/scratch-vm/playground
           destination_dir: scratch-vm
           full_commit_message: "Build for ${{ github.sha }} ${{ github.event.head_commit.message }}"
 
@@ -106,7 +106,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+          publish_dir: ./packages/scratch-gui/build
           destination_dir: scratch-gui
           full_commit_message: "Build for ${{ github.sha }} ${{ github.event.head_commit.message }}"
     needs:
