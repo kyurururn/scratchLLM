@@ -456,7 +456,6 @@ build_scratch_gui () {
     cd ./monorepo.out/packages/scratch-gui
     use_node_version_from_nvmrc
     process_workspace_webpack_config "." "webpack.config.js"
-    npm run prepublish
     npm run build
     cd -
 }

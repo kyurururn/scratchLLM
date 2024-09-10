@@ -2,6 +2,7 @@ name: CI
 
 on:
   pull_request:
+  workflow_call:
   workflow_dispatch:
 
 concurrency:
@@ -59,20 +60,9 @@ jobs:
       - if: ${{ steps.filter.outputs.any-workspace == 'true' }}
         uses: ./.github/actions/install-dependencies
 
-      - name: Build scratch-svg-renderer
-        working-directory: ./packages/scratch-svg-renderer
+      - name: Build packages
+        if: ${{ steps.filter.outputs.any-workspace == 'true' }}
         run: npm run build
-      - name: Build scratch-render
-        working-directory: ./packages/scratch-render
-        run: npm run build
-      - name: Build scratch-vm
-        working-directory: ./packages/scratch-vm
-        run: npm run build
-      - name: Build scratch-gui
-        working-directory: ./packages/scratch-gui
-        run: |
-          npm run prepublish
-          npm run build
 
       - name: Test scratch-svg-renderer
         if: ${{ !cancelled() && steps.filter.outputs.scratch-svg-renderer == 'true' }}
