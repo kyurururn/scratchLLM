@@ -2,18 +2,10 @@
 
 set -e
 
-cd ./packages/scratch-svg-renderer
-npm run build
-cd -
+npm -C ./packages/scratch-svg-renderer run build
 
-cd ./packages/scratch-render
-npm run build
-cd -
+npm -C ./packages/scratch-render run build
 
-cd ./packages/scratch-vm
-npm run build
-cd -
+npm -C ./packages/scratch-vm run build
 
-cd ./packages/scratch-gui
-NODE_ENV=production npm run build
-cd -
+NODE_ENV=production npm -C ./packages/scratch-gui run build
