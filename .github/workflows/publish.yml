@@ -1,0 +1,113 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+  cd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+
+      - name: Config GitHub user
+        shell: bash
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'github-actions@localhost'
+
+      - name: Update the version in the package files
+        shell: bash
+        run: |
+          GIT_TAG="${{github.event.release.tag_name}}"
+          NEW_VERSION="${GIT_TAG/v/}"
+
+          bash ./scripts/update-dependencies-with-tag-versions.sh "$NEW_VERSION"
+          git add package* && git commit -m "Release $NEW_VERSION"
+
+      - uses: ./.github/actions/install-dependencies
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Publish scratch-svg-renderer
+        run: npm publish --access=public --workspace=@scratch/scratch-svg-renderer
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+      - name: Publish scratch-render
+        run: npm publish --access=public --workspace=@scratch/scratch-render
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+      - name: Publish scratch-vm
+        run: npm publish --access=public --workspace=@scratch/scratch-vm
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+      - name: Publish scratch-gui
+        run: npm publish --access=public --workspace=@scratch/scratch-gui
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
+      - name: Push to develop
+        shell: bash
+        run: |
+          git fetch origin develop
+
+          TAG_NAME="${{github.event.release.tag_name}}"
+          LAST_COMMIT_ID="$(git rev-parse $TAG_NAME)"
+          DEVELOP_COMMIT_ID="$(git rev-parse origin/develop)"
+
+          if [ "$LAST_COMMIT_ID" = "$DEVELOP_COMMIT_ID" ]; then
+            git push origin HEAD:develop
+          else
+            echo "Not pushing to develop because the tag we're operating on is behind"
+          fi
+
+      # See https://stackoverflow.com/a/24849501
+      - name: Change connected commit on release
+        shell: bash
+        run: |
+          git tag -f "${{github.event.release.tag_name}}" HEAD
+          git push -f origin "refs/tags/${{github.event.release.tag_name}}"
+
+      - name: Deploy scratch-svg-renderer to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./packages/scratch-svg-renderer/playground
+          destination_dir: scratch-svg-renderer
+          full_commit_message: "Build for ${{ github.sha }} ${{ github.event.head_commit.message }}"
+
+      - name: Deploy scratch-render to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./packages/scratch-render/playground
+          destination_dir: scratch-render
+          full_commit_message: "Build for ${{ github.sha }} ${{ github.event.head_commit.message }}"
+
+      - name: Deploy scratch-vm to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./packages/scratch-vm/playground
+          destination_dir: scratch-vm
+          full_commit_message: "Build for ${{ github.sha }} ${{ github.event.head_commit.message }}"
+
+      - name: Deploy scratch-gui to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./packages/scratch-gui/build
+          destination_dir: scratch-gui
+          full_commit_message: "Build for ${{ github.sha }} ${{ github.event.head_commit.message }}"
+    needs:
+      - ci

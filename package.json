@@ -12,7 +12,8 @@
   "scripts": {
     "refresh-gh-workflow": "ts-node scripts/build-gha-workflows.ts",
     "build-monorepo": "bash ./scripts/build-monorepo.sh",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "build": "bash ./scripts/build-packages.sh"
   },
   "config": {
     "commitizen": {
