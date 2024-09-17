@@ -13,16 +13,25 @@ const baseConfig = new ScratchWebpackConfigBuilder(
     {
         rootPath: path.resolve(__dirname),
         enableReact: true,
+        enableTs: true,
         shouldSplitChunks: false
     })
     .setTarget('browserslist')
     .merge({
         output: {
             assetModuleFilename: 'static/assets/[name].[hash][ext][query]',
+            // Forces lookup for assets at the root of the current origin. Otherwise
+            // it is resolved dynamically based on what bundles the library next.
+            // For example, if scratch-gui is later bundled to `/js/`, the assets will
+            // be looked up at `/js/static/assets/...`, which is incorrect (for Scratch).
+            publicPath: '/',
             library: {
                 name: 'GUI',
                 type: 'umd2'
-            }
+            },
+            // Do not clean the JS files before building as we have two outputs to the same
+            // dist directory (the regular and the standalone version)
+            clean: false
         },
         resolve: {
             fallback: {
@@ -75,12 +84,13 @@ if (!process.env.CI) {
 const distConfig = baseConfig.clone()
     .merge({
         entry: {
-            'scratch-gui': path.join(__dirname, 'src/index.js')
+            'scratch-gui': path.join(__dirname, 'src/index.ts')
         },
         output: {
             path: path.resolve(__dirname, 'dist')
         }
     })
+    .addExternals(['react', 'react-dom', 'redux', 'react-redux'])
     .addPlugin(
         new CopyWebpackPlugin({
             patterns: [
@@ -92,6 +102,17 @@ const distConfig = baseConfig.clone()
             ]
         })
     );
+
+// build the shipping library in `dist/` bundled with react, react-dom, redux, etc.
+const distStandaloneConfig = baseConfig.clone()
+    .merge({
+        entry: {
+            'scratch-gui-standalone': path.join(__dirname, 'src/index-standalone.tsx')
+        },
+        output: {
+            path: path.resolve(__dirname, 'dist')
+        }
+    });
 
 // build the examples and debugging tools in `build/`
 const buildConfig = baseConfig.clone()
@@ -151,5 +172,5 @@ const buildConfig = baseConfig.clone()
 const buildDist = process.env.NODE_ENV === 'production' || process.env.BUILD_MODE === 'dist';
 
 module.exports = buildDist ?
-    [buildConfig.get(), distConfig.get()] :
+    [buildConfig.get(), distStandaloneConfig.get(), distConfig.get()] :
     buildConfig.get();
