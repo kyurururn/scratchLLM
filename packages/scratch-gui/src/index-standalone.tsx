@@ -1,8 +1,8 @@
-import React, { ComponentPropsWithoutRef } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import {setAppElement} from 'react-modal';
-import { createStore, combineReducers, compose, applyMiddleware } from 'redux';
+import { createStore, combineReducers, compose } from 'redux';
 import GUI from './containers/gui';
 import { guiInitialState, guiMiddleware, guiReducers } from './exported-reducers';
 
@@ -14,7 +14,7 @@ export {setAppElement} from 'react-modal';
 
 export * from './exported-reducers';
 
-// TODO: Better typing
+// TODO: Better typing once ScratchGUI has types
 export type GUIProps = any; // ComponentPropsWithoutRef<typeof ScratchGUI>;
 
 export function createStandaloneRoot(
