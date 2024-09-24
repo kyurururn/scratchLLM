@@ -20,11 +20,6 @@ const baseConfig = new ScratchWebpackConfigBuilder(
     .merge({
         output: {
             assetModuleFilename: 'static/assets/[name].[hash][ext][query]',
-            // Forces lookup for assets at the root of the current origin. Otherwise
-            // it is resolved dynamically based on what bundles the library next.
-            // For example, if scratch-gui is later bundled to `/js/`, the assets will
-            // be looked up at `/js/static/assets/...`, which is incorrect (for Scratch).
-            publicPath: '/',
             library: {
                 name: 'GUI',
                 type: 'umd2'
