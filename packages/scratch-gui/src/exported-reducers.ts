@@ -4,19 +4,19 @@ import GuiReducer, {guiInitialState, guiMiddleware, initEmbedded, initFullScreen
 import {setFullScreen, setPlayer} from './reducers/mode.js';
 
 export const guiReducers = {
-  locales: LocalesReducer,
-  scratchGui: GuiReducer,
-  scratchPaint: ScratchPaintReducer
+    locales: LocalesReducer,
+    scratchGui: GuiReducer,
+    scratchPaint: ScratchPaintReducer
 };
 
 export {
-  guiInitialState,
-  guiMiddleware,
-  initEmbedded,
-  initPlayer,
-  initFullScreen,
-  initLocale,
-  localesInitialState,
-  setFullScreen,
-  setPlayer
-}
+    guiInitialState,
+    guiMiddleware,
+    initEmbedded,
+    initPlayer,
+    initFullScreen,
+    initLocale,
+    localesInitialState,
+    setFullScreen,
+    setPlayer
+};

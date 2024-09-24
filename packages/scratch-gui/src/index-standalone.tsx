@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
+import {Provider} from 'react-redux';
 import {setAppElement} from 'react-modal';
-import { createStore, combineReducers, compose } from 'redux';
+import {createStore, combineReducers, compose} from 'redux';
 import GUI from './containers/gui';
-import { guiInitialState, guiMiddleware, guiReducers } from './exported-reducers';
+import {guiInitialState, guiMiddleware, guiReducers} from './exported-reducers';
 
 
 export {default as GUI} from './containers/gui.jsx';
@@ -15,37 +15,44 @@ export {setAppElement} from 'react-modal';
 export * from './exported-reducers';
 
 // TODO: Better typing once ScratchGUI has types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type GUIProps = any; // ComponentPropsWithoutRef<typeof ScratchGUI>;
 
-export function createStandaloneRoot(
+/**
+ * Creates a "root" for the editor to be hosted in.
+ *
+ * @param {HTMLElement} rootAppElement The main app element, set to ReactModal.setAppElement.
+ * @param {HTMLElement} container The container the editor should be hosted under.
+ *
+ * @returns {{ render: function(props: GUIProps): void, unmount: function(): void }} The mounted root.
+ */
+export const createStandaloneRoot = (
     rootAppElement: HTMLElement,
-    container: HTMLElement,
-) {
+    container: HTMLElement
+) => {
     setAppElement(rootAppElement);
 
     const store = createStore(
         combineReducers(guiReducers),
-        {
-            scratchGui: guiInitialState,
-        },
+        {scratchGui: guiInitialState},
         compose(
             // applyMiddleware(thunk),
-            guiMiddleware,
-        ),
+            guiMiddleware
+        )
     );
 
     return {
-        render(props: GUIProps) {
+        render (props: GUIProps) {
             ReactDOM.render(
                 <Provider store={store}>
                     <GUI {...props} />
                 </Provider>,
-                container,
+                container
             );
         },
 
-        unmount() {
+        unmount () {
             ReactDOM.unmountComponentAtNode(container);
-        },
+        }
     };
-}
+};
