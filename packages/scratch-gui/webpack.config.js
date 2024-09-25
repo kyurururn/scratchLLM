@@ -120,7 +120,13 @@ const buildConfig = baseConfig.clone()
             player: './src/playground/player.jsx'
         },
         output: {
-            path: path.resolve(__dirname, 'build')
+            path: path.resolve(__dirname, 'build'),
+
+            // This output is loaded using a file:// scheme from the local file system.
+            // Having `publicPath: '/'` (the default) means the `gui.js` file in `build/index.html`
+            // would be looked for at the root of the filesystem, which is incorrect.
+            // Hence, we're resetting the public path to be relative.
+            publicPath: ''
         }
     })
     .addPlugin(new HtmlWebpackPlugin({
