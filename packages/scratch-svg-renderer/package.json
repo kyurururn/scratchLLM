@@ -20,7 +20,7 @@
     "watch": "webpack --watch"
   },
   "author": "Massachusetts Institute of Technology",
-  "license": "BSD-3-Clause",
+  "license": "AGPL-3.0-only",
   "homepage": "https://github.com/scratchfoundation/scratch-svg-renderer#readme",
   "repository": {
     "type": "git",
