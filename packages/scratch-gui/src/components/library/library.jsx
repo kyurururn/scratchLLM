@@ -10,6 +10,7 @@ import Divider from '../divider/divider.jsx';
 import Filter from '../filter/filter.jsx';
 import TagButton from '../../containers/tag-button.jsx';
 import Spinner from '../spinner/spinner.jsx';
+import {CATEGORIES} from '../../../src/lib/libraries/decks/index.jsx';
 
 import styles from './library.css';
 
@@ -128,7 +129,7 @@ class LibraryComponent extends React.Component {
         this.setState({filterQuery: ''});
     }
     getFilteredData () {
-        if (this.state.selectedTag === 'all') {
+        if (this.state.selectedTag === ALL_TAG.tag) {
             if (!this.state.filterQuery) return this.props.data;
             return this.props.data.filter(dataItem => (
                 (dataItem.tags || [])
@@ -156,6 +157,53 @@ class LibraryComponent extends React.Component {
     }
     setFilteredDataRef (ref) {
         this.filteredDataRef = ref;
+    }
+    renderElement (data, index) {
+        return (<LibraryItem
+            bluetoothRequired={data.bluetoothRequired}
+            collaborator={data.collaborator}
+            description={data.description}
+            disabled={data.disabled}
+            extensionId={data.extensionId}
+            featured={data.featured}
+            hidden={data.hidden}
+            iconMd5={data.costumes ? data.costumes[0].md5ext : data.md5ext}
+            iconRawURL={data.rawURL}
+            icons={data.costumes}
+            id={index}
+            insetIconURL={data.insetIconURL}
+            internetConnectionRequired={data.internetConnectionRequired}
+            isPlaying={this.state.playingItem === index}
+            key={typeof data.name === 'string' ? data.name : data.rawURL}
+            name={data.name}
+            showPlayButton={this.props.showPlayButton}
+            onMouseEnter={this.handleMouseEnter}
+            onMouseLeave={this.handleMouseLeave}
+            onSelect={this.handleSelect}
+        />);
+    }
+    renderData (data) {
+        if (this.state.selectedTag !== ALL_TAG.tag) {
+            return data.map((dataItem, index) => this.renderElement(dataItem, index));
+        }
+
+        const dataByCategory = Object.groupBy(data, el => el.category);
+        const categoriesOrder = Object.values(CATEGORIES);
+
+        return Object.entries(dataByCategory)
+            .sort(([key1], [key2]) => categoriesOrder.indexOf(key1) - categoriesOrder.indexOf(key2))
+            .map(([key, values]) =>
+                (<div
+                    key={key}
+                    className={styles.libraryCategory}
+                >
+                    {key === 'undefined' ? null : <span className={styles.libraryCategoryTitle}>{key}</span>}
+                    <div
+                        className={styles.libraryCategoryItems}
+                    >
+                        {values.map((dataItem, index) => this.renderElement(dataItem, index))}
+                    </div>
+                </div>));
     }
     render () {
         return (
@@ -208,30 +256,7 @@ class LibraryComponent extends React.Component {
                     })}
                     ref={this.setFilteredDataRef}
                 >
-                    {this.state.loaded ? this.getFilteredData().map((dataItem, index) => (
-                        <LibraryItem
-                            bluetoothRequired={dataItem.bluetoothRequired}
-                            collaborator={dataItem.collaborator}
-                            description={dataItem.description}
-                            disabled={dataItem.disabled}
-                            extensionId={dataItem.extensionId}
-                            featured={dataItem.featured}
-                            hidden={dataItem.hidden}
-                            iconMd5={dataItem.costumes ? dataItem.costumes[0].md5ext : dataItem.md5ext}
-                            iconRawURL={dataItem.rawURL}
-                            icons={dataItem.costumes}
-                            id={index}
-                            insetIconURL={dataItem.insetIconURL}
-                            internetConnectionRequired={dataItem.internetConnectionRequired}
-                            isPlaying={this.state.playingItem === index}
-                            key={typeof dataItem.name === 'string' ? dataItem.name : dataItem.rawURL}
-                            name={dataItem.name}
-                            showPlayButton={this.props.showPlayButton}
-                            onMouseEnter={this.handleMouseEnter}
-                            onMouseLeave={this.handleMouseLeave}
-                            onSelect={this.handleSelect}
-                        />
-                    )) : (
+                    {this.state.loaded ? this.renderData(this.getFilteredData()) : (
                         <div className={styles.spinnerWrapper}>
                             <Spinner
                                 large
