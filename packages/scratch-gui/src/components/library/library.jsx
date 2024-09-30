@@ -24,6 +24,30 @@ const messages = defineMessages({
         id: 'gui.library.allTag',
         defaultMessage: 'All',
         description: 'Label for library tag to revert to all items after filtering by tag.'
+    },
+    // Unfortunately, can't seem to be able to generate those,
+    // since it looks like `defineMessages` is called on first render
+    // and (seemingly?) before any operations, such as object destructuring
+    // can happen.
+    [CATEGORIES.gettingStarted]: {
+        id: `gui.library.gettingStarted`,
+        defaultMessage: 'Getting Started',
+        description: 'Label for getting started category'
+    },
+    [CATEGORIES.basics]: {
+        id: `gui.library.basics`,
+        defaultMessage: 'Basics',
+        description: 'Label for basics category'
+    },
+    [CATEGORIES.intermediate]: {
+        id: `gui.library.intermediate`,
+        defaultMessage: 'Intermediate',
+        description: 'Label for intermediate category'
+    },
+    [CATEGORIES.prompts]: {
+        id: `gui.library.prompts`,
+        defaultMessage: 'Prompts',
+        description: 'Label for prompts category'
     }
 });
 
@@ -197,7 +221,12 @@ class LibraryComponent extends React.Component {
                     key={key}
                     className={styles.libraryCategory}
                 >
-                    {key === 'undefined' ? null : <span className={styles.libraryCategoryTitle}>{key}</span>}
+                    {key === 'undefined' ?
+                        null :
+                        <span className={styles.libraryCategoryTitle}>
+                            {this.props.intl.formatMessage(messages[key])}
+                        </span>
+                    }
                     <div
                         className={styles.libraryCategoryItems}
                     >

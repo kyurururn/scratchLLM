@@ -66,10 +66,10 @@ import moveArrowKeysThumb from './thumbnails/move-arrow-keys.jpg';
 import spinThumb from './thumbnails/spin.jpg';
 
 export const CATEGORIES = {
-    gettingStarted: 'Getting Started',
-    basics: 'Basics',
-    intermediate: 'Intermediate',
-    prompts: 'Prompts'
+    gettingStarted: 'gettingStarted',
+    basics: 'basics',
+    intermediate: 'intermediate',
+    prompts: 'prompts'
 };
 
 export default {
