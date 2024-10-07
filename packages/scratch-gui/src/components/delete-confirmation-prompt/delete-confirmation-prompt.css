@@ -2,21 +2,28 @@
 @import "../../css/units.css";
 
 .modal-content {
-    width: 400px;
+    width: 300px;
+    background: $looks-secondary;
     position: absolute;
     top: 50%;
     left: 50%;
+    border-radius: 0.5rem;
     transform: translate(-50%, -50%);
     margin: 0;
 }
 
+.modal-overlay {
+    background: $looks-transparent;
+}
+
 .body {
-    background: $ui-white;
-    padding: 1.5rem 2.25rem;
+    padding: 1rem 1.5rem;
 }
 
 .label {
-    font-weight: 500;
+    color: $ui-white;
+    font-size: 1.25rem;
+    font-weight: 700;
     margin: 1rem 0 1.5rem;
 }
 
@@ -26,26 +33,33 @@
 }
 
 .button-row button {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    width: 47%;
     padding: 0.75rem 1rem;
-    border-radius: 0.25rem;
-    background: white;
+    border-radius: 2rem;
     border: 1px solid $ui-black-transparent;
     font-weight: 600;
     font-size: 0.85rem;
-    width: 35%;
     cursor: pointer;
+    margin: auto;
 }
 
 .button-row button.ok-button {
-    background: $looks-secondary;
-    border: $looks-secondary;
-    color: white;
-    margin: auto;
     margin-left: 0;
 }
 
 .button-row button.cancel-button {
-    margin: auto;
     margin-right: 0;
+}
+
+.message {
+    margin-top: 0.25rem;
+}
+
+.delete-icon {
+    height: 1.5rem;
+    width: 1.5rem;
 }
 

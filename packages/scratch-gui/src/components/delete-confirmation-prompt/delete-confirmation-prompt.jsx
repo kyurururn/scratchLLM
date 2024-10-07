@@ -3,7 +3,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '../box/box.jsx';
-import Modal from '../../containers/modal.jsx';
+import ReactModal from 'react-modal';
+import deleteIcon from './icon--delete.svg';
+import undoIcon from './icon--undo.svg';
 
 import styles from './delete-confirmation-prompt.css';
 
@@ -15,12 +17,12 @@ const messages = defineMessages({
         id: 'gui.gui.shouldDeleteSprite'
     },
     confirmOption: {
-        defaultMessage: 'Yes',
+        defaultMessage: 'yes',
         description: 'Yes - should delete the sprite',
         id: 'gui.gui.confirm'
     },
     cancelOption: {
-        defaultMessage: 'No',
+        defaultMessage: 'no',
         description: 'No - cancel deletion',
         id: 'gui.gui.cancel'
     },
@@ -36,9 +38,10 @@ const DeleteConfirmationPrompt = ({
     onCancel,
     onOk
 }) => (
-    <Modal
-        contentLabel={intl.formatMessage(messages.confirmDeletionHeading)}
+    <ReactModal
+        isOpen
         className={styles.modalContent}
+        contentLabel={intl.formatMessage(messages.confirmDeletionHeading)}
         onRequestClose={onCancel}
     >
         <Box className={styles.body}>
@@ -51,18 +54,30 @@ const DeleteConfirmationPrompt = ({
                     onClick={onOk}
                     role="button"
                 >
-                    <FormattedMessage {...messages.confirmOption} />
+                    <img
+                        className={styles.deleteIcon}
+                        src={deleteIcon}
+                    />
+                    <div className={styles.message}>
+                        <FormattedMessage {...messages.confirmOption} />
+                    </div>
                 </button>
                 <button
                     className={styles.cancelButton}
                     onClick={onCancel}
                     role="button"
                 >
-                    <FormattedMessage {...messages.cancelOption} />
+                    <img
+                        className={styles.deleteIcon}
+                        src={undoIcon}
+                    />
+                    <div className={styles.message}>
+                        <FormattedMessage {...messages.cancelOption} />
+                    </div>
                 </button>
             </Box>
         </Box>
-    </Modal>
+    </ReactModal>
 );
 
 DeleteConfirmationPrompt.propTypes = {
