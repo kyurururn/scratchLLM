@@ -22,7 +22,7 @@ describe('SpriteSelectorItem Container', () => {
     let store;
     let vm;
     // Wrap this in a function so it gets test specific states and can be reused.
-    const getContainer = function () {
+    const getContainer = function (withDeleteConfirmation) {
         return (
             <Provider store={store}>
                 <SpriteSelectorItemContainer
@@ -35,6 +35,7 @@ describe('SpriteSelectorItem Container', () => {
                     onClick={onClick}
                     onDeleteButtonClick={onDeleteButtonClick}
                     vm={vm}
+                    withDeleteConfirmation={withDeleteConfirmation}
                 />
             </Provider>
         );
@@ -57,8 +58,16 @@ describe('SpriteSelectorItem Container', () => {
         }});
     });
 
-    test('should initiate sprite deletion', () => {
+    test('should delete the sprite, when called without `withDeleteConfirmation`', () => {
         const wrapper = mountWithIntl(getContainer());
+
+        wrapper.find(DeleteButton).simulate('click');
+        expect(DeleteConfirmationPrompt).not.toHaveBeenCalled();
+        expect(onDeleteButtonClick).toHaveBeenCalledWith(1337);
+    });
+
+    test('should initiate sprite deletion, when called `withDeleteConfirmation`', () => {
+        const wrapper = mountWithIntl(getContainer(true));
 
         expect(DeleteConfirmationPrompt).not.toHaveBeenCalled();
 
