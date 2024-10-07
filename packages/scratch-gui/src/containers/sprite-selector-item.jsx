@@ -113,7 +113,11 @@ class SpriteSelectorItem extends React.PureComponent {
     handleDeleteButtonClick (e) {
         e.stopPropagation(); // To prevent from bubbling back to handleClick
 
-        this.setState({isDeletePromptOpen: true});
+        if (this.props.withDeleteConfirmation) {
+            this.setState({isDeletePromptOpen: true});
+        } else {
+            this.props.onDeleteButtonClick(this.props.id);
+        }
     }
     handleDeleteSpriteModalClose () {
         this.setState({isDeletePromptOpen: false});
@@ -182,6 +186,7 @@ SpriteSelectorItem.propTypes = {
     onExportButtonClick: PropTypes.func,
     receivedBlocks: PropTypes.bool.isRequired,
     selected: PropTypes.bool,
+    withDeleteConfirmation: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 

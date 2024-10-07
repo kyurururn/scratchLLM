@@ -94,6 +94,7 @@ const SpriteList = function (props) {
                                 onDeleteButtonClick={onDeleteSprite}
                                 onDuplicateButtonClick={onDuplicateSprite}
                                 onExportButtonClick={onExportSprite}
+                                withDeleteConfirmation
                             />
                         </SortableAsset>
                     );
