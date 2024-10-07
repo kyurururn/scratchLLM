@@ -25,10 +25,8 @@ const messages = defineMessages({
         defaultMessage: 'All',
         description: 'Label for library tag to revert to all items after filtering by tag.'
     },
-    // Unfortunately, can't seem to be able to generate those,
-    // since it looks like `defineMessages` is called on first render
-    // and (seemingly?) before any operations, such as object destructuring
-    // can happen.
+    // Strings here need to be defined statically
+    // https://formatjs.io/docs/getting-started/message-declaration/#pre-declaring-using-definemessage-for-later-consumption-less-recommended
     [CATEGORIES.gettingStarted]: {
         id: `gui.library.gettingStarted`,
         defaultMessage: 'Getting Started',
