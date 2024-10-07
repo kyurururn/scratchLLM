@@ -157,7 +157,7 @@ class SpriteSelectorItem extends React.PureComponent {
                 costumeURL={this.getCostumeData()}
                 preventContextMenu={this.dragRecognizer.gestureInProgress()}
                 onClick={this.handleClick}
-                onDeleteButtonClick={this.handleDeleteButtonClick}
+                onDeleteButtonClick={onDeleteButtonClick ? this.handleDeleteButtonClick : null}
                 onDuplicateButtonClick={onDuplicateButtonClick ? this.handleDuplicate : null}
                 onExportButtonClick={onExportButtonClick ? this.handleExport : null}
                 onMouseDown={this.handleMouseDown}
