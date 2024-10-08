@@ -35,6 +35,7 @@ describe('Working with sounds', () => {
         await rightClickText('Meow', scope.soundsTab);
         await driver.sleep(500); // Wait a moment for context menu; only needed for local testing
         await clickText('delete', scope.soundsTab);
+        await clickText('yes', scope.modal);
 
         // Add it back
         await clickXpath('//button[@aria-label="Choose a Sound"]');
