@@ -95,6 +95,7 @@ const SpriteList = function (props) {
                                 onDuplicateButtonClick={onDuplicateSprite}
                                 onExportButtonClick={onExportSprite}
                                 withDeleteConfirmation
+                                deleteConfirmationModalPosition={'left'}
                             />
                         </SortableAsset>
                     );

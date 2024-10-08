@@ -1,23 +1,30 @@
 @import "../../css/colors.css";
 @import "../../css/units.css";
 
-.modal-content {
-    width: 300px;
-    background: $looks-secondary;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    border-radius: 0.5rem;
-    transform: translate(-50%, -50%);
-    margin: 0;
+.modal-container {
+    display: flex;
+    flex-direction: row;
+    border: none;
 }
 
-.modal-overlay {
-    background: $looks-transparent;
+.arrow-container {
+    display: flex;
+    align-items: center;
+    margin-right: -7px;
+}
+
+.arrow-container-left {
+    margin-right: -7px;
+}
+
+.arrow-container-right {
+    margin-left: -7px;
 }
 
 .body {
     padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    background: $looks-secondary;
 }
 
 .label {

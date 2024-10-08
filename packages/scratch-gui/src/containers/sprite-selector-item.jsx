@@ -144,6 +144,7 @@ class SpriteSelectorItem extends React.PureComponent {
             receivedBlocks,
             costumeURL,
             vm,
+            deleteConfirmationModalPosition,
             /* eslint-enable no-unused-vars */
             ...props
         } = this.props;
@@ -151,6 +152,8 @@ class SpriteSelectorItem extends React.PureComponent {
             {this.state.isDeletePromptOpen ? <DeleteConfirmationPrompt
                 onOk={this.handleDeleteSpriteModalConfirm}
                 onCancel={this.handleDeleteSpriteModalClose}
+                relativeElemRef={this.ref}
+                modalPosition={deleteConfirmationModalPosition}
             /> : null}
             <SpriteSelectorItemComponent
                 componentRef={this.setRef}
@@ -188,6 +191,7 @@ SpriteSelectorItem.propTypes = {
     receivedBlocks: PropTypes.bool.isRequired,
     selected: PropTypes.bool,
     withDeleteConfirmation: PropTypes.bool,
+    deleteConfirmationModalPosition: PropTypes.string,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 
