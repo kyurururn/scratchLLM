@@ -12,12 +12,22 @@ import arrowRightIcon from './icon--arrow-right.svg';
 
 import styles from './delete-confirmation-prompt.css';
 
-// TODO: Pass those from outside if we want to reuse this component
+// TODO: Parametrize from outside if we want more custom messaging
 const messages = defineMessages({
     shouldDeleteSpriteMessage: {
         defaultMessage: 'Are you sure you want to delete this sprite?',
         description: 'Message to indicate whether selected sprite should be deleted.',
         id: 'gui.gui.shouldDeleteSprite'
+    },
+    shouldDeleteCostumeMessage: {
+        defaultMessage: 'Are you sure you want to delete this costume?',
+        description: 'Message to indicate whether selected costume should be deleted.',
+        id: 'gui.gui.shouldDeleteCostume'
+    },
+    shouldDeleteSoundMessage: {
+        defaultMessage: 'Are you sure you want to delete this sound?',
+        description: 'Message to indicate whether selected sound should be deleted.',
+        id: 'gui.gui.shouldDeleteSound'
     },
     confirmOption: {
         defaultMessage: 'yes',
@@ -57,15 +67,28 @@ const calculateModalPosition = (relativeElemRef, modalPosition) => {
     return {};
 };
 
+const getMessage = entityType => {
+    if (entityType === 'COSTUME') {
+        return messages.shouldDeleteCostumeMessage;
+    }
+
+    if (entityType === 'SOUND') {
+        return messages.shouldDeleteSoundMessage;
+    }
+
+    return messages.shouldDeleteSpriteMessage;
+};
+
 const DeleteConfirmationPrompt = ({
     intl,
     onCancel,
     onOk,
     modalPosition,
+    entityType,
     relativeElemRef
 }) => {
     const modalPositionValues = calculateModalPosition(relativeElemRef, modalPosition);
-  
+
     return (<ReactModal
         isOpen
         // We have to inline the styles, since a part
@@ -106,7 +129,7 @@ const DeleteConfirmationPrompt = ({
                 </Box> : null }
             <Box className={styles.body}>
                 <Box className={styles.label}>
-                    <FormattedMessage {...messages.shouldDeleteSpriteMessage} />
+                    <FormattedMessage {...getMessage(entityType)} />
                 </Box>
                 <Box className={styles.buttonRow}>
                     <button
@@ -152,6 +175,7 @@ DeleteConfirmationPrompt.propTypes = {
     onOk: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired,
     relativeElemRef: PropTypes.object,
+    entityType: PropTypes.string,
     modalPosition: PropTypes.string,
     intl: intlShape.isRequired
 };
