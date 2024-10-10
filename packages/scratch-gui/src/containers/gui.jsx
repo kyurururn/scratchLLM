@@ -32,7 +32,6 @@ import ProjectFetcherHOC from '../lib/project-fetcher-hoc.jsx';
 import TitledHOC from '../lib/titled-hoc.jsx';
 import ProjectSaverHOC from '../lib/project-saver-hoc.jsx';
 import QueryParserHOC from '../lib/query-parser-hoc.jsx';
-import storage from '../lib/storage';
 import vmListenerHOC from '../lib/vm-listener-hoc.jsx';
 import vmManagerHOC from '../lib/vm-manager-hoc.jsx';
 import cloudManagerHOC from '../lib/cloud-manager-hoc.jsx';
@@ -41,31 +40,20 @@ import systemPreferencesHOC from '../lib/system-preferences-hoc.jsx';
 import GUIComponent from '../components/gui/gui.jsx';
 import {setIsScratchDesktop} from '../lib/isScratchDesktop.js';
 
-const {RequestMetadata, setMetadata, unsetMetadata} = storage.scratchFetch;
-
-const setProjectIdMetadata = projectId => {
-    // If project ID is '0' or zero, it's not a real project ID. In that case, remove the project ID metadata.
-    // Same if it's null undefined.
-    if (projectId && projectId !== '0') {
-        setMetadata(RequestMetadata.ProjectId, projectId);
-    } else {
-        unsetMetadata(RequestMetadata.ProjectId);
-    }
-};
-
 class GUI extends React.Component {
     componentDidMount () {
         setIsScratchDesktop(this.props.isScratchDesktop);
-        this.props.onStorageInit(storage);
+        this.props.onStorageInit(this.props.storage.scratchStorage);
         this.props.onVmInit(this.props.vm);
-        setProjectIdMetadata(this.props.projectId);
+        this.props.storage.setProjectMetadata?.(this.props.projectId);
     }
     componentDidUpdate (prevProps) {
         if (this.props.projectId !== prevProps.projectId) {
             if (this.props.projectId !== null) {
                 this.props.onUpdateProjectId(this.props.projectId);
             }
-            setProjectIdMetadata(this.props.projectId);
+
+            this.props.storage.setProjectMetadata?.(this.props.projectId);
         }
         if (this.props.isShowingProject && !prevProps.isShowingProject) {
             // this only notifies container when a project changes from not yet loaded to loaded
@@ -137,7 +125,7 @@ GUI.propTypes = {
 GUI.defaultProps = {
     isScratchDesktop: false,
     isTotallyNormal: false,
-    onStorageInit: storageInstance => storageInstance.addOfficialScratchWebStores(),
+    onStorageInit: () => {},
     onProjectLoaded: () => {},
     onUpdateProjectId: () => {},
     onVmInit: (/* vm */) => {}
@@ -146,6 +134,7 @@ GUI.defaultProps = {
 const mapStateToProps = state => {
     const loadingState = state.scratchGui.projectState.loadingState;
     return {
+        storage: state.scratchGui.config.storage,
         activeTabIndex: state.scratchGui.editorTab.activeTabIndex,
         alertsVisible: state.scratchGui.alerts.visible,
         backdropLibraryVisible: state.scratchGui.modals.backdropLibrary,

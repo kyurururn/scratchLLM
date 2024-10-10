@@ -6,9 +6,7 @@ import VM from '@scratch/scratch-vm';
 
 import collectMetadata from '../lib/collect-metadata';
 import log from '../lib/log';
-import storage from '../lib/storage';
 import dataURItoBlob from '../lib/data-uri-to-blob';
-import saveProjectToServer from '../lib/save-project-to-server';
 
 import {
     showAlertWithTimeout,
@@ -226,10 +224,15 @@ const ProjectSaverHOC = function (WrappedComponent) {
             // serialized project refers to a newer asset than what
             // we just finished saving).
             const savedVMState = this.props.vm.toJSON();
+            const scratchStorage = this.props.storage.scratchStorage;
+
+            const saveProject = this.props.onUpdateProjectData ||
+                ((projectId, vmState, params) => this.props.storage.saveProject(projectId, vmState, params));
+
             return Promise.all(this.props.vm.assets
                 .filter(asset => !asset.clean)
                 .map(
-                    asset => storage.store(
+                    asset => scratchStorage.store(
                         asset.assetType,
                         asset.dataFormat,
                         asset.data,
@@ -244,7 +247,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                     })
                 )
             )
-                .then(() => this.props.onUpdateProjectData(projectId, savedVMState, requestParams))
+                .then(() => saveProject(projectId, savedVMState, requestParams))
                 .then(response => {
                     this.props.onSetProjectUnchanged();
                     const id = response.id.toString();
@@ -388,7 +391,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
         onShowRemixSuccessAlert: PropTypes.func,
         onShowSaveSuccessAlert: PropTypes.func,
         onShowSavingAlert: PropTypes.func,
-        onUpdateProjectData: PropTypes.func.isRequired,
+        onUpdateProjectData: PropTypes.func,
         onUpdateProjectThumbnail: PropTypes.func,
         onUpdatedProject: PropTypes.func,
         projectChanged: PropTypes.bool,
@@ -402,12 +405,12 @@ const ProjectSaverHOC = function (WrappedComponent) {
         onRemixing: () => {},
         onSetProjectThumbnailer: () => {},
         onSetProjectSaver: () => {},
-        onUpdateProjectData: saveProjectToServer
     };
     const mapStateToProps = (state, ownProps) => {
         const loadingState = state.scratchGui.projectState.loadingState;
         const isShowingWithId = getIsShowingWithId(loadingState);
         return {
+            storage: state.scratchGui.config.storage,
             autoSaveTimeoutId: state.scratchGui.timeout.autoSaveTimeoutId,
             isAnyCreatingNewState: getIsAnyCreatingNewState(loadingState),
             isLoading: getIsLoading(loadingState),
