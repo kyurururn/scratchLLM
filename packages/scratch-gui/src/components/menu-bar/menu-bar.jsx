@@ -182,8 +182,7 @@ class MenuBar extends React.Component {
             'handleKeyPress',
             'handleRestoreOption',
             'getSaveToComputerHandler',
-            'restoreOptionMessage',
-            'handleTutorialOpen'
+            'restoreOptionMessage'
         ]);
     }
     componentDidMount () {
@@ -282,10 +281,6 @@ class MenuBar extends React.Component {
             this.props.onClickSave();
             event.preventDefault();
         }
-    }
-    handleTutorialOpen () {
-        history.pushState({}, {}, `?tutorial=all`);
-        this.props.onOpenTipLibrary();
     }
     getSaveToComputerHandler (downloadProjectCallback) {
         return () => {
@@ -696,7 +691,7 @@ class MenuBar extends React.Component {
                         <div
                             aria-label={this.props.intl.formatMessage(ariaMessages.tutorials)}
                             className={classNames(styles.menuBarItem, styles.hoverable, 'tutorials-button')}
-                            onClick={this.handleTutorialOpen}
+                            onClick={this.props.onOpenTipLibrary}
                         >
                             <img
                                 className={styles.helpIcon}

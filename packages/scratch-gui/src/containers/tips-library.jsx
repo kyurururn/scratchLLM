@@ -58,7 +58,6 @@ class TipsLibrary extends React.PureComponent {
             return window.open(window.location.origin + urlParams, '_blank');
         }
 
-        history.pushState({}, {}, `?tutorial=${item.urlId}`);
         this.props.onActivateDeck(item.id);
     }
     render () {
