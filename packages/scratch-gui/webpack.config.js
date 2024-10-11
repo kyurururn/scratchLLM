@@ -7,8 +7,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const ScratchWebpackConfigBuilder = require('scratch-webpack-configuration');
 
-const TerserPlugin = require('terser-webpack-plugin');
-
 // const STATIC_PATH = process.env.STATIC_PATH || '/static';
 
 const baseConfig = new ScratchWebpackConfigBuilder(
@@ -85,10 +83,6 @@ if (!process.env.CI) {
 // build the shipping library in `dist/`
 const distConfig = baseConfig.clone()
     .merge({
-        devtool: 'source-map',
-        optimization: {
-            minimize: false
-        },
         entry: {
             'scratch-gui': path.join(__dirname, 'src/index.ts')
         },
@@ -112,21 +106,6 @@ const distConfig = baseConfig.clone()
 // build the shipping library in `dist/` bundled with react, react-dom, redux, etc.
 const distStandaloneConfig = baseConfig.clone()
     .merge({
-        devtool: 'source-map',
-        optimization: {
-            minimize: false,
-            minimizer: [
-                new TerserPlugin({
-                    // Limiting Terser to use only 2 threads. At least for building scratch-gui
-                    // this results in a performance gain (from ~60s to ~36s) on a MacBook with
-                    // M1 Pro and 32GB of RAM and halving the memory usage (from ~11GB at peaks to ~6GB)
-                    parallel: 2,
-                    terserOptions: {
-                        sourceMap: true
-                    }
-                })
-            ]
-        },
         entry: {
             'scratch-gui-standalone': path.join(__dirname, 'src/index-standalone.tsx')
         },
@@ -139,10 +118,6 @@ const distStandaloneConfig = baseConfig.clone()
 const buildConfig = baseConfig.clone()
     .enableDevServer(process.env.PORT || 8601)
     .merge({
-        devtool: 'source-map',
-        optimization: {
-            minimize: false
-        },
         entry: {
             gui: './src/playground/index.jsx',
             blocksonly: './src/playground/blocks-only.jsx',
