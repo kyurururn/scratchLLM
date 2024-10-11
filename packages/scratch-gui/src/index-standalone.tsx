@@ -10,7 +10,6 @@ export {setAppElement} from 'react-modal';
 export * from './gui-config';
 export * from './exported-reducers';
 
-export {default as ScratchStorage} from 'scratch-storage';
 export * from 'scratch-storage';
 
 export {default as buildDefaultProject} from './lib/default-project';

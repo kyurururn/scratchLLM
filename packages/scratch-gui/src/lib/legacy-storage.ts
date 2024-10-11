@@ -1,4 +1,4 @@
-import ScratchStorage, {Asset} from 'scratch-storage';
+import {ScratchStorage, Asset} from 'scratch-storage';
 
 import defaultProject from './default-project';
 import {GUIStorage, TranslatorFunction} from '../gui-config';
@@ -66,7 +66,7 @@ export class LegacyStorage implements GUIStorage {
 
     saveProject (
         projectId: number,
-        vmState: object,
+        vmState: string,
         params: { originalId: string; isCopy: boolean; isRemix: boolean; title: string; }
     ): Promise<{ id: string | number; }> {
         // Haven't inlined the code here so that we can keep Git history on the implementation, just in case
