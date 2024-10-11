@@ -27,7 +27,7 @@ export interface GUIStorage {
 
   saveProjectThumbnail?(projectId: ProjectId, thumbnail: Blob): void;
 
-  // TODO: backpacks
+  // TODO: Support backpack storage
 }
 
 export type TranslatorFunction = (msgObj: MessageObject, options?: {index: number}) => string;

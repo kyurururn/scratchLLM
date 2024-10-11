@@ -64,13 +64,12 @@ export class LegacyStorage implements GUIStorage {
         this.backpackHost = host;
     }
 
-    // TODO: Figure out why this exists if the ScratchStorage class supports AssetType.Project
     saveProject(
         projectId: number,
         vmState: any,
         params: { originalId: string; isCopy: boolean; isRemix: boolean; title: string; }
     ): Promise<{ id: string | number; }> {
-        // TODO: Move the implementation here
+        // Haven't inlined the code here so that we can keep Git history on the implementation, just in case
         return saveProjectToServer(this.projectHost, projectId, vmState, params);
     }
 

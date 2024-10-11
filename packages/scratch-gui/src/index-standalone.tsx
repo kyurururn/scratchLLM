@@ -10,11 +10,10 @@ export {setAppElement} from 'react-modal';
 export * from './gui-config';
 export * from './exported-reducers';
 
-// TODO: Export this from 'scratch-storage'
 export { default as ScratchStorage } from 'scratch-storage';
 export * from 'scratch-storage';
 
-export { default as defaultProject } from './lib/default-project';
+export { default as buildDefaultProject } from './lib/default-project';
 
 // TODO: Better typing once ScratchGUI has types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
