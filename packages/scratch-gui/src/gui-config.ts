@@ -21,7 +21,7 @@ export interface GUIStorage {
 
     saveProject(
         projectId: ProjectId | null | undefined,
-        vmState: object,
+        vmState: string,
         params: {
             originalId: ProjectId;
             isCopy: boolean | 1;
