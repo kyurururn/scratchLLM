@@ -148,6 +148,7 @@
     "selenium-webdriver": "3.6.0",
     "semantic-release": "19.0.5",
     "stream-browserify": "3.0.0",
+    "ts-jest": "^21.2.4",
     "ts-loader": "9.5.1",
     "url-loader": "4.1.1",
     "web-audio-test-api": "0.5.2",
@@ -157,6 +158,12 @@
     "yauzl": "2.10.0"
   },
   "jest": {
+    "globals": {
+      "ts-jest": {
+        "isolatedModules": true,
+        "tsconfig": "<rootDir>/tsconfig.test.json"
+      }
+    },
     "setupFiles": [
       "raf/polyfill",
       "<rootDir>/test/helpers/enzyme-setup.js"
@@ -177,6 +184,11 @@
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)\\??$": "<rootDir>/test/__mocks__/fileMock.js",
       "\\.(css|less)$": "<rootDir>/test/__mocks__/styleMock.js",
       "editor-msgs(\\.js)?$": "<rootDir>/test/__mocks__/editor-msgs-mock.js"
+    },
+    "moduleFileExtensions": ["ts", "js", "tsx", "jsx"],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest",
+      "^.+\\.jsx?$": "babel-jest"
     }
   }
 }
