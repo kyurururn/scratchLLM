@@ -7,7 +7,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const ScratchWebpackConfigBuilder = require('scratch-webpack-configuration');
 
-const TerserPlugin = require("terser-webpack-plugin");
+const TerserPlugin = require('terser-webpack-plugin');
 
 // const STATIC_PATH = process.env.STATIC_PATH || '/static';
 
@@ -87,7 +87,7 @@ const distConfig = baseConfig.clone()
     .merge({
         devtool: 'source-map',
         optimization: {
-            minimize: false,
+            minimize: false
         },
         entry: {
             'scratch-gui': path.join(__dirname, 'src/index.ts')
@@ -141,7 +141,7 @@ const buildConfig = baseConfig.clone()
     .merge({
         devtool: 'source-map',
         optimization: {
-            minimize: false,
+            minimize: false
         },
         entry: {
             gui: './src/playground/index.jsx',

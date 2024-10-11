@@ -57,9 +57,9 @@ const AppStateHOC = function (WrappedComponent, localesOnly, configFactory) {
                 } = guiRedux;
                 const {ScratchPaintReducer} = require('scratch-paint');
 
-                const configOrLegacy = configFactory
-                    ? configFactory()
-                    : require('../legacy-config').legacyConfig;
+                const configOrLegacy = configFactory ?
+                    configFactory() :
+                    require('../legacy-config').legacyConfig;
 
                 let initializedGui = buildInitialState(configOrLegacy);
                 if (props.isFullScreen || props.isPlayerOnly) {

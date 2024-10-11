@@ -31,7 +31,7 @@ import workspaceMetricsReducer, {workspaceMetricsInitialState} from './workspace
 import throttle from 'redux-throttle';
 
 import decks from '../lib/libraries/decks/index.jsx';
-import { GUIConfig } from '../gui-config.js';
+import {GUIConfig} from '../gui-config.js';
 
 const guiMiddleware = compose(applyMiddleware(throttle(300, {leading: true, trailing: true})));
 

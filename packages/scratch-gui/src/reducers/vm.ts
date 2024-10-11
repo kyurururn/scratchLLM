@@ -1,5 +1,5 @@
 import VM from '@scratch/scratch-vm';
-import { GUIConfig } from '../gui-config';
+import {GUIConfig} from '../gui-config';
 
 const SET_VM = 'scratch-gui/vm/SET_VM';
 

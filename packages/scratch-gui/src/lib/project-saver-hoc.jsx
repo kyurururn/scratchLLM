@@ -404,7 +404,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
         autoSaveIntervalSecs: 600, // 10 minutes = 600 seconds
         onRemixing: () => {},
         onSetProjectThumbnailer: () => {},
-        onSetProjectSaver: () => {},
+        onSetProjectSaver: () => {}
     };
     const mapStateToProps = (state, ownProps) => {
         const loadingState = state.scratchGui.projectState.loadingState;

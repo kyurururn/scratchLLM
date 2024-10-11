@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {setAppElement} from 'react-modal';
 import GUI from './containers/gui';
-import { GUIConfig } from './gui-config';
+import {GUIConfig} from './gui-config';
 import AppStateHOC from './lib/app-state-hoc';
 
 export {setAppElement} from 'react-modal';
@@ -10,10 +10,10 @@ export {setAppElement} from 'react-modal';
 export * from './gui-config';
 export * from './exported-reducers';
 
-export { default as ScratchStorage } from 'scratch-storage';
+export {default as ScratchStorage} from 'scratch-storage';
 export * from 'scratch-storage';
 
-export { default as buildDefaultProject } from './lib/default-project';
+export {default as buildDefaultProject} from './lib/default-project';
 
 // TODO: Better typing once ScratchGUI has types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,7 +31,7 @@ export type GUIProps = any; // ComponentPropsWithoutRef<typeof ScratchGUI>;
 export const createStandaloneRoot = (
     config: GUIConfig,
     rootAppElement: HTMLElement,
-    container: HTMLElement,
+    container: HTMLElement
 ) => {
     setAppElement(rootAppElement);
 

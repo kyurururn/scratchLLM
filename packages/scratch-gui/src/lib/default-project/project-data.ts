@@ -1,6 +1,6 @@
 import {defineMessages} from 'react-intl';
 import sharedMessages from '../shared-messages';
-import { MessageObject, TranslatorFunction } from '../../gui-config';
+import {MessageObject, TranslatorFunction} from '../../gui-config';
 
 let messages = defineMessages({
     meow: {
