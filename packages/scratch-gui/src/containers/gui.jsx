@@ -39,6 +39,7 @@ import systemPreferencesHOC from '../lib/system-preferences-hoc.jsx';
 
 import GUIComponent from '../components/gui/gui.jsx';
 import {setIsScratchDesktop} from '../lib/isScratchDesktop.js';
+import {GUIStoragePropType} from '../gui-config';
 
 class GUI extends React.Component {
     componentDidMount () {
@@ -99,6 +100,7 @@ class GUI extends React.Component {
 }
 
 GUI.propTypes = {
+    storage: GUIStoragePropType,
     assetHost: PropTypes.string,
     children: PropTypes.node,
     cloudHost: PropTypes.string,

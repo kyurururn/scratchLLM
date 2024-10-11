@@ -31,6 +31,7 @@ import {
     getIsUpdating,
     projectError
 } from '../reducers/project-state';
+import {GUIStoragePropType} from '../gui-config';
 
 /**
  * Higher Order Component to provide behavior for saving projects.
@@ -227,7 +228,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
             const scratchStorage = this.props.storage.scratchStorage;
 
             const saveProject = this.props.onUpdateProjectData ||
-                ((projectId, vmState, params) => this.props.storage.saveProject(projectId, vmState, params));
+                ((id, vmState, params) => this.props.storage.saveProject(id, vmState, params));
 
             return Promise.all(this.props.vm.assets
                 .filter(asset => !asset.clean)
@@ -397,6 +398,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
         projectChanged: PropTypes.bool,
         reduxProjectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
         reduxProjectTitle: PropTypes.string,
+        storage: GUIStoragePropType,
         setAutoSaveTimeoutId: PropTypes.func.isRequired,
         vm: PropTypes.instanceOf(VM).isRequired
     };

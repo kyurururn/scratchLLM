@@ -32,6 +32,7 @@ const defaultProject = (translator?: TranslatorFunction) => {
         // TODO: This is weird - it's building the data as a string, but looking at scratch-storage,
         //       it should be a Uint8Array? How does that work? Needs more investigation.
         //       Ignoring the type difference for now as it *does work*.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         data: JSON.stringify(projectJson) as any as Uint8Array
     }, {
         id: '83a9787d4cb6f3b7632b4ddfebf74367',

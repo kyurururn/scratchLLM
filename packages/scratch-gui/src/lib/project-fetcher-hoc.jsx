@@ -21,6 +21,7 @@ import {
 } from '../reducers/editor-tab';
 
 import log from './log';
+import {GUIStoragePropType} from '../gui-config';
 
 /* Higher Order Component to provide behavior for loading projects by id. If
  * there's no id, the default project is loaded.
@@ -123,6 +124,7 @@ const ProjectFetcherHOC = function (WrappedComponent) {
         }
     }
     ProjectFetcherComponent.propTypes = {
+        storage: GUIStoragePropType,
         assetHost: PropTypes.string,
         canSave: PropTypes.bool,
         intl: intlShape.isRequired,
