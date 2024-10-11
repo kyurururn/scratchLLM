@@ -1,6 +1,7 @@
 import type ScratchStorage from 'scratch-storage';
 
 export type GUIConfigFactory = () => GUIConfig;
+export type ProjectId = string | number;
 
 export interface GUIConfig {
   storage: GUIStorage
@@ -17,15 +18,15 @@ export interface GUIStorage {
   setTranslatorFunction?(formatMessageFn: TranslatorFunction): void;
   setBackpackHost?(host: string): void;
 
-  saveProject(projectId: number | null | undefined, vmState: any, params: {
-    // TODO: Not sure about this type
-    originalId: string,
-    isCopy: boolean,
-    isRemix: boolean,
+  saveProject(projectId: ProjectId | null | undefined, vmState: object, params: {
+    originalId: ProjectId,
+    isCopy: boolean | 1,
+    isRemix: boolean | 1,
     title: string
-  }): Promise<{ id: string | number }>;
+  }): Promise<{ id: ProjectId }>;
 
-  // TODO: saveProjectThumbnail()
+  saveProjectThumbnail?(projectId: ProjectId, thumbnail: Blob): void;
+
   // TODO: backpacks
 }
 
