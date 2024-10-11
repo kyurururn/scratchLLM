@@ -10,7 +10,6 @@ const createVM = function (config: GUIConfig) {
 };
 
 const reducer = function (state, action) {
-    // TODO: Was this being used? Since we initialize the store with initial state?
     if (typeof state === 'undefined') state = null;
     switch (action.type) {
     case SET_VM:
