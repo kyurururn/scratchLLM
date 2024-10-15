@@ -27,13 +27,14 @@
 .library-category-title {
   padding-Left: .5rem;
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 2rem;
   color: $text-primary;
 }
 
 .library-category-items {
   display: flex;
   flex-wrap: wrap;
+  padding-bottom: 1rem;
 }
 
 .filter-bar {
