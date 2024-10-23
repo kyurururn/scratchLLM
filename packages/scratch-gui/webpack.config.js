@@ -177,6 +177,11 @@ const buildConfig = baseConfig.clone()
 // `BUILD_MODE=dist npm run build`
 const buildDist = process.env.NODE_ENV === 'production' || process.env.BUILD_MODE === 'dist';
 
-module.exports = buildDist ?
-    [buildConfig.get(), distStandaloneConfig.get(), distConfig.get()] :
-    buildConfig.get();
+let config;
+switch (process.env.BUILD_TYPE) {
+    case 'dist': distConfig.get(); break;
+    case 'dist-standalone': distStandaloneConfig.get(); break;
+    default: config = buildConfig.get(); break;
+}
+
+module.exports = buildDist ? config : buildConfig.get();
