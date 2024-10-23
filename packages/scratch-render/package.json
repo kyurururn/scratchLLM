@@ -28,6 +28,12 @@
     "version": "json -f package.json -I -e \"this.repository.sha = '$(git log -n1 --pretty=format:%H)'\"",
     "watch": "webpack --progress --watch --watch-poll"
   },
+  "tap": {
+    "branches": 10,
+    "functions": 20,
+    "lines": 30,
+    "statements": 30
+  },
   "browserslist": [
     "Chrome >= 63",
     "Edge >= 15",
