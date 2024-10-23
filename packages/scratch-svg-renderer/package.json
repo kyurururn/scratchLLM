@@ -29,6 +29,12 @@
   "peerDependencies": {
     "scratch-render-fonts": "^1.0.0"
   },
+  "tap": {
+    "branches": 70,
+    "functions": 50,
+    "lines": 70,
+    "statements": 70
+  },
   "dependencies": {
     "base64-js": "^1.2.1",
     "base64-loader": "^1.0.0",
