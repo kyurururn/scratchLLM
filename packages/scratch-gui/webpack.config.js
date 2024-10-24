@@ -179,9 +179,9 @@ const buildDist = process.env.NODE_ENV === 'production' || process.env.BUILD_MOD
 
 let config;
 switch (process.env.BUILD_TYPE) {
-    case 'dist': config = distConfig.get(); break;
-    case 'dist-standalone': config = distStandaloneConfig.get(); break;
-    default: config = buildConfig.get(); break;
+case 'dist': config = distConfig.get(); break;
+case 'dist-standalone': config = distStandaloneConfig.get(); break;
+default: config = buildConfig.get(); break;
 }
 
-module.exports = buildDist ? config  : buildConfig.get();
+module.exports = buildDist ? config : buildConfig.get();
