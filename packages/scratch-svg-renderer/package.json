@@ -29,6 +29,12 @@
   "peerDependencies": {
     "scratch-render-fonts": "^1.0.0"
   },
+  "tap": {
+    "branches": 70,
+    "functions": 50,
+    "lines": 70,
+    "statements": 70
+  },
   "dependencies": {
     "base64-js": "^1.2.1",
     "base64-loader": "^1.0.0",
@@ -53,9 +59,9 @@
     "rimraf": "3.0.2",
     "scratch-render-fonts": "1.0.92",
     "scratch-semantic-release-config": "1.0.14",
-    "scratch-webpack-configuration": "1.5.0",
+    "scratch-webpack-configuration": "1.6.0",
     "semantic-release": "19.0.5",
-    "tap": "11.1.5",
+    "tap": "16.3.10",
     "webpack": "5.94.0",
     "webpack-cli": "5.1.4",
     "webpack-dev-server": "3.11.3",

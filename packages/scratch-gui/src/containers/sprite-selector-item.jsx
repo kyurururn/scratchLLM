@@ -5,11 +5,11 @@ import {connect} from 'react-redux';
 
 import {setHoveredSprite} from '../reducers/hovered-target';
 import {updateAssetDrag} from '../reducers/asset-drag';
-import storage from '../lib/storage';
 import VM from '@scratch/scratch-vm';
 import getCostumeUrl from '../lib/get-costume-url';
 import DragRecognizer from '../lib/drag-recognizer';
 import {getEventXY} from '../lib/touch-utils';
+import {GUIStoragePropType} from '../gui-config';
 import DeleteConfirmationPrompt from '../components/delete-confirmation-prompt/delete-confirmation-prompt.jsx';
 
 import SpriteSelectorItemComponent from '../components/sprite-selector-item/sprite-selector-item.jsx';
@@ -53,7 +53,7 @@ class SpriteSelectorItem extends React.PureComponent {
         if (this.props.costumeURL) return this.props.costumeURL;
         if (!this.props.asset) return null;
 
-        return getCostumeUrl(this.props.asset);
+        return getCostumeUrl(this.props.storage.scratchStorage, this.props.asset);
     }
     handleDragEnd () {
         if (this.props.dragging) {
@@ -175,7 +175,8 @@ class SpriteSelectorItem extends React.PureComponent {
     }
 }
 SpriteSelectorItem.propTypes = {
-    asset: PropTypes.instanceOf(storage.Asset),
+    storage: GUIStoragePropType,
+    asset: PropTypes.object,
     costumeURL: PropTypes.string,
     dispatchSetHoveredSprite: PropTypes.func.isRequired,
     dragPayload: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -197,6 +198,7 @@ SpriteSelectorItem.propTypes = {
 };
 
 const mapStateToProps = (state, {id}) => ({
+    storage: state.scratchGui.config.storage,
     dragging: state.scratchGui.assetDrag.dragging,
     receivedBlocks: state.scratchGui.hoveredTarget.receivedBlocks &&
             state.scratchGui.hoveredTarget.sprite === id,

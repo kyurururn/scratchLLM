@@ -2,11 +2,12 @@ import React from 'react';
 import {mountWithIntl} from '../../helpers/intl-helpers.jsx';
 import configureStore from 'redux-mock-store';
 import {Provider} from 'react-redux';
+import VM from '@scratch/scratch-vm';
 
 import SpriteSelectorItemContainer from '../../../src/containers/sprite-selector-item';
 import DeleteButton from '../../../src/components/delete-button/delete-button';
+import {legacyConfig} from '../../../src/legacy-config';
 import DeleteConfirmationPrompt from '../../../src/components/delete-confirmation-prompt/delete-confirmation-prompt.jsx';
-import VM from '@scratch/scratch-vm';
 
 jest.mock('../../../src/components/delete-confirmation-prompt/delete-confirmation-prompt.jsx', () => jest.fn(() => null));
 describe('SpriteSelectorItem Container', () => {
@@ -52,6 +53,7 @@ describe('SpriteSelectorItem Container', () => {
         selected = true;
         vm = new VM();
         store = mockStore({scratchGui: {
+            config: legacyConfig,
             hoveredTarget: {receivedBlocks: false, sprite: null},
             assetDrag: {dragging: false},
             vm

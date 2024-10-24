@@ -67,6 +67,11 @@ const baseConfig = new ScratchWebpackConfigBuilder(
                 context: '../../node_modules/@scratch/scratch-vm/dist/web',
                 from: 'extension-worker.{js,js.map}',
                 noErrorOnMissing: true
+            },
+            {
+                context: '../../node_modules/scratch-storage/dist/web',
+                from: 'chunks/fetch-worker.*.{js,js.map}',
+                noErrorOnMissing: true
             }
         ]
     }));
@@ -172,6 +177,11 @@ const buildConfig = baseConfig.clone()
 // `BUILD_MODE=dist npm run build`
 const buildDist = process.env.NODE_ENV === 'production' || process.env.BUILD_MODE === 'dist';
 
-module.exports = buildDist ?
-    [buildConfig.get(), distStandaloneConfig.get(), distConfig.get()] :
-    buildConfig.get();
+let config;
+switch (process.env.BUILD_TYPE) {
+case 'dist': config = distConfig.get(); break;
+case 'dist-standalone': config = distStandaloneConfig.get(); break;
+default: config = buildConfig.get(); break;
+}
+
+module.exports = buildDist ? config : buildConfig.get();
