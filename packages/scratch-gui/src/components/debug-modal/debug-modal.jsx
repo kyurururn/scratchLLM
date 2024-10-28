@@ -1,9 +1,10 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {defineMessages, FormattedMessage} from 'react-intl';
 import PropTypes from 'prop-types';
 import ReactModal from 'react-modal';
 import classNames from 'classnames';
 import {sections} from './sections/sections';
+import GA4 from '../../lib/analytics';
 
 import styles from './debug-modal.css';
 import debugIcon from './icons/icon--debug.svg';
@@ -20,31 +21,57 @@ const messages = defineMessages({
     }
 });
 
+const logTopicChange = topicIndex => {
+    GA4.event({
+        category: 'change_topic_debug_modal',
+        label: topicIndex
+    });
+};
+
 const DebugModal = ({isOpen, onClose = () => {}}) => {
     const [selectedTopicIndex, setSelectedTopicIndex] = useState(0);
 
     const handleNext = useCallback(() => {
         if (selectedTopicIndex < sections.length - 1) {
             setSelectedTopicIndex(selectedTopicIndex + 1);
+            logTopicChange(selectedTopicIndex + 1);
         }
     }, [selectedTopicIndex, setSelectedTopicIndex]);
 
     const handlePrevious = useCallback(() => {
         if (selectedTopicIndex > 0) {
             setSelectedTopicIndex(selectedTopicIndex - 1);
+            logTopicChange(selectedTopicIndex - 1);
         }
     }, [selectedTopicIndex, setSelectedTopicIndex]);
 
     const handleTopicSelect = useCallback(index => {
         setSelectedTopicIndex(index);
+        logTopicChange(index);
     }, [setSelectedTopicIndex]);
+
+    const handleClose = useCallback(() => {
+        GA4.event({
+            category: 'close_debug_modal'
+        });
+        onClose();
+    }, [onClose]);
+
+    useEffect(() => {
+        if (isOpen) {
+            console.log('==opened debug modal');
+            GA4.event({
+                category: 'open_debug_modal'
+            });
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
     return (
         <ReactModal
             isOpen={isOpen}
-            onRequestClose={onClose}
+            onRequestClose={handleClose}
             className={styles.modalContainer}
             overlayClassName={styles.modalOverlay}
         >
