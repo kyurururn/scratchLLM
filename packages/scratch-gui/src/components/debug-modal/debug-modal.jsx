@@ -86,7 +86,7 @@ const DebugModal = ({isOpen, onClose = () => {}}) => {
                 </div>
                 <button
                     className={styles.closeButton}
-                    onClick={onClose}
+                    onClick={handleClose}
                 >
                     <img
                         className={styles.closeIcon}
