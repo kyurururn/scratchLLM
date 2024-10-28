@@ -59,7 +59,6 @@ const DebugModal = ({isOpen, onClose = () => {}}) => {
 
     useEffect(() => {
         if (isOpen) {
-            console.log('==opened debug modal');
             GA4.event({
                 category: 'open_debug_modal'
             });
