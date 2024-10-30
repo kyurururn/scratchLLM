@@ -24,7 +24,7 @@ const messages = defineMessages({
 const logTopicChange = topicIndex => {
     GA4.event({
         category: 'change_topic_debug_modal',
-        label: topicIndex
+        label: sections[topicIndex].id
     });
 };
 
@@ -60,7 +60,8 @@ const DebugModal = ({isOpen, onClose = () => {}}) => {
     useEffect(() => {
         if (isOpen) {
             GA4.event({
-                category: 'open_debug_modal'
+                category: 'open_debug_modal',
+                label: sections[0].id
             });
         }
     }, [isOpen]);

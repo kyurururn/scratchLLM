@@ -19,6 +19,7 @@ import toLoopOrNotToLoop from '../icons/icon--to-loop-or-not.svg';
 
 export const sections = [
     {
+        id: 'readAloud',
         title: messages.readAloudTitle,
         description: <div>
             <p><FormattedMessage {...messages.readAloudDescription1} /></p>
@@ -30,6 +31,7 @@ export const sections = [
         </div>,
         image: readAloud
     }, {
+        id: 'breakItDown',
         title: messages.breakItDownTitle,
         description: (<div>
             <p><FormattedMessage {...messages.breakItDownDescription1} /></p>
@@ -38,6 +40,7 @@ export const sections = [
         </div>),
         image: breakItDown
     }, {
+        id: 'slowItDown',
         title: messages.slowItDownTitle,
         description: (<div>
             <p><FormattedMessage {...messages.slowItDownDescription1} /></p>
@@ -46,6 +49,7 @@ export const sections = [
         </div>),
         image: slowItDown
     }, {
+        id: 'addSoundCheckpoints',
         title: messages.addSoundCheckpointsTitle,
         description: (<div>
             <p><FormattedMessage {...messages.addSoundCheckpointsDescription1} /></p>
@@ -54,6 +58,7 @@ export const sections = [
         </div>),
         image: addSoundCheckpoints
     }, {
+        id: 'tinkerWithBlockOrder',
         title: messages.tinkerWithBlockOrderTitle,
         description: <div>
             <p><FormattedMessage {...messages.tinkerWithBlockOrderDescription1} /></p>
@@ -66,6 +71,7 @@ export const sections = [
         </div>,
         image: tinkerWithBlockOrder
     }, {
+        id: 'toLoopOrNotToLoop',
         title: messages.toLoopOrNotTitle,
         description: (<div>
             <p><FormattedMessage {...messages.toLoopOrNotDescription1} /></p>
@@ -73,6 +79,7 @@ export const sections = [
         </div>),
         image: toLoopOrNotToLoop
     }, {
+        id: 'timingAndParallelism',
         title: messages.timingAndParallelismTitle,
         sectionTitle: messages.timingAndParallelismSectionTitle,
         description: (<div>
@@ -81,6 +88,7 @@ export const sections = [
         </div>),
         image: timingAndParallelism
     }, {
+        id: 'thinkAboutBlockOptions',
         title: messages.thinkAboutBlockOptionsTitle,
         description: (<div>
             <p><FormattedMessage {...messages.thinkAboutBlockOptionsDescription1} /></p>
@@ -89,6 +97,7 @@ export const sections = [
         </div>),
         image: thinkAboutBlockOptions
     }, {
+        id: 'checkTheValues',
         title: messages.checkTheValuesTitle,
         description: <div>
             <p><FormattedMessage {...messages.checkTheValuesDescription1} /></p>
@@ -99,6 +108,7 @@ export const sections = [
         </div>,
         image: checkTheValues
     }, {
+        id: 'checkCodeSequence',
         title: messages.checkCodeSequenceTitle,
         description: <div>
             <p><FormattedMessage {...messages.checkCodeSequenceDescription1} /></p>
@@ -107,6 +117,7 @@ export const sections = [
         </div>,
         image: checkCodeSequence
     }, {
+        id: 'commentYourCode',
         title: messages.commentYourCodeTitle,
         description: <div>
             <p><FormattedMessage {...messages.commentYourCodeDescription1} /></p>
@@ -114,6 +125,7 @@ export const sections = [
         </div>,
         image: commentYourCode
     }, {
+        id: 'takeABreak',
         title: messages.takeABreakTitle,
         description: <div>
             <p><FormattedMessage {...messages.takeABreakDescription1} /></p>
@@ -121,6 +133,7 @@ export const sections = [
         </div>,
         image: takeABreak
     }, {
+        id: 'askForHelp',
         title: messages.askForHelpTitle,
         description: <div>
             <p><FormattedMessage {...messages.askForHelpDescription1} /></p>
