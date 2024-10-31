@@ -61,7 +61,7 @@ const DebugModal = ({isOpen, onClose = () => {}}) => {
         if (isOpen) {
             GA4.event({
                 category: 'open_debug_modal',
-                label: sections[0].id
+                label: sections[selectedTopicIndex].id
             });
         }
     }, [isOpen]);
