@@ -9,6 +9,18 @@ const ScratchWebpackConfigBuilder = require('scratch-webpack-configuration');
 
 // const STATIC_PATH = process.env.STATIC_PATH || '/static';
 
+const commonHtmlWebpackPluginOptions = {
+    // Google Tag Manager ID
+    // Looks like 'GTM-XXXXXXX'
+    gtm_id: process.env.GTM_ID || '',
+
+    // Google Tag Manager env & auth info for alterative GTM environments
+    // Looks like '&gtm_auth=0123456789abcdefghijklm&gtm_preview=env-00&gtm_cookies_win=x'
+    // Taken from the middle of: GTM -> Admin -> Environments -> (environment) -> Get Snippet
+    // Blank for production
+    gtm_env_auth: process.env.GTM_ENV_AUTH || ''
+};
+
 const baseConfig = new ScratchWebpackConfigBuilder(
     {
         rootPath: path.resolve(__dirname),
@@ -66,6 +78,11 @@ const baseConfig = new ScratchWebpackConfigBuilder(
             {
                 context: '../../node_modules/@scratch/scratch-vm/dist/web',
                 from: 'extension-worker.{js,js.map}',
+                noErrorOnMissing: true
+            },
+            {
+                context: '../../node_modules/scratch-storage/dist/web',
+                from: 'chunks/fetch-worker.*.{js,js.map}',
                 noErrorOnMissing: true
             }
         ]
@@ -130,23 +147,27 @@ const buildConfig = baseConfig.clone()
         }
     })
     .addPlugin(new HtmlWebpackPlugin({
+        ...commonHtmlWebpackPluginOptions,
         chunks: ['gui'],
         template: 'src/playground/index.ejs',
         title: 'Scratch 3.0 GUI'
     }))
     .addPlugin(new HtmlWebpackPlugin({
+        ...commonHtmlWebpackPluginOptions,
         chunks: ['blocksonly'],
         filename: 'blocks-only.html',
         template: 'src/playground/index.ejs',
         title: 'Scratch 3.0 GUI: Blocks Only Example'
     }))
     .addPlugin(new HtmlWebpackPlugin({
+        ...commonHtmlWebpackPluginOptions,
         chunks: ['compatibilitytesting'],
         filename: 'compatibility-testing.html',
         template: 'src/playground/index.ejs',
         title: 'Scratch 3.0 GUI: Compatibility Testing'
     }))
     .addPlugin(new HtmlWebpackPlugin({
+        ...commonHtmlWebpackPluginOptions,
         chunks: ['player'],
         filename: 'player.html',
         template: 'src/playground/index.ejs',
@@ -172,6 +193,11 @@ const buildConfig = baseConfig.clone()
 // `BUILD_MODE=dist npm run build`
 const buildDist = process.env.NODE_ENV === 'production' || process.env.BUILD_MODE === 'dist';
 
-module.exports = buildDist ?
-    [buildConfig.get(), distStandaloneConfig.get(), distConfig.get()] :
-    buildConfig.get();
+let config;
+switch (process.env.BUILD_TYPE) {
+case 'dist': config = distConfig.get(); break;
+case 'dist-standalone': config = distStandaloneConfig.get(); break;
+default: config = buildConfig.get(); break;
+}
+
+module.exports = buildDist ? config : buildConfig.get();

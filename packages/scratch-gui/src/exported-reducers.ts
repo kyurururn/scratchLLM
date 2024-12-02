@@ -1,6 +1,6 @@
 import {ScratchPaintReducer} from 'scratch-paint';
 import LocalesReducer, {localesInitialState, initLocale} from './reducers/locales.js';
-import GuiReducer, {guiInitialState, guiMiddleware, initEmbedded, initFullScreen, initPlayer} from './reducers/gui.js';
+import GuiReducer, {buildInitialState, guiMiddleware, initEmbedded, initFullScreen, initPlayer} from './reducers/gui';
 import {setFullScreen, setPlayer} from './reducers/mode.js';
 import {activateDeck} from './reducers/cards.js';
 
@@ -11,7 +11,7 @@ export const guiReducers = {
 };
 
 export {
-    guiInitialState,
+    buildInitialState,
     guiMiddleware,
     initEmbedded,
     initPlayer,
