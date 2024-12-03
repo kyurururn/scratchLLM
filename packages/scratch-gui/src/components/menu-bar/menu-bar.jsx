@@ -696,7 +696,12 @@ class MenuBar extends React.Component {
                     <div className={styles.fileGroup}>
                         <div
                             aria-label={this.props.intl.formatMessage(ariaMessages.tutorials)}
-                            className={classNames(styles.menuBarItem, styles.noOffset, styles.hoverable)}
+                            className={classNames(
+                                styles.menuBarItem,
+                                styles.noOffset,
+                                styles.hoverable,
+                                'tutorials-button'
+                            )}
                             onClick={this.props.onOpenTipLibrary}
                         >
                             <img
