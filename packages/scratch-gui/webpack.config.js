@@ -132,6 +132,7 @@ const buildConfig = baseConfig.clone()
     .merge({
         entry: {
             gui: './src/playground/index.jsx',
+            guistandalone: './src/playground/standalone.jsx',
             blocksonly: './src/playground/blocks-only.jsx',
             compatibilitytesting: './src/playground/compatibility-testing.jsx',
             player: './src/playground/player.jsx'
@@ -151,6 +152,13 @@ const buildConfig = baseConfig.clone()
         chunks: ['gui'],
         template: 'src/playground/index.ejs',
         title: 'Scratch 3.0 GUI'
+    }))
+    .addPlugin(new HtmlWebpackPlugin({
+        ...commonHtmlWebpackPluginOptions,
+        chunks: ['guistandalone'],
+        filename: 'standalone.html',
+        template: 'src/playground/index.ejs',
+        title: 'Scratch 3.0 GUI: Standalone Mode'
     }))
     .addPlugin(new HtmlWebpackPlugin({
         ...commonHtmlWebpackPluginOptions,
