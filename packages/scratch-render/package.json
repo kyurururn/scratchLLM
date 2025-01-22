@@ -7,8 +7,7 @@
   "homepage": "https://github.com/scratchfoundation/scratch-render#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/scratchfoundation/scratch-editor.git",
-    "sha": "e593d13de19afe7250aacb252a93f8703f52a7a6"
+    "url": "https://github.com/scratchfoundation/scratch-editor.git"
   },
   "exports": {
     "webpack": "./src/index.js",
@@ -25,7 +24,6 @@
     "start": "webpack-dev-server",
     "tap": "tap test/unit test/integration",
     "test": "npm run lint && npm run docs && npm run build && npm run tap",
-    "version": "json -f package.json -I -e \"this.repository.sha = '$(git log -n1 --pretty=format:%H)'\"",
     "watch": "webpack --progress --watch --watch-poll"
   },
   "tap": {

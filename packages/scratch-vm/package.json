@@ -7,8 +7,7 @@
   "homepage": "https://github.com/scratchfoundation/scratch-vm#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/scratchfoundation/scratch-editor.git",
-    "sha": "c916f9ce07065d4061177fdd9f3cca511dbc1d85"
+    "url": "https://github.com/scratchfoundation/scratch-editor.git"
   },
   "main": "./dist/node/scratch-vm.js",
   "browser": "./dist/web/scratch-vm.js",
@@ -31,8 +30,7 @@
     "tap:unit": "tap ./test/unit/*.js",
     "tap:integration": "tap ./test/integration/*.js",
     "test": "npm run lint && npm run tap",
-    "watch": "webpack --progress --watch",
-    "version": "json -f package.json -I -e \"this.repository.sha = '$(git log -n1 --pretty=format:%H)'\""
+    "watch": "webpack --progress --watch"
   },
   "browserslist": [
     "Chrome >= 63",
