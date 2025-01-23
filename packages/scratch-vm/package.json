@@ -1,6 +1,6 @@
 {
   "name": "@scratch/scratch-vm",
-  "version": "4.5.457",
+  "version": "11.0.0-beta.1",
   "description": "Virtual Machine for Scratch 3.0",
   "author": "Massachusetts Institute of Technology",
   "license": "AGPL-3.0-only",
@@ -45,8 +45,8 @@
     "statements": 70
   },
   "dependencies": {
-    "@scratch/scratch-render": "1.0.317",
-    "@scratch/scratch-svg-renderer": "2.3.126",
+    "@scratch/scratch-render": "11.0.0-beta.1",
+    "@scratch/scratch-svg-renderer": "11.0.0-beta.1",
     "@vernier/godirect": "^1.5.0",
     "arraybuffer-loader": "^1.0.6",
     "atob": "^2.1.2",
