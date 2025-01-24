@@ -10,6 +10,7 @@
     "node": "./dist/node/scratch-svg-renderer.js",
     "default": "./src/index.js"
   },
+  "files": ["dist"],
   "scripts": {
     "build": "npm run clean && webpack",
     "clean": "rimraf ./dist",

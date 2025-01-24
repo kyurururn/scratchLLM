@@ -21,6 +21,7 @@
       "default": "./dist/scratch-gui-standalone.js"
     }
   },
+  "files": ["dist"],
   "scripts": {
     "build": "npm run clean && BUILD_TYPE=dev webpack && BUILD_TYPE=dist webpack && BUILD_TYPE=dist-standalone webpack",
     "clean": "rimraf ./build ./dist",
@@ -31,7 +32,7 @@
     "i18n:src": "rimraf ./translations/messages/src && babel src > tmp.js && rimraf tmp.js && build-i18n-src ./translations/messages/src ./translations/",
     "start": "webpack serve",
     "test": "npm run test:lint && npm run test:unit && npm run build && npm run test:integration",
-    "test:integration": "cross-env JEST_JUNIT_OUTPUT_NAME=integration-tests-results.xml jest --maxWorkers=2 test[\\\\/]integration",
+    "test:integration": "cross-env JEST_JUNIT_OUTPUT_NAME=integration-tests-results.xml jest --maxWorkers=4 test[\\\\/]integration",
     "test:lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test:unit": "cross-env JEST_JUNIT_OUTPUT_NAME=unit-tests-results.xml jest test[\\\\/]unit",
     "test:smoke": "jest --runInBand test[\\\\/]smoke",
