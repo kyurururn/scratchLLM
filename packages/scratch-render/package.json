@@ -1,6 +1,6 @@
 {
   "name": "@scratch/scratch-render",
-  "version": "11.0.0-beta.1",
+  "version": "11.0.0-beta.2",
   "description": "WebGL Renderer for Scratch 3.0",
   "author": "Massachusetts Institute of Technology",
   "license": "AGPL-3.0-only",
@@ -16,7 +16,10 @@
     "node": "./dist/node/scratch-render.js",
     "default": "./src/index.js"
   },
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "webpack --progress",
     "docs": "jsdoc -c .jsdoc.json",
@@ -43,7 +46,7 @@
     "iOS >= 8"
   ],
   "dependencies": {
-    "@scratch/scratch-svg-renderer": "11.0.0-beta.1",
+    "@scratch/scratch-svg-renderer": "11.0.0-beta.2",
     "grapheme-breaker": "^0.3.2",
     "hull.js": "0.2.10",
     "ify-loader": "^1.0.4",
@@ -60,7 +63,7 @@
     "@babel/eslint-parser": "7.25.1",
     "@babel/polyfill": "7.12.1",
     "@babel/preset-env": "7.25.4",
-    "@scratch/scratch-vm": "11.0.0-beta.1",
+    "@scratch/scratch-vm": "11.0.0-beta.2",
     "babel-loader": "9.1.3",
     "copy-webpack-plugin": "4.6.0",
     "docdash": "0.4.0",

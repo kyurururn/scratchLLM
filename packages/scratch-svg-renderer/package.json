@@ -1,6 +1,6 @@
 {
   "name": "@scratch/scratch-svg-renderer",
-  "version": "11.0.0-beta.1",
+  "version": "11.0.0-beta.2",
   "description": "SVG renderer for Scratch",
   "main": "./dist/node/scratch-svg-renderer.js",
   "browser": "./dist/web/scratch-svg-renderer.js",
@@ -10,7 +10,10 @@
     "node": "./dist/node/scratch-svg-renderer.js",
     "default": "./src/index.js"
   },
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "npm run clean && webpack",
     "clean": "rimraf ./dist",
