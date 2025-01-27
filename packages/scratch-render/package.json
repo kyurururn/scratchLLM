@@ -16,7 +16,7 @@
     "node": "./dist/node/scratch-render.js",
     "default": "./src/index.js"
   },
-  "files": ["dist"],
+  "files": ["dist", "src"],
   "scripts": {
     "build": "webpack --progress",
     "docs": "jsdoc -c .jsdoc.json",
