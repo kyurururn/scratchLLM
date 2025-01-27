@@ -1,0 +1,28 @@
+name: Test package
+
+inputs:
+  package_name:
+    description: The name of the tested package
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Playwright
+      shell: bash
+      run: |
+        if [[ ${{ inputs.package_name }} == "scratch-render" ]]; then
+          npx playwright install --with-deps chromium
+        fi
+    - name: Test
+      working-directory: ./packages/${{ inputs.package_name }}
+      shell: bash
+      run: |
+        mkdir -p test-results
+        npm run test | tee -a ./test-results/${{ inputs.package_name }}-test-results.txt
+    - name: Store Test Results
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.package_name }}-test-output
+        path: ./packages/${{ inputs.package_name }}/test-results/*
