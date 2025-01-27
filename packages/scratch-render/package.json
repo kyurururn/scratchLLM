@@ -9,6 +9,7 @@
     "type": "git",
     "url": "https://github.com/scratchfoundation/scratch-editor.git"
   },
+  "main": "./dist/node/scratch-render.js",
   "exports": {
     "webpack": "./src/index.js",
     "browser": "./dist/web/scratch-render.js",
