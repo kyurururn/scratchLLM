@@ -21,7 +21,7 @@
       "default": "./dist/scratch-gui-standalone.js"
     }
   },
-  "files": ["dist"],
+  "files": ["dist", "src"],
   "scripts": {
     "build": "npm run clean && BUILD_TYPE=dev webpack && BUILD_TYPE=dist webpack && BUILD_TYPE=dist-standalone webpack",
     "clean": "rimraf ./build ./dist",
