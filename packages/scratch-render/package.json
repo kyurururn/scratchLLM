@@ -9,12 +9,14 @@
     "type": "git",
     "url": "https://github.com/scratchfoundation/scratch-editor.git"
   },
+  "main": "./dist/node/scratch-render.js",
   "exports": {
     "webpack": "./src/index.js",
     "browser": "./dist/web/scratch-render.js",
     "node": "./dist/node/scratch-render.js",
     "default": "./src/index.js"
   },
+  "files": ["dist", "src"],
   "scripts": {
     "build": "webpack --progress",
     "docs": "jsdoc -c .jsdoc.json",

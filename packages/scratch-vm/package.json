@@ -17,6 +17,7 @@
     "node": "./dist/node/scratch-vm.js",
     "default": "./src/index.js"
   },
+  "files": ["dist", "src"],
   "scripts": {
     "build": "npm run docs && webpack --progress",
     "coverage": "tap ./test/{unit,integration}/*.js --coverage --coverage-report=lcov",
