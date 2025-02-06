@@ -427,8 +427,9 @@ const ProjectSaverHOC = function (WrappedComponent) {
             isManualUpdating: getIsManualUpdating(loadingState),
             loadingState: loadingState,
             locale: state.locales.locale,
-            onUpdateProjectThumbnail: ownProps.onUpdateProjectThumbnail ??
-                ((projectId, thumbnail) => storage.saveProjectThumbnail(projectId, thumbnail)),
+            onUpdateProjectThumbnail:
+                ownProps.onUpdateProjectThumbnail ??
+                storage.saveProjectThumbnail?.bind(storage),
             projectChanged: state.scratchGui.projectChanged,
             reduxProjectId: state.scratchGui.projectState.projectId,
             reduxProjectTitle: state.scratchGui.projectTitle,
