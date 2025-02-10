@@ -4,5 +4,9 @@
   // The monorepo, as a whole, should be treated as a JS app
   "extends": [
     "github>scratchfoundation/scratch-renovate-config:js-app"
+  ],
+
+  "ignoreDeps": [
+    "cat-blocks"
   ]
 }
