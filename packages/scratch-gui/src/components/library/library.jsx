@@ -12,6 +12,8 @@ import TagButton from '../../containers/tag-button.jsx';
 import Spinner from '../spinner/spinner.jsx';
 import {CATEGORIES} from '../../../src/lib/libraries/decks/index.jsx';
 
+import {legacyConfig} from '../../legacy-config';
+
 import styles from './library.css';
 
 const messages = defineMessages({
@@ -62,6 +64,7 @@ const getAssetTypeForFileExtension = function (fileExtension) {
         sensitivity: 'accent',
         usage: 'search'
     };
+    const storage = legacyConfig.storage.scratchStorage;
     for (const assetTypeId in storage.AssetType) {
         const assetType = storage.AssetType[assetTypeId];
         if (fileExtension.localeCompare(assetType.runtimeFormat, compareOptions) === 0) {
