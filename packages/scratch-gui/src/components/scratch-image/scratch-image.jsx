@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import VisibilitySensor from 'react-visibility-sensor';
 
-import storage from '../../lib/storage';
+import {legacyConfig} from '../../legacy-config';
 
 class ScratchImage extends React.PureComponent {
     static init () {
@@ -36,7 +36,7 @@ class ScratchImage extends React.PureComponent {
             this._pendingImages.delete(nextImage);
             const imageSource = nextImage.props.imageSource;
             ++this._currentJobs;
-            storage
+            legacyConfig.storage.scratchStorage
                 .load(imageSource.assetType, imageSource.assetId)
                 .then(asset => {
                     if (!nextImage.wasUnmounted) {
@@ -122,7 +122,11 @@ class ScratchImage extends React.PureComponent {
 ScratchImage.ImageSourcePropType = PropTypes.oneOfType([
     PropTypes.shape({
         assetId: PropTypes.string.isRequired,
-        assetType: PropTypes.oneOf(Object.values(storage.AssetType)).isRequired
+        assetType: PropTypes.oneOf(
+            Object.values(
+                legacyConfig.storage.scratchStorage.AssetType
+            )
+        ).isRequired
     }),
     PropTypes.shape({
         uri: PropTypes.string.isRequired
