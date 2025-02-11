@@ -1,6 +1,6 @@
 {
   "name": "@scratch/scratch-vm",
-  "version": "11.0.0-beta.1",
+  "version": "11.0.0-beta.2",
   "description": "Virtual Machine for Scratch 3.0",
   "author": "Massachusetts Institute of Technology",
   "license": "AGPL-3.0-only",
@@ -17,6 +17,10 @@
     "node": "./dist/node/scratch-vm.js",
     "default": "./src/index.js"
   },
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "npm run docs && webpack --progress",
     "coverage": "tap ./test/{unit,integration}/*.js --coverage --coverage-report=lcov",
@@ -45,8 +49,8 @@
     "statements": 70
   },
   "dependencies": {
-    "@scratch/scratch-render": "11.0.0-beta.1",
-    "@scratch/scratch-svg-renderer": "11.0.0-beta.1",
+    "@scratch/scratch-render": "11.0.0-beta.2",
+    "@scratch/scratch-svg-renderer": "11.0.0-beta.2",
     "@vernier/godirect": "^1.5.0",
     "arraybuffer-loader": "^1.0.6",
     "atob": "^2.1.2",
@@ -59,9 +63,9 @@
     "immutable": "^3.8.1",
     "jszip": "^3.1.5",
     "minilog": "^3.1.0",
-    "scratch-audio": "^1.0.6",
+    "scratch-audio": "^1.0.254",
     "scratch-parser": "^5.1.1",
-    "scratch-sb1-converter": "^1.0.0",
+    "scratch-sb1-converter": "^1.0.246",
     "scratch-storage": "^4.0.24",
     "scratch-translate-extension-languages": "^1.0.0",
     "text-encoding": "^0.7.0",
@@ -88,9 +92,9 @@
     "json": "^9.0.4",
     "pngjs": "3.4.0",
     "scratch-blocks": "1.1.206",
-    "scratch-l10n": "3.18.286",
-    "scratch-render-fonts": "1.0.92",
-    "scratch-semantic-release-config": "1.0.14",
+    "scratch-l10n": "3.18.357",
+    "scratch-render-fonts": "1.0.161",
+    "scratch-semantic-release-config": "1.0.16",
     "scratch-webpack-configuration": "1.6.0",
     "script-loader": "0.7.2",
     "semantic-release": "19.0.5",

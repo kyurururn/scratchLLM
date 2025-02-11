@@ -1,6 +1,6 @@
 {
   "name": "@scratch/scratch-svg-renderer",
-  "version": "11.0.0-beta.1",
+  "version": "11.0.0-beta.2",
   "description": "SVG renderer for Scratch",
   "main": "./dist/node/scratch-svg-renderer.js",
   "browser": "./dist/web/scratch-svg-renderer.js",
@@ -10,6 +10,10 @@
     "node": "./dist/node/scratch-svg-renderer.js",
     "default": "./src/index.js"
   },
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "npm run clean && webpack",
     "clean": "rimraf ./dist",
@@ -57,8 +61,8 @@
     "json": "9.0.6",
     "mkdirp": "2.1.6",
     "rimraf": "3.0.2",
-    "scratch-render-fonts": "1.0.92",
-    "scratch-semantic-release-config": "1.0.14",
+    "scratch-render-fonts": "1.0.161",
+    "scratch-semantic-release-config": "1.0.16",
     "scratch-webpack-configuration": "1.6.0",
     "semantic-release": "19.0.5",
     "tap": "16.3.10",

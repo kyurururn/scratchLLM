@@ -1,6 +1,6 @@
 {
   "name": "@scratch/scratch-gui",
-  "version": "11.0.0-beta.1",
+  "version": "11.0.0-beta.2",
   "description": "Graphical User Interface for creating and running Scratch 3.0 projects",
   "author": "Massachusetts Institute of Technology",
   "license": "AGPL-3.0-only",
@@ -21,6 +21,10 @@
       "default": "./dist/scratch-gui-standalone.js"
     }
   },
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "npm run clean && BUILD_TYPE=dev webpack && BUILD_TYPE=dist webpack && BUILD_TYPE=dist-standalone webpack",
     "clean": "rimraf ./build ./dist",
@@ -31,7 +35,7 @@
     "i18n:src": "rimraf ./translations/messages/src && babel src > tmp.js && rimraf tmp.js && build-i18n-src ./translations/messages/src ./translations/",
     "start": "webpack serve",
     "test": "npm run test:lint && npm run test:unit && npm run build && npm run test:integration",
-    "test:integration": "cross-env JEST_JUNIT_OUTPUT_NAME=integration-tests-results.xml jest --maxWorkers=2 test[\\\\/]integration",
+    "test:integration": "cross-env JEST_JUNIT_OUTPUT_NAME=integration-tests-results.xml jest --maxWorkers=4 test[\\\\/]integration",
     "test:lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test:unit": "cross-env JEST_JUNIT_OUTPUT_NAME=unit-tests-results.xml jest test[\\\\/]unit",
     "test:smoke": "jest --runInBand test[\\\\/]smoke",
@@ -39,9 +43,9 @@
   },
   "dependencies": {
     "@microbit/microbit-universal-hex": "^0.2.2",
-    "@scratch/scratch-render": "11.0.0-beta.1",
-    "@scratch/scratch-svg-renderer": "11.0.0-beta.1",
-    "@scratch/scratch-vm": "11.0.0-beta.1",
+    "@scratch/scratch-render": "11.0.0-beta.2",
+    "@scratch/scratch-svg-renderer": "11.0.0-beta.2",
+    "@scratch/scratch-vm": "11.0.0-beta.2",
     "arraybuffer-loader": "^1.0.6",
     "autoprefixer": "^9.0.1",
     "balance-text": "^3.3.1",
@@ -89,11 +93,11 @@
     "react-virtualized": "^9.20.1",
     "react-visibility-sensor": "5.0.2",
     "redux-throttle": "^0.1.1",
-    "scratch-audio": "^1.0.0",
+    "scratch-audio": "^1.0.254",
     "scratch-blocks": "^1.1.6",
-    "scratch-l10n": "^3.18.3",
-    "scratch-paint": "^2.2.151",
-    "scratch-render-fonts": "^1.0.2",
+    "scratch-l10n": "^3.18.286",
+    "scratch-paint": "^2.2.400",
+    "scratch-render-fonts": "^1.0.93",
     "scratch-storage": "^4.0.24",
     "startaudiocontext": "^1.2.1",
     "style-loader": "4.0.0",
@@ -145,7 +149,7 @@
     "react-test-renderer": "16.14.0",
     "redux-mock-store": "1.5.4",
     "rimraf": "2.7.1",
-    "scratch-semantic-release-config": "1.0.14",
+    "scratch-semantic-release-config": "1.0.16",
     "scratch-webpack-configuration": "1.6.0",
     "selenium-webdriver": "3.6.0",
     "semantic-release": "19.0.5",
