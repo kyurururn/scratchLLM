@@ -2,6 +2,7 @@ name: CI
 
 on:
   pull_request:
+  push:
   workflow_call:
   workflow_dispatch:
 
@@ -56,7 +57,7 @@ jobs:
               - "packages/scratch-render/**"
               - "packages/scratch-svg-renderer/**"
               - "packages/scratch-vm/**"
-              
+
       - if: ${{ steps.filter.outputs.any-workspace == 'true' }}
         uses: ./.github/actions/install-dependencies
 
