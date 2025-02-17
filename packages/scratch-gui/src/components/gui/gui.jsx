@@ -130,6 +130,7 @@ const GUIComponent = props => {
         tipsLibraryVisible,
         username,
         userOwnsProject,
+        hideTutorialProjects,
         vm,
         ...componentProps
     } = omit(props, 'dispatch');
@@ -193,7 +194,7 @@ const GUIComponent = props => {
                     <WebGlModal isRtl={isRtl} />
                 )}
                 {tipsLibraryVisible ? (
-                    <TipsLibrary />
+                    <TipsLibrary hideTutorialProjects={hideTutorialProjects} />
                 ) : null}
                 {cardsVisible ? (
                     <Cards />
@@ -455,6 +456,7 @@ GUIComponent.propTypes = {
     tipsLibraryVisible: PropTypes.bool,
     username: PropTypes.string,
     userOwnsProject: PropTypes.bool,
+    hideTutorialProjects: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 GUIComponent.defaultProps = {

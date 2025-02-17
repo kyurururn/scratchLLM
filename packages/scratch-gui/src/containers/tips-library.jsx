@@ -7,7 +7,7 @@ import decksLibraryContent from '../lib/libraries/decks/index.jsx';
 import tutorialTags from '../lib/libraries/tutorial-tags';
 
 import analytics from '../lib/analytics';
-import {notScratchDesktop} from '../lib/isScratchDesktop';
+import {isScratchDesktop} from '../lib/isScratchDesktop';
 
 import LibraryComponent from '../components/library/library.jsx';
 
@@ -63,12 +63,14 @@ class TipsLibrary extends React.PureComponent {
     render () {
         const decksLibraryThumbnailData = Object.keys(decksLibraryContent)
             .filter(id => {
-                if (notScratchDesktop()) return true; // Do not filter anything in online editor
+                if (!isScratchDesktop() && !this.props.hideTutorialProjects) {
+                    return true;
+                }
                 const deck = decksLibraryContent[id];
-                // Scratch Desktop doesn't want tutorials with `requiredProjectId`
+                // Don't show tutorials that require specific projects
                 if (Object.prototype.hasOwnProperty.call(deck, 'requiredProjectId')) return false;
                 // Scratch Desktop should not load tutorials that are _only_ videos
-                if (deck.steps.filter(s => s.title).length === 0) return false;
+                if (isScratchDesktop() && deck.steps.filter(s => s.title).length === 0) return false;
                 // Allow any other tutorials
                 return true;
             })
@@ -106,7 +108,8 @@ TipsLibrary.propTypes = {
     onActivateDeck: PropTypes.func.isRequired,
     onRequestClose: PropTypes.func,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    visible: PropTypes.bool
+    visible: PropTypes.bool,
+    hideTutorialProjects: PropTypes.bool
 };
 
 const mapStateToProps = state => ({
