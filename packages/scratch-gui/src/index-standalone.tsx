@@ -46,6 +46,7 @@ export const createStandaloneRoot = (
 
     return {
         render (props: GUIProps) {
+            console.log('index-standalone', props);
             ReactDOM.render(
                 <WrappedGui
                     appState={state}
