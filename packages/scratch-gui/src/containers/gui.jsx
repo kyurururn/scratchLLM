@@ -130,6 +130,7 @@ GUI.propTypes = {
     shouldStopProject: PropTypes.bool,
     telemetryModalVisible: PropTypes.bool,
     username: PropTypes.string,
+    userOwnsProject: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 

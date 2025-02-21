@@ -454,6 +454,7 @@ GUIComponent.propTypes = {
     theme: PropTypes.string,
     tipsLibraryVisible: PropTypes.bool,
     username: PropTypes.string,
+    userOwnsProject: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 GUIComponent.defaultProps = {

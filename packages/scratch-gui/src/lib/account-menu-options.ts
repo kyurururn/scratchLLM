@@ -20,7 +20,9 @@ export const AccountMenuOptionsPropTypes = PropTypes.shape({
 
     canRegister: PropTypes.bool,
     canLogin: PropTypes.bool,
+    canLogout: PropTypes.bool,
 
+    avatarUrl: PropTypes.string,
     myStuffUrl: PropTypes.string,
     profileUrl: PropTypes.string,
     myClassesUrl: PropTypes.string,
