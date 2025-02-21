@@ -118,7 +118,7 @@ const cloudManagerHOC = function (WrappedComponent) {
 
                 vm,
 
-                // Intentionally propagating this one since it's used in the
+                // Intentionally propagating this one since it's used in MenuBar
                 // username,
 
                 ...componentProps
