@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  merge_group:
   pull_request:
   push: # WARNING: Renovate sometimes automerges without PR, so we MUST build and test renovate/** branches
   workflow_call:
