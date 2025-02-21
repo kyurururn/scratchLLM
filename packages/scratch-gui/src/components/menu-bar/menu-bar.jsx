@@ -744,7 +744,7 @@ class MenuBar extends React.Component {
                             // ************ user is logged in ************
                             <React.Fragment>
                                 {menuOpts.myStuffUrl ? (
-                                    <a href={myStuffUrl}>
+                                    <a href={menuOpts.myStuffUrl}>
                                         <div
                                             className={classNames(
                                                 styles.menuBarItem,

@@ -1,4 +1,4 @@
-import PropTypes from "prop-types";
+import PropTypes from 'prop-types';
 
 export interface AccountMenuOptions {
     canHaveSession: boolean;
@@ -25,5 +25,5 @@ export const AccountMenuOptionsPropTypes = PropTypes.shape({
     profileUrl: PropTypes.string,
     myClassesUrl: PropTypes.string,
     myClassUrl: PropTypes.string,
-    accountSettingsUrl: PropTypes.string,
+    accountSettingsUrl: PropTypes.string
 });
