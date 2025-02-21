@@ -21,7 +21,7 @@ import MenuBarMenu from './menu-bar-menu.jsx';
 import {MenuItem, MenuSection} from '../menu/menu.jsx';
 import ProjectTitleInput from './project-title-input.jsx';
 import AuthorInfo from './author-info.jsx';
-import AccountNav from '../../containers/account-nav.jsx';
+import AccountNav from '../../components/menu-bar/account-nav.jsx';
 import LoginDropdown from './login-dropdown.jsx';
 import SB3Downloader from '../../containers/sb3-downloader.jsx';
 import DeletionRestorer from '../../containers/deletion-restorer.jsx';
@@ -93,6 +93,8 @@ import prehistoricLogo from './prehistoric-logo.svg';
 import oldtimeyLogo from './oldtimey-logo.svg';
 
 import sharedMessages from '../../lib/shared-messages';
+
+import {AccountMenuOptionsPropTypes} from '../../lib/account-menu-options';
 
 const ariaMessages = defineMessages({
     tutorials: {
@@ -421,6 +423,9 @@ class MenuBar extends React.Component {
         );
         // Show the About button only if we have a handler for it (like in the desktop app)
         const aboutButton = this.buildAboutMenu(this.props.onClickAbout);
+
+        const menuOpts = this.props.accountMenuOptions;
+
         return (
             <Box
                 className={classNames(
@@ -733,79 +738,98 @@ class MenuBar extends React.Component {
                             <SaveStatus />
                         )}
                     </div>
-                    {console.log('props', this.props.sessionExists, this.props.username)}
-                    {this.props.sessionExists ? (
+
+                    {menuOpts.canHaveSession ? (
                         this.props.username ? (
                             // ************ user is logged in ************
                             <React.Fragment>
-                                <a href="/mystuff/">
-                                    <div
-                                        className={classNames(
-                                            styles.menuBarItem,
-                                            styles.hoverable,
-                                            styles.mystuffButton
-                                        )}
-                                    >
-                                        <img
-                                            className={styles.mystuffIcon}
-                                            src={mystuffIcon}
-                                        />
-                                    </div>
-                                </a>
+                                {menuOpts.myStuffUrl ? (
+                                    <a href={myStuffUrl}>
+                                        <div
+                                            className={classNames(
+                                                styles.menuBarItem,
+                                                styles.hoverable,
+                                                styles.mystuffButton
+                                            )}
+                                        >
+                                            <img
+                                                className={styles.mystuffIcon}
+                                                src={mystuffIcon}
+                                            />
+                                        </div>
+                                    </a>
+                                ) : null}
+
                                 <AccountNav
                                     className={classNames(
                                         styles.menuBarItem,
                                         styles.hoverable,
                                         {[styles.active]: this.props.accountMenuOpen}
                                     )}
+
                                     isOpen={this.props.accountMenuOpen}
                                     isRtl={this.props.isRtl}
+
                                     menuBarMenuClassName={classNames(styles.menuBarMenu)}
+
                                     onClick={this.props.onClickAccount}
                                     onClose={this.props.onRequestCloseAccount}
-                                    onLogOut={this.props.onLogOut}
+                                    onLogOut={menuOpts.canLogout ? this.props.onLogOut : null}
+
                                     username={this.props.username}
+
+                                    avatarUrl={menuOpts.avatarUrl}
+                                    myStuffUrl={menuOpts.myStuffUrl}
+                                    profileUrl={menuOpts.profileUrl}
+                                    myClassesUrl={menuOpts.myClassesUrl}
+                                    myClassUrl={menuOpts.myClassUrl}
+                                    accountSettingsUrl={menuOpts.accountSettingsUrl}
                                 />
                             </React.Fragment>
                         ) : (
                             // ********* user not logged in, but a session exists
                             // ********* so they can choose to log in
                             <React.Fragment>
-                                <div
-                                    className={classNames(
-                                        styles.menuBarItem,
-                                        styles.hoverable
-                                    )}
-                                    key="join"
-                                    onMouseUp={this.props.onOpenRegistration}
-                                >
-                                    <FormattedMessage
-                                        defaultMessage="Join Scratch"
-                                        description="Link for creating a Scratch account"
-                                        id="gui.menuBar.joinScratch"
-                                    />
-                                </div>
-                                <div
-                                    className={classNames(
-                                        styles.menuBarItem,
-                                        styles.hoverable
-                                    )}
-                                    key="login"
-                                    onMouseUp={this.props.onClickLogin}
-                                >
-                                    <FormattedMessage
-                                        defaultMessage="Sign in"
-                                        description="Link for signing in to your Scratch account"
-                                        id="gui.menuBar.signIn"
-                                    />
-                                    <LoginDropdown
-                                        className={classNames(styles.menuBarMenu)}
-                                        isOpen={this.props.loginMenuOpen}
-                                        isRtl={this.props.isRtl}
-                                        renderLogin={this.props.renderLogin}
-                                        onClose={this.props.onRequestCloseLogin}
-                                    />
-                                </div>
+                                {menuOpts.canRegister ? (
+                                    <div
+                                        className={classNames(
+                                            styles.menuBarItem,
+                                            styles.hoverable
+                                        )}
+                                        key="join"
+                                        onMouseUp={this.props.onOpenRegistration}
+                                    >
+                                        <FormattedMessage
+                                            defaultMessage="Join Scratch"
+                                            description="Link for creating a Scratch account"
+                                            id="gui.menuBar.joinScratch"
+                                        />
+                                    </div>
+                                ) : null}
+
+                                {menuOpts.canLogin ? (
+                                    <div
+                                        className={classNames(
+                                            styles.menuBarItem,
+                                            styles.hoverable
+                                        )}
+                                        key="login"
+                                        onMouseUp={this.props.onClickLogin}
+                                    >
+                                        <FormattedMessage
+                                            defaultMessage="Sign in"
+                                            description="Link for signing in to your Scratch account"
+                                            id="gui.menuBar.signIn"
+                                        />
+                                        <LoginDropdown
+                                            className={classNames(styles.menuBarMenu)}
+                                            isOpen={this.props.loginMenuOpen}
+                                            isRtl={this.props.isRtl}
+                                            renderLogin={this.props.renderLogin}
+                                            onClose={this.props.onRequestCloseLogin}
+                                        />
+                                    </div>
+                                ) : null}
                             </React.Fragment>
                         )
                     ) : (
@@ -940,12 +964,14 @@ MenuBar.propTypes = {
     onToggleLoginOpen: PropTypes.func,
     projectTitle: PropTypes.string,
     renderLogin: PropTypes.func,
-    sessionExists: PropTypes.bool,
     settingsMenuOpen: PropTypes.bool,
     shouldSaveBeforeTransition: PropTypes.func,
     showComingSoon: PropTypes.bool,
     username: PropTypes.string,
     userOwnsProject: PropTypes.bool,
+
+    accountMenuOptions: AccountMenuOptionsPropTypes,
+
     vm: PropTypes.instanceOf(VM).isRequired
 };
 
@@ -957,7 +983,9 @@ MenuBar.defaultProps = {
 const mapStateToProps = (state, ownProps) => {
     const loadingState = state.scratchGui.projectState.loadingState;
     const user = state.session && state.session.session && state.session.session.user;
-    console.log('menu-bar maptostate', ownProps, ownProps.username);
+    const permissions = state.session && state.session.permissions;
+    const sessionExists = state.session && typeof state.session.session !== 'undefined';
+
     return {
         aboutMenuOpen: aboutMenuOpen(state),
         accountMenuOpen: accountMenuOpen(state),
@@ -971,18 +999,34 @@ const mapStateToProps = (state, ownProps) => {
         loginMenuOpen: loginMenuOpen(state),
         modeMenuOpen: modeMenuOpen(state),
         projectTitle: state.scratchGui.projectTitle,
-        sessionExists: ownProps.username ? !!ownProps.username :
-            state.session && typeof state.session.session !== 'undefined',
         settingsMenuOpen: settingsMenuOpen(state),
-        username: ownProps.username ? ownProps.username : user ? user.username : null,
-        userOwnsProject: ownProps.authorUsername && user &&
-            (ownProps.authorUsername === user.username),
+        username: ownProps.username ?? (user ? user.username : null),
+        userIsEducator: state.session && state.session.permissions && state.session.permissions.educator,
         vm: state.scratchGui.vm,
         mode220022BC: isTimeTravel220022BC(state),
         mode1920: isTimeTravel1920(state),
         mode1990: isTimeTravel1990(state),
         mode2020: isTimeTravel2020(state),
-        modeNow: isTimeTravelNow(state)
+        modeNow: isTimeTravelNow(state),
+
+        userOwnsProject: ownProps.userOwnsProject ?? (
+            ownProps.authorUsername && user && (ownProps.authorUsername === user.username)
+        ),
+
+        accountMenuOptions: ownProps.accountMenuOptions ?? {
+            canHaveSession: sessionExists,
+
+            canRegister: true,
+            canLogin: true,
+            canLogout: true,
+
+            avatarUrl: user?.thumbnailUrl,
+            myStuffUrl: '/mystuff/',
+            profileUrl: user && `/users/${user.username}`,
+            myClassesUrl: permissions?.educator ? '/educators/classes/' : null,
+            myClassUrl: user && permissions?.student ? `/classes/${user.classroomId}/` : null,
+            accountSettingsUrl: '/accounts/settings/'
+        }
     };
 };
 
@@ -996,7 +1040,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     onRequestCloseFile: () => dispatch(closeFileMenu()),
     onClickEdit: () => dispatch(openEditMenu()),
     onRequestCloseEdit: () => dispatch(closeEditMenu()),
-    onClickLogin: () => dispatch(openLoginMenu()),
+    onClickLogin: ownProps.onClickLogin ?? (() => dispatch(openLoginMenu())),
     onRequestCloseLogin: () => dispatch(closeLoginMenu()),
     onClickMode: () => dispatch(openModeMenu()),
     onRequestCloseMode: () => dispatch(closeModeMenu()),

@@ -7,6 +7,7 @@ import {ReactComponentLike} from 'prop-types';
 import {compose} from 'redux';
 
 export {EditorState, EditorStateParams} from './lib/editor-state';
+export {AccountMenuOptions} from './lib/account-menu-options';
 
 export {setAppElement} from 'react-modal';
 
@@ -46,7 +47,6 @@ export const createStandaloneRoot = (
 
     return {
         render (props: GUIProps) {
-            console.log('index-standalone', props);
             ReactDOM.render(
                 <WrappedGui
                     appState={state}

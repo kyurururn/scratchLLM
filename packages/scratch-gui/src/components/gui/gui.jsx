@@ -34,6 +34,7 @@ import TelemetryModal from '../telemetry-modal/telemetry-modal.jsx';
 import layout, {STAGE_SIZE_MODES} from '../../lib/layout-constants';
 import {resolveStageSize} from '../../lib/screen-utils';
 import {themeMap} from '../../lib/themes';
+import {AccountMenuOptionsPropTypes} from '../../lib/account-menu-options';
 
 import styles from './gui.css';
 import addExtensionIcon from './icon--extensions.svg';
@@ -56,6 +57,7 @@ let isRendererSupported = null;
 
 const GUIComponent = props => {
     const {
+        accountMenuOptions,
         accountNavOpen,
         activeTabIndex,
         alertsVisible,
@@ -127,6 +129,7 @@ const GUIComponent = props => {
         theme,
         tipsLibraryVisible,
         username,
+        userOwnsProject,
         vm,
         ...componentProps
     } = omit(props, 'dispatch');
@@ -251,7 +254,9 @@ const GUIComponent = props => {
                     onShare={onShare}
                     onStartSelectingFileUpload={onStartSelectingFileUpload}
                     onToggleLoginOpen={onToggleLoginOpen}
+                    userOwnsProject={userOwnsProject}
                     username={username}
+                    accountMenuOptions={accountMenuOptions}
                 />
                 <Box className={styles.bodyWrapper}>
                     <Box className={styles.flexWrapper}>
@@ -382,6 +387,7 @@ const GUIComponent = props => {
 
 GUIComponent.propTypes = {
     accountNavOpen: PropTypes.bool,
+    accountMenuOptions: AccountMenuOptionsPropTypes,
     activeTabIndex: PropTypes.number,
     authorId: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]), // can be false
     authorThumbnailUrl: PropTypes.string,
