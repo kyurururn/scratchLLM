@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-  push:
+  push: # WARNING: Renovate sometimes automerges without PR, so we MUST build and test renovate/** branches
   workflow_call:
   workflow_dispatch:
 
