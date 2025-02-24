@@ -41,6 +41,7 @@ import systemPreferencesHOC from '../lib/system-preferences-hoc.jsx';
 import GUIComponent from '../components/gui/gui.jsx';
 import {setIsScratchDesktop} from '../lib/isScratchDesktop.js';
 import {GUIStoragePropType} from '../gui-config';
+import {AccountMenuOptionsPropTypes} from '../lib/account-menu-options';
 
 class GUI extends React.Component {
     componentDidMount () {
@@ -92,6 +93,7 @@ class GUI extends React.Component {
             loadingStateVisible,
             ...componentProps
         } = this.props;
+
         return (
             <GUIComponent
                 loading={fetchingProject || isLoading || loadingStateVisible}
@@ -105,6 +107,7 @@ class GUI extends React.Component {
 
 GUI.propTypes = {
     storage: GUIStoragePropType,
+    accountMenuOptions: AccountMenuOptionsPropTypes,
     assetHost: PropTypes.string,
     children: PropTypes.node,
     cloudHost: PropTypes.string,
@@ -126,6 +129,8 @@ GUI.propTypes = {
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     shouldStopProject: PropTypes.bool,
     telemetryModalVisible: PropTypes.bool,
+    username: PropTypes.string,
+    userOwnsProject: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 
