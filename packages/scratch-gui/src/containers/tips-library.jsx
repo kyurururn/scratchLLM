@@ -63,15 +63,24 @@ class TipsLibrary extends React.PureComponent {
     render () {
         const decksLibraryThumbnailData = Object.keys(decksLibraryContent)
             .filter(id => {
-                if (!isScratchDesktop() && !this.props.hideTutorialProjects) {
-                    return true;
-                }
+                /**
+                 * Scratch desktop can't support project and video-only tutorials.
+                 * NGP can't support project tutorials.
+                 * The online editor, conversely, should show all tutorials.
+                 */
+                
                 const deck = decksLibraryContent[id];
-                // Don't show tutorials that require specific projects
-                if (Object.prototype.hasOwnProperty.call(deck, 'requiredProjectId')) return false;
-                // Scratch Desktop should not load tutorials that are _only_ videos
-                if (isScratchDesktop() && deck.steps.filter(s => s.title).length === 0) return false;
-                // Allow any other tutorials
+                const isProjectTutorial = Object.prototype.hasOwnProperty.call(deck, 'requiredProjectId');
+                const isVideoOnlyTutorial = decksLibraryContent[id].steps.filter(s => s.title).length === 0;
+
+                if (isProjectTutorial && (this.props.hideTutorialProjects || isScratchDesktop())) {
+                    return false;
+                }
+
+                if (isVideoOnlyTutorial && isScratchDesktop()) {
+                    return false;
+                }
+
                 return true;
             })
             .map(id => ({
