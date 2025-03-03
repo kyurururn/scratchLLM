@@ -48,43 +48,35 @@ if [ -z "${npm_package_version}" ]; then
     exit 1
 fi
 
-update_workspace_dependency_kind () {
-    kind_arg="$1"
-    kind_property="$2"
-
-    workspace_args=()
-    if [ "$3" != "." ]; then
-        workspace_args+=("--workspace" "$3")
-    fi
-
-    dependencies=()
-    for dependency in "${workspace_names[@]}"; do
-        if jq -e ".${kind_property}.\"$dependency\"" "$workspace/package.json" > /dev/null; then
-            dependencies+=("${dependency}@${npm_package_version}")
-        fi
-    done
-    if [ "${#dependencies[@]}" -gt 0 ]; then
-        echo "Updating $kind_property in $workspace: ${dependencies[*]}" >&2
-        set -x
-        npm "${workspace_args[@]}" install --offline --no-audit --no-fund "$kind_arg" --save-exact "${dependencies[@]}"
-        { set +x; } 2>/dev/null
-    else
-        echo "No $kind_property to update in $workspace" >&2
-    fi
-}
-
-update_workspace_dependency_versions () {
+update_dependency_in_workspace () {
     workspace="$1"
-    update_workspace_dependency_kind --save-prod dependencies "$workspace"
-    update_workspace_dependency_kind --save-dev devDependencies "$workspace"
-    update_workspace_dependency_kind --save-optional optionalDependencies "$workspace"
-    update_workspace_dependency_kind --save-peer peerDependencies "$workspace"
+    dependency="$2"
 
-    # Do it all twice: sometimes npm doesn't actually update the dependency versions the first time
-    update_workspace_dependency_kind --save-prod dependencies "$workspace"
-    update_workspace_dependency_kind --save-dev devDependencies "$workspace"
-    update_workspace_dependency_kind --save-optional optionalDependencies "$workspace"
-    update_workspace_dependency_kind --save-peer peerDependencies "$workspace"
+    jq_filter="
+        if .dependencies.\"$dependency\" then
+            .dependencies.\"$dependency\" = \"$npm_package_version\"
+        else
+            .
+        end |
+        if .devDependencies.\"$dependency\" then
+            .devDependencies.\"$dependency\" = \"$npm_package_version\"
+        else
+            .
+        end |
+        if .optionalDependencies.\"$dependency\" then
+            .optionalDependencies.\"$dependency\" = \"$npm_package_version\"
+        else
+            .
+        end |
+        if .peerDependencies.\"$dependency\" then
+            .peerDependencies.\"$dependency\" = \"$npm_package_version\"
+        else
+            .
+        end
+    "
+
+    jq "$jq_filter" "$workspace/package.json" > "$workspace/package.json.tmp"
+    mv "$workspace/package.json.tmp" "$workspace/package.json"
 }
 
 echo "${me}: Setting workspace versions..." >&2
@@ -95,10 +87,16 @@ readarray -t workspace_locations < <( npm query .workspace | jq -r '.[].location
 readarray -t workspace_names < <( npm query .workspace | jq -r '.[].name' )
 
 echo "${me}: Updating internal dependency versions..." >&2
-update_workspace_dependency_versions "." # workspace root
-for workspace in "${workspace_locations[@]}"; do
-    update_workspace_dependency_versions "$workspace"
+for workspace in "." "${workspace_locations[@]}"; do
+    for dependency in "${workspace_names[@]}"; do
+        update_dependency_in_workspace "$workspace" "$dependency"
+    done
 done
+
+echo "${me}: Asking npm to clean up the lock file..." >&2
+npm install --offline --no-audit --no-fund --ignore-scripts --package-lock-only
+# Sometimes it makes further changes the second time
+npm install --offline --no-audit --no-fund --ignore-scripts --package-lock-only
 
 if [ -z "${npm_config_git_tag_version+set}" ]; then
     echo "${me}: Staging workspace package.json files..." >&2
