@@ -1,0 +1,13 @@
+changelog:
+  categories:
+    - title: General
+      labels:
+        - '*'
+    - title: Security
+      labels:
+        - 'security'
+    - title: Dependencies
+      authors:
+        - 'renovate'
+      labels:
+        - 'dependencies'
