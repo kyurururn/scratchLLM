@@ -3,11 +3,18 @@ changelog:
     - title: General
       labels:
         - '*'
+      exclude:
+        authors:
+          - 'renovate[bot]'
+        labels:
+          - 'dependencies'
+          - 'security'
     - title: Security
       labels:
         - 'security'
+    # The "Dependencies" category includes
+    # - items with the 'dependencies' label
+    # - items excluded above, mainly by the exclude.authors in "General"
     - title: Dependencies
-      authors:
-        - 'renovate'
       labels:
-        - 'dependencies'
+        - '*'
