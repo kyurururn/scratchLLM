@@ -29,7 +29,7 @@ jobs:
           GIT_TAG="${{github.event.release.tag_name}}"
           NEW_VERSION="${GIT_TAG/v/}"
 
-          bash ./scripts/update-dependencies-with-tag-versions.sh "$NEW_VERSION"
+          npm version "$NEW_VERSION" --no-git-tag-version
           git add package* && git commit -m "Release $NEW_VERSION"
 
       - uses: ./.github/actions/install-dependencies

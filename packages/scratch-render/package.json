@@ -22,6 +22,7 @@
   ],
   "scripts": {
     "build": "webpack --progress && npm run docs",
+    "clean": "rimraf dist playground",
     "docs": "jsdoc -c .jsdoc.json",
     "lint": "eslint .",
     "prepublish": "npm run build",

@@ -11,9 +11,11 @@
   },
   "scripts": {
     "refresh-gh-workflow": "ts-node scripts/build-gha-workflows.ts",
-    "build-monorepo": "bash ./scripts/build-monorepo.sh",
+    "build-monorepo": "cross-env-shell ./scripts/build-monorepo.sh",
     "prepare": "husky install",
-    "build": "bash ./scripts/build-packages.sh"
+    "build": "cross-env NODE_ENV=production npm run --workspaces build",
+    "clean": "npm run --workspaces clean",
+    "version": "cross-env-shell ./scripts/npm-version.sh"
   },
   "config": {
     "commitizen": {
@@ -21,11 +23,15 @@
     }
   },
   "workspaces": [
-    "packages/*"
+    "packages/scratch-svg-renderer",
+    "packages/scratch-render",
+    "packages/scratch-vm",
+    "packages/scratch-gui"
   ],
   "devDependencies": {
     "@commitlint/cli": "17.8.1",
     "@commitlint/config-conventional": "17.8.1",
+    "cross-env": "7.0.3",
     "husky": "8.0.3",
     "npm": "10.9.2",
     "ts-node": "10.9.2"
