@@ -23,6 +23,8 @@ jobs:
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@localhost'
 
+      - uses: ./.github/actions/install-dependencies
+
       - name: Update the version in the package files
         shell: bash
         run: |
@@ -31,8 +33,6 @@ jobs:
 
           npm version "$NEW_VERSION" --no-git-tag-version
           git add package* && git commit -m "Release $NEW_VERSION"
-
-      - uses: ./.github/actions/install-dependencies
 
       - name: Build packages
         run: npm run build
