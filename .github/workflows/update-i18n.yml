@@ -1,0 +1,43 @@
+name: Update i18n
+
+on:
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+  schedule:
+    - cron: 0 0 * * * # daily at midnight UTC = 7-8pm US Eastern
+
+concurrency:
+  group: '${{ github.workflow }}'
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  update-i18n:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+      - name: Info
+        run: |
+          cat <<EOF
+          Node version: $(node --version)
+          NPM version: $(npm --version)
+          GitHub ref: ${{ github.ref }}
+          GitHub head ref: ${{ github.head_ref }}
+          EOF
+      - name: Setup
+        uses: ./.github/actions/install-dependencies
+      - name: Update i18n in scratch-vm
+        uses: ./.github/actions/update-i18n
+        with:
+          package_name: scratch-vm
+          tx_token: ${{ secrets.TX_TOKEN }}
+      - name: Update i18n in scratch-gui
+        uses: ./.github/actions/update-i18n
+        with:
+          package_name: scratch-gui
+          tx_token: ${{ secrets.TX_TOKEN }}

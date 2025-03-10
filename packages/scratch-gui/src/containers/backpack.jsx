@@ -13,10 +13,11 @@ import {
 } from '../lib/backpack-api';
 import DragConstants from '../lib/drag-constants';
 import DropAreaHOC from '../lib/drop-area-hoc.jsx';
+import {GUIStoragePropType} from '../gui-config';
 
 import {connect} from 'react-redux';
-import storage from '../lib/storage';
 import VM from '@scratch/scratch-vm';
+
 
 const dragTypes = [DragConstants.COSTUME, DragConstants.SOUND, DragConstants.SPRITE];
 const DroppableBackpack = DropAreaHOC(dragTypes)(BackpackComponent);
@@ -28,7 +29,6 @@ class Backpack extends React.Component {
             'handleDrop',
             'handleToggle',
             'handleDelete',
-            'getBackpackAssetURL',
             'getContents',
             'handleMouseEnter',
             'handleMouseLeave',
@@ -50,14 +50,8 @@ class Backpack extends React.Component {
             contents: []
         };
 
-        // If a host is given, add it as a web source to the storage module
-        // TODO remove the hacky flag that prevents double adding
-        if (props.host && !storage._hasAddedBackpackSource) {
-            storage.addWebSource(
-                [storage.AssetType.ImageVector, storage.AssetType.ImageBitmap, storage.AssetType.Sound],
-                this.getBackpackAssetURL
-            );
-            storage._hasAddedBackpackSource = true;
+        if (props.host) {
+            props.storage.setBackpackHost?.(props.host);
         }
     }
     componentDidMount () {
@@ -67,9 +61,6 @@ class Backpack extends React.Component {
     componentWillUnmount () {
         this.props.vm.removeListener('BLOCK_DRAG_END', this.handleBlockDragEnd);
         this.props.vm.removeListener('BLOCK_DRAG_UPDATE', this.handleBlockDragUpdate);
-    }
-    getBackpackAssetURL (asset) {
-        return `${this.props.host}/${asset.assetId}.${asset.dataFormat}`;
     }
     handleToggle () {
         const newState = !this.state.expanded;
@@ -82,11 +73,13 @@ class Backpack extends React.Component {
         }
     }
     handleDrop (dragInfo) {
+        const scratchStorage = this.props.storage.scratchStorage;
+
         let payloader = null;
         let presaveAsset = null;
         switch (dragInfo.dragType) {
         case DragConstants.COSTUME:
-            payloader = costumePayload;
+            payloader = costume => costumePayload(scratchStorage, costume);
             presaveAsset = dragInfo.payload.asset;
             break;
         case DragConstants.SOUND:
@@ -109,7 +102,7 @@ class Backpack extends React.Component {
                     // Force the asset to save to the asset server before storing in backpack
                     // Ensures any asset present in the backpack is also on the asset server
                     if (presaveAsset && !presaveAsset.clean) {
-                        return storage.store(
+                        return scratchStorage.store(
                             presaveAsset.assetType,
                             presaveAsset.dataFormat,
                             presaveAsset.data,
@@ -236,6 +229,7 @@ class Backpack extends React.Component {
 }
 
 Backpack.propTypes = {
+    storage: GUIStoragePropType,
     host: PropTypes.string,
     token: PropTypes.string,
     username: PropTypes.string,
@@ -262,6 +256,7 @@ const getTokenAndUsername = state => {
 
 const mapStateToProps = state => Object.assign(
     {
+        storage: state.scratchGui.config.storage,
         dragInfo: state.scratchGui.assetDrag,
         vm: state.scratchGui.vm,
         blockDrag: state.scratchGui.blockDrag

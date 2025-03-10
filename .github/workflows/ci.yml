@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  merge_group:
+  pull_request:
+  push: # WARNING: Renovate sometimes automerges without PR, so we MUST build and test renovate/** branches
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: "${{ github.workflow }} @ ${{ github.event.compare || github.head_ref || github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Detect affected packages, build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+      - uses: wagoid/commitlint-github-action@9763196e10f27aef304c9b8b660d31d97fce0f99 # v5
+      - name: Debug info
+        run: |
+          cat <<EOF
+          Scratch environment: ${{ vars.SCRATCH_ENV || '<none>' }}
+          Node version: $(node --version)
+          NPM version: $(npm --version)
+          GitHub ref: ${{ github.ref }}
+          GitHub head ref: ${{ github.head_ref }}
+          Working directory: $(pwd)
+          EOF
+
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        id: filter
+        with:
+          # Files in the `global` filter affect all workspaces, even if workspace-specific files have not changed.
+          filters: |
+            global:
+              - ".github/workflows/ci.yml"
+              - "package.json"
+              - "package-lock.json"
+              - "scripts/**"
+            any-workspace:
+              - "packages/**"
+            scratch-svg-renderer:
+              - "packages/scratch-svg-renderer/**"
+            scratch-render:
+              - "packages/scratch-render/**"
+              - "packages/scratch-svg-renderer/**"
+            scratch-vm:
+              - "packages/scratch-render/**"
+              - "packages/scratch-svg-renderer/**"
+              - "packages/scratch-vm/**"
+            scratch-gui:
+              - "packages/scratch-gui/**"
+              - "packages/scratch-render/**"
+              - "packages/scratch-svg-renderer/**"
+              - "packages/scratch-vm/**"
+
+      - if: ${{ steps.filter.outputs.global == 'true' || steps.filter.outputs.any-workspace == 'true' }}
+        uses: ./.github/actions/install-dependencies
+
+      - name: Build packages
+        if: ${{ steps.filter.outputs.global == 'true' || steps.filter.outputs.any-workspace == 'true' }}
+        run: npm run build
+
+      - name: Test scratch-svg-renderer
+        if: ${{ !cancelled() && (steps.filter.outputs.global == 'true' || steps.filter.outputs.scratch-svg-renderer == 'true') }}
+        uses: ./.github/actions/test-package
+        with:
+          package_name: scratch-svg-renderer
+      - name: Test scratch-render
+        if: ${{ !cancelled() && (steps.filter.outputs.global == 'true' || steps.filter.outputs.scratch-render == 'true') }}
+        uses: ./.github/actions/test-package
+        with:
+          package_name: scratch-render
+      - name: Test scratch-vm
+        if: ${{ !cancelled() && (steps.filter.outputs.global == 'true' || steps.filter.outputs.scratch-vm == 'true') }}
+        uses: ./.github/actions/test-package
+        with:
+          package_name: scratch-vm
+      - name: Test scratch-gui
+        if: ${{ !cancelled() && (steps.filter.outputs.global == 'true' || steps.filter.outputs.scratch-gui == 'true') }}
+        uses: ./.github/actions/test-package
+        with:
+          package_name: scratch-gui

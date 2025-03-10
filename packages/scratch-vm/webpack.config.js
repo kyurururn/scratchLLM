@@ -20,10 +20,6 @@ const nodeBuilder = new ScratchWebpackConfigBuilder(common)
                 name: 'VirtualMachine'
             }
         }
-    })
-    .addModuleRule({
-        test: /\.mp3$/,
-        type: 'asset'
     });
 
 const webBuilder = new ScratchWebpackConfigBuilder(common)
@@ -42,10 +38,6 @@ const webBuilder = new ScratchWebpackConfigBuilder(common)
                 name: 'VirtualMachine'
             }
         }
-    })
-    .addModuleRule({
-        test: /\.mp3$/,
-        type: 'asset'
     })
     .addModuleRule({
         test: require.resolve('./src/index.js'),
@@ -103,10 +95,10 @@ const playgroundBuilder = webBuilder.clone()
         }
     })
     .addModuleRule({
-        test: require.resolve('scratch-storage/src/index.js'),
+        test: require.resolve('scratch-storage'),
         loader: 'expose-loader',
         options: {
-            exposes: 'ScratchStorage'
+            exposes: 'ScratchStorage ScratchStorage'
         }
     })
     .addModuleRule({

@@ -34,12 +34,14 @@ import TelemetryModal from '../telemetry-modal/telemetry-modal.jsx';
 import layout, {STAGE_SIZE_MODES} from '../../lib/layout-constants';
 import {resolveStageSize} from '../../lib/screen-utils';
 import {themeMap} from '../../lib/themes';
+import {AccountMenuOptionsPropTypes} from '../../lib/account-menu-options';
 
 import styles from './gui.css';
 import addExtensionIcon from './icon--extensions.svg';
 import codeIcon from './icon--code.svg';
 import costumesIcon from './icon--costumes.svg';
 import soundsIcon from './icon--sounds.svg';
+import DebugModal from '../debug-modal/debug-modal.jsx';
 
 const messages = defineMessages({
     addExtension: {
@@ -55,6 +57,7 @@ let isRendererSupported = null;
 
 const GUIComponent = props => {
     const {
+        accountMenuOptions,
         accountNavOpen,
         activeTabIndex,
         alertsVisible,
@@ -82,6 +85,7 @@ const GUIComponent = props => {
         connectionModalVisible,
         costumeLibraryVisible,
         costumesTabVisible,
+        debugModalVisible,
         enableCommunity,
         intl,
         isCreating,
@@ -111,6 +115,7 @@ const GUIComponent = props => {
         onProjectTelemetryEvent,
         onRequestCloseBackdropLibrary,
         onRequestCloseCostumeLibrary,
+        onRequestCloseDebugModal,
         onRequestCloseTelemetryModal,
         onSeeCommunity,
         onShare,
@@ -127,6 +132,9 @@ const GUIComponent = props => {
         theme,
         tipsLibraryVisible,
         useExternalPeripheralList,
+        username,
+        userOwnsProject,
+        hideTutorialProjects,
         vm,
         ...componentProps
     } = omit(props, 'dispatch');
@@ -190,7 +198,7 @@ const GUIComponent = props => {
                     <WebGlModal isRtl={isRtl} />
                 )}
                 {tipsLibraryVisible ? (
-                    <TipsLibrary />
+                    <TipsLibrary hideTutorialProjects={hideTutorialProjects} />
                 ) : null}
                 {cardsVisible ? (
                     <Cards />
@@ -210,6 +218,10 @@ const GUIComponent = props => {
                         onRequestClose={onRequestCloseCostumeLibrary}
                     />
                 ) : null}
+                {<DebugModal
+                    isOpen={debugModalVisible}
+                    onClose={onRequestCloseDebugModal}
+                />}
                 {backdropLibraryVisible ? (
                     <BackdropLibrary
                         vm={vm}
@@ -248,6 +260,9 @@ const GUIComponent = props => {
                     onShare={onShare}
                     onStartSelectingFileUpload={onStartSelectingFileUpload}
                     onToggleLoginOpen={onToggleLoginOpen}
+                    userOwnsProject={userOwnsProject}
+                    username={username}
+                    accountMenuOptions={accountMenuOptions}
                 />
                 <Box className={styles.bodyWrapper}>
                     <Box className={styles.flexWrapper}>
@@ -384,6 +399,7 @@ const GUIComponent = props => {
 
 GUIComponent.propTypes = {
     accountNavOpen: PropTypes.bool,
+    accountMenuOptions: AccountMenuOptionsPropTypes,
     activeTabIndex: PropTypes.number,
     authorId: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]), // can be false
     authorThumbnailUrl: PropTypes.string,
@@ -408,6 +424,7 @@ GUIComponent.propTypes = {
     children: PropTypes.node,
     costumeLibraryVisible: PropTypes.bool,
     costumesTabVisible: PropTypes.bool,
+    debugModalVisible: PropTypes.bool,
     enableCommunity: PropTypes.bool,
     intl: intlShape.isRequired,
     isCreating: PropTypes.bool,
@@ -430,6 +447,7 @@ GUIComponent.propTypes = {
     onOpenRegistration: PropTypes.func,
     onRequestCloseBackdropLibrary: PropTypes.func,
     onRequestCloseCostumeLibrary: PropTypes.func,
+    onRequestCloseDebugModal: PropTypes.func,
     onRequestCloseTelemetryModal: PropTypes.func,
     onSeeCommunity: PropTypes.func,
     onShare: PropTypes.func,
@@ -449,6 +467,9 @@ GUIComponent.propTypes = {
     theme: PropTypes.string,
     tipsLibraryVisible: PropTypes.bool,
     useExternalPeripheralList: PropTypes.bool, // true for CDM, false for normal Scratch Link
+    username: PropTypes.string,
+    userOwnsProject: PropTypes.bool,
+    hideTutorialProjects: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 

@@ -2,8 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import VM from '@scratch/scratch-vm';
-import storage from '../../lib/storage';
-
+import {legacyConfig} from '../../legacy-config';
 import SpriteLibrary from '../../containers/sprite-library.jsx';
 import SpriteSelectorComponent from '../sprite-selector/sprite-selector.jsx';
 import StageSelector from '../../containers/stage-selector.jsx';
@@ -28,6 +27,7 @@ const TargetPane = ({
     onChangeSpriteRotationStyle,
     onChangeSpriteSize,
     onChangeSpriteVisibility,
+
     onChangeSpriteX,
     onChangeSpriteY,
     onDeleteSprite,
@@ -109,7 +109,7 @@ const spriteShape = PropTypes.shape({
     costume: PropTypes.shape({
         url: PropTypes.string,
         name: PropTypes.string.isRequired,
-        asset: PropTypes.instanceOf(storage.Asset),
+        asset: PropTypes.instanceOf(legacyConfig.storage.scratchStorage.Asset),
         // The following are optional because costumes uploaded from disk
         // will not have these properties available
         bitmapResolution: PropTypes.number,
