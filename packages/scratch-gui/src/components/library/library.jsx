@@ -9,10 +9,9 @@ import Modal from '../../containers/modal.jsx';
 import Divider from '../divider/divider.jsx';
 import Filter from '../filter/filter.jsx';
 import TagButton from '../../containers/tag-button.jsx';
+import {legacyConfig} from '../../legacy-config';
 import Spinner from '../spinner/spinner.jsx';
 import {CATEGORIES} from '../../../src/lib/libraries/decks/index.jsx';
-
-import {legacyConfig} from '../../legacy-config';
 
 import styles from './library.css';
 
@@ -74,35 +73,21 @@ const getAssetTypeForFileExtension = function (fileExtension) {
 };
 
 /**
- * Figure out one or more icon(s) for a library item.
- * If it's an animated thumbnail, this will return an array of `imageSource`.
- * Otherwise it'll return just one `imageSource`.
+ * Figure out an `imageSource` (URI or asset ID & type) for a library item's icon.
  * @param {object} item - either a library item or one of a library item's costumes.
- *   The latter is used internally as part of processing an animated thumbnail.
- * @returns {LibraryItem.PropTypes.icons} - an `imageSource` or array of them, ready for `LibraryItem` & `ScratchImage`
+ * @returns {object} - an `imageSource` ready to be passed to a `ScratchImage`.
  */
-const getItemIcons = function (item) {
-    const costumes = (item.json && item.json.costumes) || item.costumes;
-    if (costumes) {
-        return costumes.map(getItemIcons);
-    }
-
+const getItemImageSource = function (item) {
     if (item.rawURL) {
         return {
             uri: item.rawURL
         };
     }
 
-    if (item.assetId && item.dataFormat) {
-        return {
-            assetId: item.assetId,
-            assetType: getAssetTypeForFileExtension(item.dataFormat)
-        };
-    }
-
-    const md5ext = item.md5ext || item.md5 || item.baseLayerMD5;
-    if (md5ext) {
-        const [assetId, fileExtension] = md5ext.split('.');
+    // TODO: adjust libraries to be more storage-friendly; don't use split() here.
+    const md5 = item.costumes ? item.costumes[0].md5ext : item.md5ext;
+    if (md5) {
+        const [assetId, fileExtension] = md5.split('.');
         return {
             assetId: assetId,
             assetType: getAssetTypeForFileExtension(fileExtension)
@@ -248,7 +233,12 @@ class LibraryComponent extends React.Component {
     }
     renderElement (data) {
         const key = this.constructKey(data);
-        const icons = getItemIcons(data);
+        const iconSource = getItemImageSource(data);
+        const icons = data.json && data.json.costumes.map(getItemImageSource);
+        console.log('icons', JSON.stringify(icons, null, 2));
+        console.log('iconSource', JSON.stringify(iconSource, null, 2));
+        console.log('data', JSON.stringify(data, null, 2));
+
         return (<LibraryItem
             bluetoothRequired={data.bluetoothRequired}
             collaborator={data.collaborator}
@@ -257,6 +247,9 @@ class LibraryComponent extends React.Component {
             extensionId={data.extensionId}
             featured={data.featured}
             hidden={data.hidden}
+            iconMd5={data.costumes ? data.costumes[0].md5ext : data.md5ext}
+            iconRawURL={data.rawURL}
+            iconSource={iconSource}
             icons={icons}
             id={key}
             insetIconURL={data.insetIconURL}

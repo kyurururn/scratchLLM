@@ -21,7 +21,6 @@ class LibraryItem extends React.PureComponent {
             'startRotatingIcons',
             'stopRotatingIcons'
         ]);
-        this.hasIconsArray = Array.isArray(props.icons);
         this.state = {
             iconIndex: 0,
             isRotatingIcon: false
@@ -54,7 +53,7 @@ class LibraryItem extends React.PureComponent {
         // only show hover effects on the item if not showing a play button
         if (!this.props.showPlayButton) {
             this.props.onMouseEnter(this.props.id);
-            if (this.hasIconsArray) {
+            if (this.props.icons && this.props.icons.length) {
                 this.stopRotatingIcons();
                 this.setState({
                     isRotatingIcon: true
@@ -66,7 +65,7 @@ class LibraryItem extends React.PureComponent {
         // only show hover effects on the item if not showing a play button
         if (!this.props.showPlayButton) {
             this.props.onMouseLeave(this.props.id);
-            if (this.hasIconsArray) {
+            if (this.props.icons && this.props.icons.length) {
                 this.setState({
                     isRotatingIcon: false
                 }, this.stopRotatingIcons);
@@ -93,18 +92,13 @@ class LibraryItem extends React.PureComponent {
         this.setState({iconIndex: nextIconIndex});
     }
     curIconSource () {
-        if (this.hasIconsArray) {
-            if (this.state.isRotatingIcon &&
-                this.state.iconIndex < this.props.icons.length &&
-                this.props.icons[this.state.iconIndex]) {
-                // multiple icons, currently animating: show current frame
-                return this.props.icons[this.state.iconIndex];
-            }
-            // multiple icons, not currently animating: show first frame
-            return this.props.icons[0];
+        if (this.props.icons &&
+            this.state.isRotatingIcon &&
+            this.state.iconIndex < this.props.icons.length &&
+            this.props.icons[this.state.iconIndex]) {
+            return this.props.icons[this.state.iconIndex];
         }
-        // single icon
-        return this.props.icons;
+        return this.props.iconSource;
     }
     render () {
         const iconSource = this.curIconSource();
@@ -148,10 +142,8 @@ LibraryItem.propTypes = {
     extensionId: PropTypes.string,
     featured: PropTypes.bool,
     hidden: PropTypes.bool,
-    icons: PropTypes.oneOfType([
-        LibraryItemComponent.propTypes.iconSource, // single icon
-        PropTypes.arrayOf(LibraryItemComponent.propTypes.iconSource) // rotating icons
-    ]),
+    iconSource: LibraryItemComponent.propTypes.iconSource, // single icon
+    icons: PropTypes.arrayOf(LibraryItemComponent.propTypes.iconSource), // rotating icons
     id: PropTypes.string.isRequired,
     insetIconURL: PropTypes.string,
     internetConnectionRequired: PropTypes.bool,
