@@ -79,6 +79,14 @@ const getAssetTypeForFileExtension = function (fileExtension) {
  */
 const getItemImageSource = function (item) {
     if (item.rawURL) {
+        // Check if this is running in Android environment
+        if (window.isAndroid) {
+            // Transform web paths to Android-compatible paths
+            return {
+                uri: `file:///android_asset${item.rawURL}`
+                // or whatever the correct Android asset path should be
+            };
+        }
         return {
             uri: item.rawURL
         };

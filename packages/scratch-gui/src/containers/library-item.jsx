@@ -144,7 +144,7 @@ LibraryItem.propTypes = {
     hidden: PropTypes.bool,
     iconSource: LibraryItemComponent.propTypes.iconSource, // single icon
     icons: PropTypes.arrayOf(LibraryItemComponent.propTypes.iconSource), // rotating icons
-    id: PropTypes.string.isRequired,
+    id: PropTypes.number.isRequired,
     insetIconURL: PropTypes.string,
     internetConnectionRequired: PropTypes.bool,
     isPlaying: PropTypes.bool,

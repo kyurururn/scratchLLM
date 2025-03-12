@@ -98,6 +98,8 @@ class ScratchImage extends React.PureComponent {
             imageSource: _imageSource,
             ...imgProps
         } = this.props;
+        console.log('Scratch image', JSON.stringify(this.props, null, 2));
+        console.log('Scratch image state image uri', this.state.imageURI);
         return (
             <VisibilitySensor
                 intervalCheck
@@ -110,7 +112,7 @@ class ScratchImage extends React.PureComponent {
                         ScratchImage.loadPendingImages();
                         return (
                             <img
-                                src={this.state.imageURI}
+                                src={`file:///android_asset/www${this.state.imageURI}`}
                                 style={{
                                     minWidth: '1px',
                                     minHeight: '1px'
