@@ -26,6 +26,8 @@ import {
     closeDebugModal
 } from '../reducers/modals';
 
+import {setPlatform} from '../reducers/platform';
+
 import FontLoaderHOC from '../lib/font-loader-hoc.jsx';
 import LocalizationHOC from '../lib/localization-hoc.jsx';
 import SBFileUploaderHOC from '../lib/sb-file-uploader-hoc.jsx';
@@ -91,8 +93,11 @@ class GUI extends React.Component {
             fetchingProject,
             isLoading,
             loadingStateVisible,
+            platform,
             ...componentProps
         } = this.props;
+
+        setPlatform(platform);
 
         return (
             <GUIComponent
@@ -125,6 +130,7 @@ GUI.propTypes = {
     onStorageInit: PropTypes.func,
     onUpdateProjectId: PropTypes.func,
     onVmInit: PropTypes.func,
+    platform: PropTypes.string,
     projectHost: PropTypes.string,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     shouldStopProject: PropTypes.bool,
@@ -185,6 +191,7 @@ const mapDispatchToProps = dispatch => ({
     onRequestCloseCostumeLibrary: () => dispatch(closeCostumeLibrary()),
     onRequestCloseDebugModal: () => dispatch(closeDebugModal()),
     onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal())
+
 });
 
 const ConnectedGUI = injectIntl(connect(
