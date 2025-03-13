@@ -79,14 +79,6 @@ const getAssetTypeForFileExtension = function (fileExtension) {
  */
 const getItemImageSource = function (item) {
     if (item.rawURL) {
-        // Check if this is running in Android environment
-        if (window.isAndroid) {
-            // Transform web paths to Android-compatible paths
-            return {
-                uri: `file:///android_asset${item.rawURL}`
-                // or whatever the correct Android asset path should be
-            };
-        }
         return {
             uri: item.rawURL
         };
@@ -243,9 +235,6 @@ class LibraryComponent extends React.Component {
         const key = this.constructKey(data);
         const iconSource = getItemImageSource(data);
         const icons = data.json && data.json.costumes.map(getItemImageSource);
-        console.log('icons', JSON.stringify(icons, null, 2));
-        console.log('iconSource', JSON.stringify(iconSource, null, 2));
-        console.log('data', JSON.stringify(data, null, 2));
 
         return (<LibraryItem
             bluetoothRequired={data.bluetoothRequired}

@@ -4,6 +4,11 @@ import VisibilitySensor from 'react-visibility-sensor';
 
 import {legacyConfig} from '../../legacy-config';
 
+const isAndroid = () => {
+    const ua = navigator.userAgent.toLowerCase();
+    return ua.includes('wv');
+};
+
 class ScratchImage extends React.PureComponent {
     static init () {
         this._maxParallelism = 6;
@@ -98,8 +103,6 @@ class ScratchImage extends React.PureComponent {
             imageSource: _imageSource,
             ...imgProps
         } = this.props;
-        console.log('Scratch image', JSON.stringify(this.props, null, 2));
-        console.log('Scratch image state image uri', this.state.imageURI);
         return (
             <VisibilitySensor
                 intervalCheck
@@ -107,12 +110,11 @@ class ScratchImage extends React.PureComponent {
             >
                 {
                     ({isVisible}) => {
-                        // console.log(isVisible);
                         this.isVisible = isVisible;
                         ScratchImage.loadPendingImages();
                         return (
                             <img
-                                src={`file:///android_asset/www${this.state.imageURI}`}
+                                src={isAndroid() ? `file:///android_asset/www${this.state.imageURI}` : this.state.imageURI}
                                 style={{
                                     minWidth: '1px',
                                     minHeight: '1px'

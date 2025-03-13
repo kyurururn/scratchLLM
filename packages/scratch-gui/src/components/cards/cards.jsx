@@ -149,20 +149,24 @@ VideoStep.propTypes = {
     video: PropTypes.string.isRequired
 };
 
-const ImageStep = ({title, image}) => (
-    <Fragment>
-        <div className={styles.stepTitle}>
-            {title}
-        </div>
-        <div className={styles.stepImageContainer}>
-            <img
-                className={styles.stepImage}
-                draggable={false}
-                key={image} /* Use src as key to prevent hanging around on slow connections */
-                src={image}
-            />
-        </div>
-    </Fragment>
+const isAndroid = () => {
+    const ua = navigator.userAgent.toLowerCase();
+    return ua.includes('wv');
+};
+
+const ImageStep = ({title, image}) => (<Fragment>
+    <div className={styles.stepTitle}>
+        {title}
+    </div>
+    <div className={styles.stepImageContainer}>
+        <img
+            className={styles.stepImage}
+            draggable={false}
+            key={image} /* Use src as key to prevent hanging around on slow connections */
+            src={isAndroid() ? `file:///android_asset/www${image}` : image}
+        />
+    </div>
+</Fragment>
 );
 
 ImageStep.propTypes = {
@@ -237,7 +241,7 @@ const PreviewsStep = ({deckIds, content, onActivateDeckFactory, onShowAll}) => (
                     <img
                         className={styles.deckImage}
                         draggable={false}
-                        src={content[id].img}
+                        src={isAndroid() ? `file:///android_asset/www${content[id].img}` : content[id].img}
                     />
                     <div className={styles.deckName}>{content[id].name}</div>
                 </div>
