@@ -51,6 +51,7 @@ class GUI extends React.Component {
         this.props.onStorageInit(this.props.storage.scratchStorage);
         this.props.onVmInit(this.props.vm);
         this.props.storage.setProjectMetadata?.(this.props.projectId);
+        this.props.setPlatform(this.props.platform);
     }
     componentDidUpdate (prevProps) {
         if (this.props.projectId !== prevProps.projectId) {
@@ -93,11 +94,9 @@ class GUI extends React.Component {
             fetchingProject,
             isLoading,
             loadingStateVisible,
-            platform,
             ...componentProps
         } = this.props;
 
-        setPlatform(platform);
 
         return (
             <GUIComponent
@@ -131,6 +130,7 @@ GUI.propTypes = {
     onUpdateProjectId: PropTypes.func,
     onVmInit: PropTypes.func,
     platform: PropTypes.string,
+    setPlatform: PropTypes.func.isRequired,
     projectHost: PropTypes.string,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     shouldStopProject: PropTypes.bool,
@@ -187,11 +187,11 @@ const mapDispatchToProps = dispatch => ({
     onActivateTab: tab => dispatch(activateTab(tab)),
     onActivateCostumesTab: () => dispatch(activateTab(COSTUMES_TAB_INDEX)),
     onActivateSoundsTab: () => dispatch(activateTab(SOUNDS_TAB_INDEX)),
+    setPlatform: platform => dispatch(setPlatform(platform)),
     onRequestCloseBackdropLibrary: () => dispatch(closeBackdropLibrary()),
     onRequestCloseCostumeLibrary: () => dispatch(closeCostumeLibrary()),
     onRequestCloseDebugModal: () => dispatch(closeDebugModal()),
     onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal())
-
 });
 
 const ConnectedGUI = injectIntl(connect(
