@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import omit from 'lodash.omit';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-intl';
 import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
@@ -42,6 +42,7 @@ import codeIcon from './icon--code.svg';
 import costumesIcon from './icon--costumes.svg';
 import soundsIcon from './icon--sounds.svg';
 import DebugModal from '../debug-modal/debug-modal.jsx';
+import {setPlatform} from '../../reducers/platform.js';
 
 const messages = defineMessages({
     addExtension: {
@@ -137,6 +138,12 @@ const GUIComponent = props => {
     if (children) {
         return <Box {...componentProps}>{children}</Box>;
     }
+
+    console.log('GUIComponent props:', props);
+
+    useEffect(() => {
+        props.setPlatform(props.platform);
+    }, [props.platform]);
 
     const tabClassNames = {
         tabs: styles.tabs,
@@ -446,10 +453,12 @@ GUIComponent.propTypes = {
     onTelemetryModalOptIn: PropTypes.func,
     onTelemetryModalOptOut: PropTypes.func,
     onToggleLoginOpen: PropTypes.func,
+    platform: PropTypes.string,
     renderLogin: PropTypes.func,
     showComingSoon: PropTypes.bool,
     soundsTabVisible: PropTypes.bool,
     stageSizeMode: PropTypes.oneOf(Object.keys(STAGE_SIZE_MODES)),
+    setPlatform: PropTypes.func,
     targetIsStage: PropTypes.bool,
     telemetryModalVisible: PropTypes.bool,
     theme: PropTypes.string,
@@ -490,6 +499,11 @@ const mapStateToProps = state => ({
     theme: state.scratchGui.theme.theme
 });
 
+const mapDispatchToProps = dispatch => ({
+    setPlatform: platform => dispatch(setPlatform(platform))
+});
+
 export default injectIntl(connect(
-    mapStateToProps
+    mapStateToProps,
+    mapDispatchToProps
 )(GUIComponent));
