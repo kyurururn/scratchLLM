@@ -139,8 +139,6 @@ const GUIComponent = props => {
         return <Box {...componentProps}>{children}</Box>;
     }
 
-    console.log('GUIComponent props:', props);
-
     useEffect(() => {
         props.setPlatform(props.platform);
     }, [props.platform]);
