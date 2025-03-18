@@ -72,6 +72,11 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 this.reportTelemetryEvent('projectDidLoad');
             }
 
+            if (this.props.saveThumbnailOnLoad && this.props.isShowingWithId &&
+                !prevProps.isShowingWithId) {
+                setTimeout(() => this.storeProjectThumbnail(this.props.reduxProjectId));
+            }
+
             if (this.props.projectChanged && !prevProps.projectChanged) {
                 this.scheduleAutoSave();
             }

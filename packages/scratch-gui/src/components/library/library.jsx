@@ -9,6 +9,7 @@ import Modal from '../../containers/modal.jsx';
 import Divider from '../divider/divider.jsx';
 import Filter from '../filter/filter.jsx';
 import TagButton from '../../containers/tag-button.jsx';
+import {legacyConfig} from '../../legacy-config';
 import Spinner from '../spinner/spinner.jsx';
 import {CATEGORIES} from '../../../src/lib/libraries/decks/index.jsx';
 
@@ -51,6 +52,48 @@ const messages = defineMessages({
 
 const ALL_TAG = {tag: 'all', intlLabel: messages.allTag};
 const tagListPrefix = [ALL_TAG];
+
+/**
+ * Find the AssetType which corresponds to a particular file extension. For example, 'png' => AssetType.ImageBitmap.
+ * @param {string} fileExtension - the file extension to look up.
+ * @returns {AssetType} - the AssetType corresponding to the extension, if any.
+ */
+const getAssetTypeForFileExtension = function (fileExtension) {
+    const compareOptions = {
+        sensitivity: 'accent',
+        usage: 'search'
+    };
+    const storage = legacyConfig.storage.scratchStorage;
+    for (const assetTypeId in storage.AssetType) {
+        const assetType = storage.AssetType[assetTypeId];
+        if (fileExtension.localeCompare(assetType.runtimeFormat, compareOptions) === 0) {
+            return assetType;
+        }
+    }
+};
+
+/**
+ * Figure out an `imageSource` (URI or asset ID & type) for a library item's icon.
+ * @param {object} item - either a library item or one of a library item's costumes.
+ * @returns {object} - an `imageSource` ready to be passed to a `ScratchImage`.
+ */
+const getItemImageSource = function (item) {
+    if (item.rawURL) {
+        return {
+            uri: item.rawURL
+        };
+    }
+
+    // TODO: adjust libraries to be more storage-friendly; don't use split() here.
+    const md5 = item.costumes ? item.costumes[0].md5ext : item.md5ext;
+    if (md5) {
+        const [assetId, fileExtension] = md5.split('.');
+        return {
+            assetId: assetId,
+            assetType: getAssetTypeForFileExtension(fileExtension)
+        };
+    }
+};
 
 class LibraryComponent extends React.Component {
     constructor (props) {
@@ -190,6 +233,9 @@ class LibraryComponent extends React.Component {
     }
     renderElement (data) {
         const key = this.constructKey(data);
+        const iconSource = getItemImageSource(data);
+        const icons = data.json && data.json.costumes.map(getItemImageSource);
+
         return (<LibraryItem
             bluetoothRequired={data.bluetoothRequired}
             collaborator={data.collaborator}
@@ -200,7 +246,8 @@ class LibraryComponent extends React.Component {
             hidden={data.hidden}
             iconMd5={data.costumes ? data.costumes[0].md5ext : data.md5ext}
             iconRawURL={data.rawURL}
-            icons={data.costumes}
+            iconSource={iconSource}
+            icons={icons}
             id={key}
             insetIconURL={data.insetIconURL}
             internetConnectionRequired={data.internetConnectionRequired}
