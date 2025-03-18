@@ -18,6 +18,8 @@ import closeIcon from './icon--close.svg';
 import {translateVideo} from '../../lib/libraries/decks/translate-video.js';
 import {translateImage} from '../../lib/libraries/decks/translate-image.js';
 
+import {PLATFORM} from '../../lib/platform.js';
+
 const CardHeader = ({onCloseCards, onShrinkExpandCards, onShowAll, totalSteps, step, expanded}) => (
     <div className={expanded ? styles.headerButtons : classNames(styles.headerButtons, styles.headerButtonsHidden)}>
         <div
@@ -149,12 +151,7 @@ VideoStep.propTypes = {
     video: PropTypes.string.isRequired
 };
 
-const isAndroid = () => {
-    const ua = navigator.userAgent.toLowerCase();
-    return ua.includes('wv');
-};
-
-const ImageStep = ({title, image}) => (<Fragment>
+const ImageStep = ({title, image, platform}) => (<Fragment>
     <div className={styles.stepTitle}>
         {title}
     </div>
@@ -163,7 +160,7 @@ const ImageStep = ({title, image}) => (<Fragment>
             className={styles.stepImage}
             draggable={false}
             key={image} /* Use src as key to prevent hanging around on slow connections */
-            src={isAndroid() ? `file:///android_asset/www${image}` : image}
+            src={platform === PLATFORM.ANDROID ? `file:///android_asset/www${image}` : image}
         />
     </div>
 </Fragment>
@@ -171,7 +168,8 @@ const ImageStep = ({title, image}) => (<Fragment>
 
 ImageStep.propTypes = {
     image: PropTypes.string.isRequired,
-    title: PropTypes.node.isRequired
+    title: PropTypes.node.isRequired,
+    platform: PropTypes.string
 };
 
 const NextPrevButtons = ({isRtl, onNextStep, onPrevStep, expanded}) => (
@@ -222,7 +220,7 @@ CardHeader.propTypes = {
     totalSteps: PropTypes.number
 };
 
-const PreviewsStep = ({deckIds, content, onActivateDeckFactory, onShowAll}) => (
+const PreviewsStep = ({deckIds, content, onActivateDeckFactory, onShowAll, platform}) => (
     <Fragment>
         <div className={styles.stepTitle}>
             <FormattedMessage
@@ -241,7 +239,7 @@ const PreviewsStep = ({deckIds, content, onActivateDeckFactory, onShowAll}) => (
                     <img
                         className={styles.deckImage}
                         draggable={false}
-                        src={isAndroid() ? `file:///android_asset/www${content[id].img}` : content[id].img}
+                        src={platform === PLATFORM.ANDROID ? `file:///android_asset/www${content[id].img}` : content[id].img}
                     />
                     <div className={styles.deckName}>{content[id].name}</div>
                 </div>
@@ -277,7 +275,8 @@ PreviewsStep.propTypes = {
     }).isRequired,
     deckIds: PropTypes.arrayOf(PropTypes.string).isRequired,
     onActivateDeckFactory: PropTypes.func.isRequired,
-    onShowAll: PropTypes.func.isRequired
+    onShowAll: PropTypes.func.isRequired,
+    platform: PropTypes.string
 };
 
 const Cards = props => {
@@ -299,6 +298,7 @@ const Cards = props => {
         showVideos,
         step,
         expanded,
+        platform,
         ...posProps
     } = props;
     let {x, y} = posProps;
@@ -362,6 +362,7 @@ const Cards = props => {
                                     deckIds={steps[step].deckIds}
                                     onActivateDeckFactory={onActivateDeckFactory}
                                     onShowAll={onShowAll}
+                                    platform={platform}
                                 />
                             ) : (
                                 steps[step].video ? (
@@ -375,12 +376,14 @@ const Cards = props => {
                                         <ImageStep
                                             image={content[activeDeckId].img}
                                             title={content[activeDeckId].name}
+                                            platform={platform}
                                         />
                                     )
                                 ) : (
                                     <ImageStep
                                         image={translateImage(steps[step].image, locale)}
                                         title={steps[step].title}
+                                        platform={platform}
                                     />
                                 )
                             )}
@@ -426,6 +429,7 @@ Cards.propTypes = {
     onShowAll: PropTypes.func,
     onShrinkExpandCards: PropTypes.func.isRequired,
     onStartDrag: PropTypes.func,
+    platform: PropTypes.string,
     showVideos: PropTypes.bool,
     step: PropTypes.number.isRequired,
     x: PropTypes.number,

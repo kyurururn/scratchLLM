@@ -51,7 +51,10 @@ class GUI extends React.Component {
         this.props.onStorageInit(this.props.storage.scratchStorage);
         this.props.onVmInit(this.props.vm);
         this.props.storage.setProjectMetadata?.(this.props.projectId);
-        this.props.setPlatform(this.props.platform);
+        console.log('GUI componentDidMount');
+        if (this.props.platform) {
+            this.props.setPlatform(this.props.platform);
+        }
     }
     componentDidUpdate (prevProps) {
         if (this.props.projectId !== prevProps.projectId) {

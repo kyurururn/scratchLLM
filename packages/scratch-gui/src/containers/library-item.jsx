@@ -2,6 +2,7 @@ import bindAll from 'lodash.bindall';
 import PropTypes from 'prop-types';
 import React from 'react';
 import {injectIntl} from 'react-intl';
+import {connect} from 'react-redux';
 
 import LibraryItemComponent from '../components/library-item/library-item.jsx';
 
@@ -50,7 +51,6 @@ class LibraryItem extends React.PureComponent {
         }
     }
     handleMouseEnter () {
-        // only show hover effects on the item if not showing a play button
         if (!this.props.showPlayButton) {
             this.props.onMouseEnter(this.props.id);
             if (this.props.icons && this.props.icons.length) {
@@ -62,7 +62,6 @@ class LibraryItem extends React.PureComponent {
         }
     }
     handleMouseLeave () {
-        // only show hover effects on the item if not showing a play button
         if (!this.props.showPlayButton) {
             this.props.onMouseLeave(this.props.id);
             if (this.props.icons && this.props.icons.length) {
@@ -117,6 +116,7 @@ class LibraryItem extends React.PureComponent {
                 internetConnectionRequired={this.props.internetConnectionRequired}
                 isPlaying={this.props.isPlaying}
                 name={this.props.name}
+                platform={this.props.platform}
                 showPlayButton={this.props.showPlayButton}
                 onBlur={this.handleBlur}
                 onClick={this.handleClick}
@@ -130,6 +130,10 @@ class LibraryItem extends React.PureComponent {
         );
     }
 }
+
+const mapStateToProps = state => ({
+    platform: state.scratchGui.platform
+});
 
 LibraryItem.propTypes = {
     bluetoothRequired: PropTypes.bool,
@@ -155,7 +159,8 @@ LibraryItem.propTypes = {
     onMouseEnter: PropTypes.func.isRequired,
     onMouseLeave: PropTypes.func.isRequired,
     onSelect: PropTypes.func.isRequired,
+    platform: PropTypes.string,
     showPlayButton: PropTypes.bool
 };
 
-export default injectIntl(LibraryItem);
+export default connect(mapStateToProps)(injectIntl(LibraryItem));

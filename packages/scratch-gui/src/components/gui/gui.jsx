@@ -144,7 +144,9 @@ const GUIComponent = props => {
     }
 
     useEffect(() => {
-        props.setPlatform(props.platform);
+        if (props.platform) {
+            props.setPlatform(props.platform);
+        }
     }, [props.platform]);
 
     const tabClassNames = {
