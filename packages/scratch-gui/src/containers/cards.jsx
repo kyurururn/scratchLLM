@@ -55,7 +55,7 @@ const mapStateToProps = state => ({
     locale: state.locales.locale,
     dragging: state.scratchGui.cards.dragging,
     showVideos: notScratchDesktop(),
-    platform: state.scratchGui.platform
+    platform: state.scratchGui.platform.platform
 });
 
 const mapDispatchToProps = dispatch => ({
