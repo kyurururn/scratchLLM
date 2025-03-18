@@ -132,7 +132,7 @@ class LibraryItem extends React.PureComponent {
 }
 
 const mapStateToProps = state => ({
-    platform: state.scratchGui.platform
+    platform: state.scratchGui.platform.platform
 });
 
 LibraryItem.propTypes = {
