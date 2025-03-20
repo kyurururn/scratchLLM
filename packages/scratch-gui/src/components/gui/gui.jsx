@@ -138,14 +138,14 @@ const GUIComponent = props => {
         hideTutorialProjects,
         vm,
         ...componentProps
-    } = omit(props, 'dispatch');
+    } = omit(props, 'dispatch', 'setPlatform');
     if (children) {
         return <Box {...componentProps}>{children}</Box>;
     }
 
     useEffect(() => {
         if (props.platform) {
-            props.setPlatform(props.platform);
+            setPlatform(props.platform);
         }
     }, [props.platform]);
 
