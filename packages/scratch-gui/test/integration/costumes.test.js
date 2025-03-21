@@ -196,30 +196,6 @@ describe('Working with costumes', () => {
         await expect(logs).toEqual([]);
     });
 
-    // Doesn't work on Android
-    /*
-    // TODO: This sometimes results in a stack overflow error in the GitHub Actions workflow - flaky test.
-    //       Seems like at random another costume is shown. Need to debug
-    test.skip('Costumes animate on mouseover', async () => {
-        await loadUri(uri);
-        await clickXpath('//button[@aria-label="Choose a Sprite"]');
-        const searchElement = await findByXpath("//input[@placeholder='Search']");
-        await searchElement.sendKeys('abb');
-        const abbyElement = await findByXpath('//*[span[text()="Abby"]]');
-        driver.actions()
-            .mouseMove(abbyElement)
-            .perform();
-        // wait for one of Abby's alternate costumes to appear
-        await findByXpath('//img[@src="https://cdn.assets.scratch.mit.edu/internalapi/asset/45de34b47a2ce22f6f5d28bb35a44ff5.svg/get/"]');
-        const src1 = await abbyElement.findElement({css: 'img'}).getAttribute('src');
-        await driver.sleep(300);
-        const src2 = await abbyElement.findElement({css: 'img'}).getAttribute('src');
-        const sourcesMatch = (src1 === src2);
-        await expect(sourcesMatch).toBeFalsy(); // 'src' attribute should have changed by now
-        const logs = await getLogs();
-        await expect(logs).toEqual([]);
-    });*/
-
     test('Adding multiple costumes at the same time', async () => {
         const files = [
             path.resolve(__dirname, '../fixtures/gh-3582-png.png'),
