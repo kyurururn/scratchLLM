@@ -24,12 +24,12 @@ import {notScratchDesktop} from '../lib/isScratchDesktop';
 class Cards extends React.Component {
     componentDidMount () {
         if (this.props.locale !== 'en') {
-            loadImageData(this.props.locale);
+            loadImageData(this.props.locale, this.props.platform);
         }
     }
     componentDidUpdate (prevProps) {
         if (this.props.locale !== prevProps.locale) {
-            loadImageData(this.props.locale);
+            loadImageData(this.props.locale, this.props.platform);
         }
     }
     render () {
@@ -40,7 +40,8 @@ class Cards extends React.Component {
 }
 
 Cards.propTypes = {
-    locale: PropTypes.string.isRequired
+    locale: PropTypes.string.isRequired,
+    platform: PropTypes.string
 };
 
 const mapStateToProps = state => ({
