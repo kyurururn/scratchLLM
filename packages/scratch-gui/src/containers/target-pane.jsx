@@ -305,8 +305,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    onNewSpriteClick: e => {
-        e.preventDefault();
+    onNewSpriteClick: () => {
         dispatch(openSpriteLibrary());
     },
     onRequestCloseSpriteLibrary: () => {
