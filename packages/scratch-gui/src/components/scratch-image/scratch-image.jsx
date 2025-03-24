@@ -3,11 +3,7 @@ import React from 'react';
 import VisibilitySensor from 'react-visibility-sensor';
 
 import {legacyConfig} from '../../legacy-config';
-
-const isAndroid = () => {
-    const ua = navigator.userAgent.toLowerCase();
-    return ua.includes('wv');
-};
+import {PLATFORM} from '../../lib/platform';
 
 class ScratchImage extends React.PureComponent {
     static init () {
@@ -60,7 +56,7 @@ class ScratchImage extends React.PureComponent {
     constructor (props) {
         super(props);
         this.state = {};
-        Object.assign(this.state, this._loadImageSource(props.imageSource));
+        Object.assign(this.state, this._loadImageSource(props.imageSource, props.platform));
     }
     componentWillReceiveProps (nextProps) {
         const newState = this._loadImageSource(nextProps.imageSource);
@@ -101,6 +97,7 @@ class ScratchImage extends React.PureComponent {
         const {
             src: _src, // eslint-disable-line react/prop-types
             imageSource: _imageSource,
+
             ...imgProps
         } = this.props;
         return (
@@ -114,7 +111,7 @@ class ScratchImage extends React.PureComponent {
                         ScratchImage.loadPendingImages();
                         return (
                             <img
-                                src={isAndroid() ? `file:///android_asset/www${this.state.imageURI}` : this.state.imageURI}
+                                src={this.props.platform === PLATFORM.ANDROID ? `file:///android_asset/www${this.state.imageURI}` : this.state.imageURI}
                                 style={{
                                     minWidth: '1px',
                                     minHeight: '1px'
@@ -140,7 +137,8 @@ ScratchImage.ImageSourcePropType = PropTypes.oneOfType([
 ]);
 
 ScratchImage.propTypes = {
-    imageSource: ScratchImage.ImageSourcePropType.isRequired
+    imageSource: ScratchImage.ImageSourcePropType.isRequired,
+    platform: PropTypes.string
 };
 
 ScratchImage.init();

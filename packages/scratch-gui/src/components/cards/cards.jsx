@@ -295,7 +295,6 @@ const Cards = props => {
         onShowAll,
         onNextStep,
         onPrevStep,
-        showVideos,
         step,
         expanded,
         platform,
@@ -368,7 +367,7 @@ const Cards = props => {
                                 />
                             ) : (
                                 steps[step].video ? (
-                                    showVideos ? (
+                                    platform === PLATFORM.WEB || platform === PLATFORM.ANDROID ? (
                                         <VideoStep
                                             dragging={dragging}
                                             expanded={expanded}
@@ -432,7 +431,6 @@ Cards.propTypes = {
     onShrinkExpandCards: PropTypes.func.isRequired,
     onStartDrag: PropTypes.func,
     platform: PropTypes.string,
-    showVideos: PropTypes.bool,
     step: PropTypes.number.isRequired,
     x: PropTypes.number,
     y: PropTypes.number
