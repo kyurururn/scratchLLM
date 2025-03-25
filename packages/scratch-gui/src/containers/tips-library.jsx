@@ -58,6 +58,9 @@ class TipsLibrary extends React.PureComponent {
             return window.open(window.location.origin + urlParams, '_blank');
         }
 
+        if (this.props.displayTutorialsFeedback) {
+            this.props.displayTutorialsFeedback();
+        }
         this.props.onActivateDeck(item.id);
     }
     render () {
@@ -113,6 +116,7 @@ class TipsLibrary extends React.PureComponent {
 }
 
 TipsLibrary.propTypes = {
+    displayTutorialsFeedback: PropTypes.func,
     intl: intlShape.isRequired,
     onActivateDeck: PropTypes.func.isRequired,
     onRequestClose: PropTypes.func,
