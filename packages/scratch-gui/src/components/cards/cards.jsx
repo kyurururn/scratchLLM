@@ -326,8 +326,6 @@ const Cards = props => {
 
     const steps = content[activeDeckId].steps;
 
-    console.log('PLATFROM IS', platform);
-
     return (
         // Custom overlay to act as the bounding parent for the draggable, using values from above
         <div
