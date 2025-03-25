@@ -451,6 +451,7 @@ GUIComponent.propTypes = {
     onExtensionButtonClick: PropTypes.func,
     onLogOut: PropTypes.func,
     onNewSpriteClick: PropTypes.func,
+    onNewLibraryCostumeClick: PropTypes.func,
     onOpenRegistration: PropTypes.func,
     onRequestCloseBackdropLibrary: PropTypes.func,
     onRequestCloseCostumeLibrary: PropTypes.func,
