@@ -275,7 +275,12 @@ class LibraryComponent extends React.Component {
             return data.map(item => this.renderElement(item));
         }
 
-        const dataByCategory = Object.groupBy(data, el => el.category);
+        // Object.groupBy is not available on older versions of javascript
+        const dataByCategory = data.reduce((acc, el) => {
+            acc[el.category] = acc[el.category] || [];
+            acc[el.category].push(el);
+            return acc;
+          }, {});
         const categoriesOrder = Object.values(CATEGORIES);
 
         return Object.entries(dataByCategory)

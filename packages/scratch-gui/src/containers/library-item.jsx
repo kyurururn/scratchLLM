@@ -152,7 +152,7 @@ LibraryItem.propTypes = {
         LibraryItemComponent.propTypes.iconSource, // single icon
         PropTypes.arrayOf(LibraryItemComponent.propTypes.iconSource) // rotating icons
     ]),
-    id: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
     insetIconURL: PropTypes.string,
     internetConnectionRequired: PropTypes.bool,
     isPlaying: PropTypes.bool,

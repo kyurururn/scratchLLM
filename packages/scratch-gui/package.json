@@ -16,6 +16,18 @@
       "types": "./dist/types/index.d.ts",
       "default": "./dist/scratch-gui.js"
     },
+    "./costumes": {
+      "default": "./src/lib/libraries/costumes.json"
+    },
+    "./sprites": {
+      "default": "./src/lib/libraries/sprites.json"
+    },
+    "./sounds": {
+      "default": "./src/lib/libraries/sounds.json"
+    },
+    "./backdrops": {
+      "default": "./src/lib/libraries/backdrops.json"
+    },
     "./standalone": {
       "types": "./dist/types/index-standalone.d.ts",
       "default": "./dist/scratch-gui-standalone.js"
