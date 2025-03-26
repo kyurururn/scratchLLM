@@ -113,10 +113,10 @@
     "scratch-storage": "^4.0.24",
     "startaudiocontext": "^1.2.1",
     "style-loader": "4.0.0",
-    "text-encoding": "0.7.0",
-    "to-style": "1.3.3",
-    "wav-encoder": "1.3.0",
-    "xhr": "2.5.0"
+    "text-encoding": "^0.7.0",
+    "to-style": "^1.3.3",
+    "wav-encoder": "^1.3.0",
+    "xhr": "^2.5.0"
   },
   "peerDependencies": {
     "react": "^16.0.0",
