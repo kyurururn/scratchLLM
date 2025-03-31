@@ -86,8 +86,8 @@ const GUIComponent = props => {
         costumeLibraryVisible,
         costumesTabVisible,
         debugModalVisible,
-        displayDebugFeedback,
-        displayTutorialsFeedback,
+        onDebugModalClose,
+        onTutorialSelect,
         enableCommunity,
         intl,
         isCreating,
@@ -149,12 +149,12 @@ const GUIComponent = props => {
         tabSelected: classNames(tabStyles.reactTabsTabSelected, styles.isSelected)
     };
 
-    const onDebugModalClose = useCallback(() => {
-        if (displayDebugFeedback) {
-            displayDebugFeedback();
+    const onCloseDebugModal = useCallback(() => {
+        if (onDebugModalClose) {
+            onDebugModalClose();
         }
         onRequestCloseDebugModal();
-    }, [displayDebugFeedback, onRequestCloseDebugModal]);
+    }, [onDebugModalClose, onRequestCloseDebugModal]);
 
     if (isRendererSupported === null) {
         isRendererSupported = Renderer.isSupported();
@@ -205,7 +205,7 @@ const GUIComponent = props => {
                 {tipsLibraryVisible ? (
                     <TipsLibrary
                         hideTutorialProjects={hideTutorialProjects}
-                        displayTutorialsFeedback={displayTutorialsFeedback}
+                        onTutorialSelect={onTutorialSelect}
                     />
                 ) : null}
                 {cardsVisible ? (
@@ -227,7 +227,7 @@ const GUIComponent = props => {
                 ) : null}
                 {<DebugModal
                     isOpen={debugModalVisible}
-                    onClose={onDebugModalClose}
+                    onClose={onCloseDebugModal}
                 />}
                 {backdropLibraryVisible ? (
                     <BackdropLibrary
@@ -426,8 +426,8 @@ GUIComponent.propTypes = {
     costumeLibraryVisible: PropTypes.bool,
     costumesTabVisible: PropTypes.bool,
     debugModalVisible: PropTypes.bool,
-    displayDebugFeedback: PropTypes.func,
-    displayTutorialsFeedback: PropTypes.func,
+    onDebugModalClose: PropTypes.func,
+    onTutorialSelect: PropTypes.func,
     enableCommunity: PropTypes.bool,
     intl: intlShape.isRequired,
     isCreating: PropTypes.bool,
