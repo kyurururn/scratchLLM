@@ -99,11 +99,10 @@ const distConfig = baseConfig.clone()
             'scratch-gui': path.join(__dirname, 'src/index.ts')
         },
         output: {
-            // TODO: Test if this breaks the current version of -www!!
-            // This change is needed, because of scratch-desktop - if the publicPath
-            // defaults to `/` here, scratch-desktop is unable to load the assets,
-            // which reside on something similar to `/tmp/*path-to-packaged-dist*/static/assets`
-            publicPath: '',
+            // We need the public path to be relative, because of scratch-desktop - if the publicPath
+            // defaults to `/` here, it is unable to load the assets,
+            // which reside on a path similar to `/tmp/*path-to-packaged-dist*/static/assets`
+            publicPath: 'auto',
             path: path.resolve(__dirname, 'dist')
         }
     })
