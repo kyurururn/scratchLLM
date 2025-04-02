@@ -9,10 +9,9 @@ import Modal from '../../containers/modal.jsx';
 import Divider from '../divider/divider.jsx';
 import Filter from '../filter/filter.jsx';
 import TagButton from '../../containers/tag-button.jsx';
+import {legacyConfig} from '../../legacy-config';
 import Spinner from '../spinner/spinner.jsx';
 import {CATEGORIES} from '../../../src/lib/libraries/decks/index.jsx';
-
-import {legacyConfig} from '../../legacy-config';
 
 import styles from './library.css';
 

@@ -8,5 +8,9 @@
 
   "ignoreDeps": [
     "cat-blocks"
-  ]
+  ],
+
+  // Attempt to reduce notification noise for updates that can auto-merge
+  // See https://docs.renovatebot.com/key-concepts/automerge/#branch-vs-pr-automerging
+  "automergeType": "branch"
 }

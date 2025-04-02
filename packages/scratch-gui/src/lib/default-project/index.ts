@@ -9,12 +9,12 @@ import costume1 from '!raw-loader!./bcf454acf82e4504149f7ffe07081dbc.svg?';
 import costume2 from '!raw-loader!./0fb9be3e8397c983338cb71dc84d0b25.svg?';
 /* eslint-enable import/no-unresolved */
 
-declare function require(path: 'text-encoding'): { TextEncoder: typeof TextEncoder };
+declare function require(path: 'fastestsmallesttextencoderdecoder'): { TextEncoder: typeof TextEncoder };
 
 const defaultProject = (translator?: TranslatorFunction) => {
     let _TextEncoder: typeof TextEncoder;
     if (typeof TextEncoder === 'undefined') {
-        _TextEncoder = require('text-encoding').TextEncoder;
+        _TextEncoder = require('fastestsmallesttextencoderdecoder').TextEncoder;
     } else {
         _TextEncoder = TextEncoder;
     }

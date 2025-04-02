@@ -193,8 +193,11 @@ const SBFileUploaderHOC = function (WrappedComponent) {
                 onSetProjectTitle,
                 projectChanged,
                 requestProjectUpload: requestProjectUploadProp,
-                userOwnsProject,
                 /* eslint-enable no-unused-vars */
+
+                // Intentionally propagating this one as well, since it's used in MenuBar
+                // userOwnsProject,
+
                 ...componentProps
             } = this.props;
             return (
@@ -234,8 +237,10 @@ const SBFileUploaderHOC = function (WrappedComponent) {
             isShowingWithoutId: getIsShowingWithoutId(loadingState),
             loadingState: loadingState,
             projectChanged: state.scratchGui.projectChanged,
-            userOwnsProject: ownProps.authorUsername && user &&
-                (ownProps.authorUsername === user.username),
+            userOwnsProject: ownProps.userOwnsProject ?? (
+                ownProps.authorUsername && user &&
+                    (ownProps.authorUsername === user.username)
+            ),
             vm: state.scratchGui.vm
         };
     };

@@ -39,6 +39,7 @@ describe('Cards component', () => {
         const component = mountWithIntl(
             <Cards
                 {...defaultProps()}
+                platform="WEB"
                 showVideos
             />
         );

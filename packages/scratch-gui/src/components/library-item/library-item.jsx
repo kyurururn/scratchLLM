@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import Box from '../box/box.jsx';
-import PlayButton from '../../containers/play-button.jsx';
 import ScratchImage from '../scratch-image/scratch-image.jsx';
+import PlayButton from '../../containers/play-button.jsx';
 import styles from './library-item.css';
 import classNames from 'classnames';
 
@@ -41,6 +41,7 @@ class LibraryItemComponent extends React.PureComponent {
                         <ScratchImage
                             className={styles.featuredImage}
                             imageSource={this.props.iconSource}
+                            platform={this.props.platform}
                         />
                     ) : null}
                 </div>
@@ -133,6 +134,7 @@ class LibraryItemComponent extends React.PureComponent {
                         <ScratchImage
                             className={styles.libraryItemImage}
                             imageSource={this.props.iconSource}
+                            platform={this.props.platform}
                         />
                     </Box>
                 </Box>
@@ -170,6 +172,7 @@ LibraryItemComponent.propTypes = {
         PropTypes.string,
         PropTypes.node
     ]),
+    platform: PropTypes.string,
     onBlur: PropTypes.func.isRequired,
     onClick: PropTypes.func.isRequired,
     onFocus: PropTypes.func.isRequired,
