@@ -8,20 +8,58 @@ jobs:
   ci:
     uses: ./.github/workflows/ci.yml
   cd:
+    needs:
+      - ci
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
-        with:
-          cache: 'npm'
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
+      - name: Debug info
+        run: |
+          cat <<EOF
+          Release tag name: ${{ github.event.release.tag_name }}
+          Release target commit-ish: ${{ github.event.release.target_commitish }}
+          EOF
+
+      - name: Determine NPM tag
+        id: npm_tag
+        shell: bash
+        run: |
+          case ${{ github.event.release.target_commitish }} in
+            develop | main | master)
+              if [[ ${{ github.event.release.prerelease }} == true ]]; then
+                npm_tag=beta
+              else
+                npm_tag=latest
+              fi
+              ;;
+            *)
+              # use the branch name
+              npm_tag="${{ github.event.release.target_commitish }}"
+              ;;
+          esac
+          echo "Determined NPM tag: [$npm_tag]"
+          echo "npm_tag=${npm_tag}" >> "$GITHUB_OUTPUT"
+      - name: Check NPM tag
+        run: |
+          if [ -z "${{ steps.npm_tag.outputs.npm_tag }}" ]; then
+            echo "Refusing to publish with empty NPM tag."
+            exit 1
+          fi
 
       - name: Config GitHub user
         shell: bash
         run: |
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@localhost'
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          token: ${{ secrets.PAT_RELEASE_PUSH }} # persists the token for pushing to the repo later
+
+      - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
 
       - uses: ./.github/actions/install-dependencies
 
@@ -32,28 +70,28 @@ jobs:
           NEW_VERSION="${GIT_TAG/v/}"
 
           npm version "$NEW_VERSION" --no-git-tag-version
-          git add package* && git commit -m "Release $NEW_VERSION"
+          git add package* && git commit -m "chore(release): $NEW_VERSION [skip ci]"
 
       - name: Build packages
         run: npm run build
 
       - name: Publish scratch-svg-renderer
-        run: npm publish --access=public --workspace=@scratch/scratch-svg-renderer
+        run: npm publish --access=public --tag="${{steps.npm_tag.outputs.npm_tag}}" --workspace=@scratch/scratch-svg-renderer
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
       - name: Publish scratch-render
-        run: npm publish --access=public --workspace=@scratch/scratch-render
+        run: npm publish --access=public --tag="${{steps.npm_tag.outputs.npm_tag}}" --workspace=@scratch/scratch-render
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
       - name: Publish scratch-vm
-        run: npm publish --access=public --workspace=@scratch/scratch-vm
+        run: npm publish --access=public --tag="${{steps.npm_tag.outputs.npm_tag}}" --workspace=@scratch/scratch-vm
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
       - name: Publish scratch-gui
-        run: npm publish --access=public --workspace=@scratch/scratch-gui
+        run: npm publish --access=public --tag="${{steps.npm_tag.outputs.npm_tag}}" --workspace=@scratch/scratch-gui
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
@@ -110,5 +148,3 @@ jobs:
           publish_dir: ./packages/scratch-gui/build
           destination_dir: scratch-gui
           full_commit_message: "Build for ${{ github.sha }} ${{ github.event.head_commit.message }}"
-    needs:
-      - ci
