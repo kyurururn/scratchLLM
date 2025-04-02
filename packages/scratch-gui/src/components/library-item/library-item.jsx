@@ -41,7 +41,6 @@ class LibraryItemComponent extends React.PureComponent {
                         <ScratchImage
                             className={styles.featuredImage}
                             imageSource={this.props.iconSource}
-                            platform={this.props.platform}
                         />
                     ) : null}
                 </div>
@@ -134,7 +133,6 @@ class LibraryItemComponent extends React.PureComponent {
                         <ScratchImage
                             className={styles.libraryItemImage}
                             imageSource={this.props.iconSource}
-                            platform={this.props.platform}
                         />
                     </Box>
                 </Box>
@@ -172,7 +170,6 @@ LibraryItemComponent.propTypes = {
         PropTypes.string,
         PropTypes.node
     ]),
-    platform: PropTypes.string,
     onBlur: PropTypes.func.isRequired,
     onClick: PropTypes.func.isRequired,
     onFocus: PropTypes.func.isRequired,

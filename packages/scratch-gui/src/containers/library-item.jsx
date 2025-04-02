@@ -122,7 +122,6 @@ class LibraryItem extends React.PureComponent {
                 internetConnectionRequired={this.props.internetConnectionRequired}
                 isPlaying={this.props.isPlaying}
                 name={this.props.name}
-                platform={this.props.platform}
                 showPlayButton={this.props.showPlayButton}
                 onBlur={this.handleBlur}
                 onClick={this.handleClick}
@@ -136,10 +135,6 @@ class LibraryItem extends React.PureComponent {
         );
     }
 }
-
-const mapStateToProps = state => ({
-    platform: state.scratchGui.platform.platform
-});
 
 LibraryItem.propTypes = {
     bluetoothRequired: PropTypes.bool,
@@ -167,8 +162,7 @@ LibraryItem.propTypes = {
     onMouseEnter: PropTypes.func.isRequired,
     onMouseLeave: PropTypes.func.isRequired,
     onSelect: PropTypes.func.isRequired,
-    platform: PropTypes.string,
     showPlayButton: PropTypes.bool
 };
 
-export default connect(mapStateToProps)(injectIntl(LibraryItem));
+export default injectIntl(LibraryItem);

@@ -3,7 +3,6 @@ import React from 'react';
 import VisibilitySensor from 'react-visibility-sensor';
 
 import {legacyConfig} from '../../legacy-config';
-import {PLATFORM} from '../../lib/platform';
 
 class ScratchImage extends React.PureComponent {
     static init () {
@@ -57,7 +56,7 @@ class ScratchImage extends React.PureComponent {
     constructor (props) {
         super(props);
         this.state = {};
-        Object.assign(this.state, this._loadImageSource(props.imageSource, props.platform));
+        Object.assign(this.state, this._loadImageSource(props.imageSource));
     }
     componentWillReceiveProps (nextProps) {
         const newState = this._loadImageSource(nextProps.imageSource);
@@ -113,7 +112,7 @@ class ScratchImage extends React.PureComponent {
                         ScratchImage.loadPendingImages();
                         return (
                             <img
-                                src={this.props.platform === PLATFORM.ANDROID ? `file:///android_asset/www${this.state.imageURI}` : this.state.imageURI}
+                                src={this.state.imageURI}
                                 style={{
                                     minWidth: '1px',
                                     minHeight: '1px'
@@ -144,7 +143,6 @@ ScratchImage.ImageSourcePropType = PropTypes.oneOfType([
 
 ScratchImage.propTypes = {
     imageSource: ScratchImage.ImageSourcePropType.isRequired,
-    platform: PropTypes.string
 };
 
 ScratchImage.init();
