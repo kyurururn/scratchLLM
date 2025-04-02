@@ -57,11 +57,13 @@ const playgroundConfig = new ScratchWebpackConfigBuilder(common)
         }
     })
     .addPlugin(
-        new CopyWebpackPlugin([
-            {
-                from: 'src/playground'
-            }
-        ])
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: 'src/playground'
+                }
+            ]
+        })
     )
     .get();
 
