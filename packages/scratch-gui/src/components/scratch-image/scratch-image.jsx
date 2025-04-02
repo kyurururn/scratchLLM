@@ -142,7 +142,7 @@ ScratchImage.ImageSourcePropType = PropTypes.oneOfType([
 ]);
 
 ScratchImage.propTypes = {
-    imageSource: ScratchImage.ImageSourcePropType.isRequired,
+    imageSource: ScratchImage.ImageSourcePropType.isRequired
 };
 
 ScratchImage.init();

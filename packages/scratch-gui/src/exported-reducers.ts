@@ -17,7 +17,7 @@ import {
     openLoadingProject,
     closeLoadingProject,
     openTelemetryModal
-} from './reducers/modals.js'
+} from './reducers/modals.js';
 
 export const guiReducers = {
     locales: LocalesReducer,

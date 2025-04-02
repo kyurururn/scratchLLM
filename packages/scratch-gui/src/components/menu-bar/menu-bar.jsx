@@ -111,7 +111,9 @@ const ariaMessages = defineMessages({
     }
 });
 
-const getScratchLogo = (platform) => platform === PLATFORM.ANDROID ? scratchLogoAndroid : scratchLogo;
+function getScratchLogo (platform) {
+    return platform === PLATFORM.ANDROID ? scratchLogoAndroid : scratchLogo;
+} 
 
 const MenuBarItemTooltip = ({
     children,
@@ -966,6 +968,7 @@ MenuBar.propTypes = {
     onShare: PropTypes.func,
     onStartSelectingFileUpload: PropTypes.func,
     onToggleLoginOpen: PropTypes.func,
+    platform: PropTypes.string,
     projectTitle: PropTypes.string,
     renderLogin: PropTypes.func,
     settingsMenuOpen: PropTypes.bool,
