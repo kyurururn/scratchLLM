@@ -351,6 +351,7 @@ const ProjectSaverHOC = function (WrappedComponent) {
                 reduxProjectId,
                 reduxProjectTitle,
                 setAutoSaveTimeoutId: setAutoSaveTimeoutIdProp,
+                saveThumbnailOnLoad,
                 /* eslint-enable no-unused-vars */
                 ...componentProps
             } = this.props;

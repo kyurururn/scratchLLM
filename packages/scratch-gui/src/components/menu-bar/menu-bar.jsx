@@ -73,6 +73,7 @@ import {
 } from '../../reducers/menus';
 
 import collectMetadata from '../../lib/collect-metadata';
+import {PLATFORM} from '../../lib/platform';
 
 import styles from './menu-bar.css';
 
@@ -87,6 +88,7 @@ import editIcon from './icon--edit.svg';
 import debugIcon from '../debug-modal/icons/icon--debug.svg';
 
 import scratchLogo from './scratch-logo.svg';
+import scratchLogoAndroid from './scratch-logo-android.svg';
 import ninetiesLogo from './nineties_logo.svg';
 import catLogo from './cat_logo.svg';
 import prehistoricLogo from './prehistoric-logo.svg';
@@ -108,6 +110,8 @@ const ariaMessages = defineMessages({
         description: 'accessibility text for the debug button'
     }
 });
+
+const getScratchLogo = (platform) => platform === PLATFORM.ANDROID ? scratchLogoAndroid : scratchLogo;
 
 const MenuBarItemTooltip = ({
     children,
@@ -271,7 +275,7 @@ class MenuBar extends React.Component {
             } else if (mode === '220022BC') {
                 document.getElementById('logo_img').src = prehistoricLogo;
             } else {
-                document.getElementById('logo_img').src = this.props.logo;
+                document.getElementById('logo_img').src = getScratchLogo(this.props.platform);
             }
 
             this.props.onSetTimeTravelMode(mode);
@@ -443,7 +447,7 @@ class MenuBar extends React.Component {
                                     [styles.clickable]: typeof this.props.onClickLogo !== 'undefined'
                                 })}
                                 draggable={false}
-                                src={this.props.logo}
+                                src={getScratchLogo(this.props.platform)}
                                 onClick={this.props.onClickLogo}
                             />
                         </div>
@@ -1008,6 +1012,8 @@ const mapStateToProps = (state, ownProps) => {
         mode1990: isTimeTravel1990(state),
         mode2020: isTimeTravel2020(state),
         modeNow: isTimeTravelNow(state),
+
+        platform: state.scratchGui.platform.platform,
 
         userOwnsProject: ownProps.userOwnsProject ?? (
             ownProps.authorUsername && user && (ownProps.authorUsername === user.username)

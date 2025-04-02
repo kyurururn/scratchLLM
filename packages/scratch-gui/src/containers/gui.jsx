@@ -122,6 +122,7 @@ GUI.propTypes = {
     intl: intlShape,
     isError: PropTypes.bool,
     isLoading: PropTypes.bool,
+    // TODO: Use platform prop
     isScratchDesktop: PropTypes.bool,
     isShowingProject: PropTypes.bool,
     isTotallyNormal: PropTypes.bool,

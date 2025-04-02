@@ -366,7 +366,7 @@ const Cards = props => {
                                 />
                             ) : (
                                 steps[step].video ? (
-                                    (platform === PLATFORM.WEB || platform === PLATFORM.ANDROID) && showVideos ? (
+                                    showVideos ? (
                                         <VideoStep
                                             dragging={dragging}
                                             expanded={expanded}
