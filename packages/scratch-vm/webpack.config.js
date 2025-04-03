@@ -47,7 +47,8 @@ const webBuilder = new ScratchWebpackConfigBuilder(common)
         }
     });
 
-const playgroundBuilder = webBuilder.clone()
+const playgroundBuilder = webBuilder
+    .clone()
     .merge({
         devServer: {
             contentBase: false,
@@ -59,8 +60,12 @@ const playgroundBuilder = webBuilder.clone()
         },
         entry: {
             'benchmark': './src/playground/benchmark',
-            'video-sensing-extension-debug': './src/extensions/scratch3_video_sensing/debug',
-            'extension-worker': path.join(__dirname, 'src/extension-support/extension-worker.js')
+            'video-sensing-extension-debug':
+                './src/extensions/scratch3_video_sensing/debug',
+            'extension-worker': path.join(
+                __dirname,
+                'src/extension-support/extension-worker.js'
+            )
         },
         output: {
             path: path.resolve(__dirname, 'playground'),
@@ -74,7 +79,9 @@ const playgroundBuilder = webBuilder.clone()
         loader: 'script-loader'
     })
     .addModuleRule({
-        test: require.resolve('./src/extensions/scratch3_video_sensing/debug.js'),
+        test: require.resolve(
+            './src/extensions/scratch3_video_sensing/debug.js'
+        ),
         loader: 'expose-loader',
         options: {
             exposes: 'Scratch3VideoSensingDebug'
@@ -108,24 +115,28 @@ const playgroundBuilder = webBuilder.clone()
             exposes: 'ScratchRender'
         }
     })
-    .addPlugin(new CopyWebpackPlugin([
-        {
-            from: '../../node_modules/scratch-blocks/media',
-            to: 'media'
-        },
-        {
-            from: '../../node_modules/scratch-storage/dist/web'
-        },
-        {
-            from: '../../node_modules/@scratch/scratch-render/dist/web'
-        },
-        {
-            from: '../../node_modules/@scratch/scratch-svg-renderer/dist/web'
-        },
-        {
-            from: 'src/playground'
-        }
-    ]));
+    .addPlugin(
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: '../../node_modules/scratch-blocks/media',
+                    to: 'media'
+                },
+                {
+                    from: '../../node_modules/scratch-storage/dist/web'
+                },
+                {
+                    from: '../../node_modules/@scratch/scratch-render/dist/web'
+                },
+                {
+                    from: '../../node_modules/@scratch/scratch-svg-renderer/dist/web'
+                },
+                {
+                    from: 'src/playground'
+                }
+            ]
+        })
+    );
 
 module.exports = [
     nodeBuilder.get(),

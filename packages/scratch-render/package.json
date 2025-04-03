@@ -60,13 +60,13 @@
     "scratch-render-fonts": "^1.0.0"
   },
   "devDependencies": {
-    "@babel/core": "7.26.9",
-    "@babel/eslint-parser": "7.26.8",
+    "@babel/core": "7.26.10",
+    "@babel/eslint-parser": "7.27.0",
     "@babel/polyfill": "7.12.1",
     "@babel/preset-env": "7.26.9",
     "@scratch/scratch-vm": "11.0.0",
     "babel-loader": "9.2.1",
-    "copy-webpack-plugin": "4.6.0",
+    "copy-webpack-plugin": "6.4.1",
     "docdash": "0.4.0",
     "eslint": "8.57.1",
     "eslint-config-scratch": "9.0.9",
@@ -74,16 +74,16 @@
     "html-webpack-plugin": "5.6.3",
     "jsdoc": "3.6.11",
     "json": "9.0.6",
-    "playwright-chromium": "1.51.0",
-    "scratch-render-fonts": "1.0.173",
+    "playwright-chromium": "1.51.1",
+    "scratch-render-fonts": "1.0.180",
     "scratch-semantic-release-config": "3.0.0",
-    "scratch-storage": "4.0.75",
+    "scratch-storage": "4.0.95",
     "scratch-webpack-configuration": "3.0.0",
     "semantic-release": "19.0.5",
     "tap": "16.3.10",
     "terser-webpack-plugin": "5.3.14",
     "webpack": "5.98.0",
     "webpack-cli": "5.1.4",
-    "webpack-dev-server": "5.2.0"
+    "webpack-dev-server": "5.2.1"
   }
 }
