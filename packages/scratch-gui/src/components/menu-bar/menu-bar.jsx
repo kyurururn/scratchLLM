@@ -1021,7 +1021,7 @@ const mapStateToProps = (state, ownProps) => {
         ),
 
         accountMenuOptions: ownProps.accountMenuOptions ?? {
-            canHaveSession: sessionExists,
+            canHaveSession: sessionExists ?? false,
 
             canRegister: true,
             canLogin: true,
