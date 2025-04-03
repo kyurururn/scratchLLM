@@ -111,9 +111,7 @@ const ariaMessages = defineMessages({
     }
 });
 
-function getScratchLogo (platform) {
-    return platform === PLATFORM.ANDROID ? scratchLogoAndroid : scratchLogo;
-} 
+const getScratchLogo = platform => (platform === PLATFORM.ANDROID ? scratchLogoAndroid : scratchLogo);
 
 const MenuBarItemTooltip = ({
     children,

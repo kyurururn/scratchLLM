@@ -279,7 +279,7 @@ class LibraryComponent extends React.Component {
             acc[el.category] = acc[el.category] || [];
             acc[el.category].push(el);
             return acc;
-            }, {});
+        }, {});
         const categoriesOrder = Object.values(CATEGORIES);
 
         return Object.entries(dataByCategory)

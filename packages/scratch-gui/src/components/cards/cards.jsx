@@ -166,7 +166,7 @@ const ImageStep = ({title, image}) => (<Fragment>
 
 ImageStep.propTypes = {
     image: PropTypes.string.isRequired,
-    title: PropTypes.node.isRequired,
+    title: PropTypes.node.isRequired
 };
 
 const NextPrevButtons = ({isRtl, onNextStep, onPrevStep, expanded}) => (
@@ -272,7 +272,7 @@ PreviewsStep.propTypes = {
     }).isRequired,
     deckIds: PropTypes.arrayOf(PropTypes.string).isRequired,
     onActivateDeckFactory: PropTypes.func.isRequired,
-    onShowAll: PropTypes.func.isRequired,
+    onShowAll: PropTypes.func.isRequired
 };
 
 const Cards = props => {

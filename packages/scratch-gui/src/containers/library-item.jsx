@@ -2,7 +2,6 @@ import bindAll from 'lodash.bindall';
 import PropTypes from 'prop-types';
 import React from 'react';
 import {injectIntl} from 'react-intl';
-import {connect} from 'react-redux';
 
 import LibraryItemComponent from '../components/library-item/library-item.jsx';
 
