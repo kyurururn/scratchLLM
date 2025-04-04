@@ -1,6 +1,6 @@
 import React from 'react';
 import {FormattedMessage} from 'react-intl';
-import {messages} from './messages.ts';
+import {messages} from './messages.js';
 
 import addSoundCheckpoints from '../icons/icon--add-sound-checkpoints.svg';
 import askForHelp from '../icons/icon--ask-for-help.svg';
