@@ -18,6 +18,8 @@ import closeIcon from './icon--close.svg';
 import {translateVideo} from '../../lib/libraries/decks/translate-video.js';
 import {translateImage} from '../../lib/libraries/decks/translate-image.js';
 
+import {PLATFORM} from '../../lib/platform.js';
+
 const CardHeader = ({onCloseCards, onShrinkExpandCards, onShowAll, totalSteps, step, expanded}) => (
     <div className={expanded ? styles.headerButtons : classNames(styles.headerButtons, styles.headerButtonsHidden)}>
         <div
@@ -291,9 +293,9 @@ const Cards = props => {
         onShowAll,
         onNextStep,
         onPrevStep,
-        showVideos,
         step,
         expanded,
+        platform,
         ...posProps
     } = props;
     let {x, y} = posProps;
@@ -360,7 +362,7 @@ const Cards = props => {
                                 />
                             ) : (
                                 steps[step].video ? (
-                                    showVideos ? (
+                                    platform !== PLATFORM.DESKTOP ? (
                                         <VideoStep
                                             dragging={dragging}
                                             expanded={expanded}
@@ -421,14 +423,10 @@ Cards.propTypes = {
     onShowAll: PropTypes.func,
     onShrinkExpandCards: PropTypes.func.isRequired,
     onStartDrag: PropTypes.func,
-    showVideos: PropTypes.bool,
+    platform: PropTypes.string,
     step: PropTypes.number.isRequired,
     x: PropTypes.number,
     y: PropTypes.number
-};
-
-Cards.defaultProps = {
-    showVideos: true
 };
 
 export {
