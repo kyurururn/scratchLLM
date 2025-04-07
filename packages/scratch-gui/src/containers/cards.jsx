@@ -19,6 +19,7 @@ import {
 
 import CardsComponent from '../components/cards/cards.jsx';
 import {loadImageData} from '../lib/libraries/decks/translate-image.js';
+import {PLATFORM} from '../lib/platform.js';
 
 class Cards extends React.Component {
     componentDidMount () {
@@ -40,7 +41,7 @@ class Cards extends React.Component {
 
 Cards.propTypes = {
     locale: PropTypes.string.isRequired,
-    platform: PropTypes.string
+    platform: PropTypes.oneOf(Object.keys(PLATFORM))
 };
 
 const mapStateToProps = state => ({

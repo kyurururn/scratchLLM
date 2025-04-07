@@ -39,15 +39,14 @@ import vmListenerHOC from '../lib/vm-listener-hoc.jsx';
 import vmManagerHOC from '../lib/vm-manager-hoc.jsx';
 import cloudManagerHOC from '../lib/cloud-manager-hoc.jsx';
 import systemPreferencesHOC from '../lib/system-preferences-hoc.jsx';
+import {PLATFORM} from '../lib/platform.js';
 
 import GUIComponent from '../components/gui/gui.jsx';
-import {setIsScratchDesktop} from '../lib/isScratchDesktop.js';
 import {GUIStoragePropType} from '../gui-config';
 import {AccountMenuOptionsPropTypes} from '../lib/account-menu-options';
 
 class GUI extends React.Component {
     componentDidMount () {
-        setIsScratchDesktop(this.props.isScratchDesktop);
         this.props.onStorageInit(this.props.storage.scratchStorage);
         this.props.onVmInit(this.props.vm);
         this.props.storage.setProjectMetadata?.(this.props.projectId);
@@ -83,7 +82,6 @@ class GUI extends React.Component {
             cloudHost,
             error,
             isError,
-            isScratchDesktop,
             isShowingProject,
             onProjectLoaded,
             onStorageInit,
@@ -122,8 +120,6 @@ GUI.propTypes = {
     intl: intlShape,
     isError: PropTypes.bool,
     isLoading: PropTypes.bool,
-    // TODO: Use platform prop
-    isScratchDesktop: PropTypes.bool,
     isShowingProject: PropTypes.bool,
     isTotallyNormal: PropTypes.bool,
     loadingStateVisible: PropTypes.bool,
@@ -132,7 +128,7 @@ GUI.propTypes = {
     onStorageInit: PropTypes.func,
     onUpdateProjectId: PropTypes.func,
     onVmInit: PropTypes.func,
-    platform: PropTypes.string,
+    platform: PropTypes.oneOf(Object.keys(PLATFORM)),
     setPlatform: PropTypes.func.isRequired,
     projectHost: PropTypes.string,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -145,7 +141,6 @@ GUI.propTypes = {
 };
 
 GUI.defaultProps = {
-    isScratchDesktop: false,
     isTotallyNormal: false,
     onStorageInit: () => {},
     onProjectLoaded: () => {},

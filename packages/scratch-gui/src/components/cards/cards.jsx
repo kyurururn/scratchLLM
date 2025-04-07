@@ -423,7 +423,7 @@ Cards.propTypes = {
     onShowAll: PropTypes.func,
     onShrinkExpandCards: PropTypes.func.isRequired,
     onStartDrag: PropTypes.func,
-    platform: PropTypes.string,
+    platform: PropTypes.oneOf(Object.keys(PLATFORM)),
     step: PropTypes.number.isRequired,
     x: PropTypes.number,
     y: PropTypes.number
