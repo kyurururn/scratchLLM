@@ -1,21 +1,8 @@
-import {defineMessages} from 'react-intl';
+import projectDataMessages from './messages';
 import sharedMessages from '../shared-messages';
 import {MessageObject, TranslatorFunction} from '../../gui-config';
 
-let messages = defineMessages({
-    meow: {
-        defaultMessage: 'Meow',
-        description: 'Name for the meow sound',
-        id: 'gui.defaultProject.meow'
-    },
-    variable: {
-        defaultMessage: 'my variable',
-        description: 'Name for the default variable',
-        id: 'gui.defaultProject.variable'
-    }
-});
-
-messages = {...messages, ...sharedMessages};
+const messages = {...projectDataMessages, ...sharedMessages};
 
 // use the default message if a translation function is not passed
 const defaultTranslator = (msgObj: MessageObject) => msgObj.defaultMessage;
