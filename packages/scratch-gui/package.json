@@ -94,7 +94,7 @@
     "react-virtualized": "9.22.6",
     "redux-throttle": "0.1.1",
     "scratch-audio": "2.0.117",
-    "scratch-blocks": "1.1.206",
+    "scratch-blocks": "1.1.208",
     "scratch-l10n": "5.0.197",
     "scratch-paint": "3.0.205",
     "scratch-render-fonts": "1.0.181",
