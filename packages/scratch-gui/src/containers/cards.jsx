@@ -41,7 +41,6 @@ class Cards extends React.Component {
 
 Cards.propTypes = {
     locale: PropTypes.string.isRequired,
-    platform: PropTypes.oneOf(Object.keys(PLATFORM))
 };
 
 const mapStateToProps = state => ({
@@ -55,7 +54,9 @@ const mapStateToProps = state => ({
     isRtl: state.locales.isRtl,
     locale: state.locales.locale,
     dragging: state.scratchGui.cards.dragging,
-    platform: state.scratchGui.platform.platform
+    // Assume user is offline and don't attempt to
+    // download and show videos
+    showVideos: state.scratchGui.platform.platform !== PLATFORM.DESKTOP
 });
 
 const mapDispatchToProps = dispatch => ({

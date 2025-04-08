@@ -18,8 +18,6 @@ import closeIcon from './icon--close.svg';
 import {translateVideo} from '../../lib/libraries/decks/translate-video.js';
 import {translateImage} from '../../lib/libraries/decks/translate-image.js';
 
-import {PLATFORM} from '../../lib/platform.js';
-
 const CardHeader = ({onCloseCards, onShrinkExpandCards, onShowAll, totalSteps, step, expanded}) => (
     <div className={expanded ? styles.headerButtons : classNames(styles.headerButtons, styles.headerButtonsHidden)}>
         <div
@@ -295,7 +293,7 @@ const Cards = props => {
         onPrevStep,
         step,
         expanded,
-        platform,
+        showVideos,
         ...posProps
     } = props;
     let {x, y} = posProps;
@@ -362,19 +360,17 @@ const Cards = props => {
                                 />
                             ) : (
                                 steps[step].video ? (
-                                    platform === PLATFORM.DESKTOP ?
-                                    // Assume user is offline and don't attempt to
-                                    // download videos
+                                    showVideos ?
                                         (
-                                            <ImageStep
-                                                image={content[activeDeckId].img}
-                                                title={content[activeDeckId].name}
-                                            />
-                                        ) : (
                                             <VideoStep
                                                 dragging={dragging}
                                                 expanded={expanded}
                                                 video={translateVideo(steps[step].video, locale)}
+                                            />
+                                        ) : (
+                                            <ImageStep
+                                                image={content[activeDeckId].img}
+                                                title={content[activeDeckId].name}
                                             />
                                         )
                                 ) : (
@@ -426,7 +422,7 @@ Cards.propTypes = {
     onShowAll: PropTypes.func,
     onShrinkExpandCards: PropTypes.func.isRequired,
     onStartDrag: PropTypes.func,
-    platform: PropTypes.oneOf(Object.keys(PLATFORM)),
+    showVideos: PropTypes.bool,
     step: PropTypes.number.isRequired,
     x: PropTypes.number,
     y: PropTypes.number
