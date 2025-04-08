@@ -362,18 +362,21 @@ const Cards = props => {
                                 />
                             ) : (
                                 steps[step].video ? (
-                                    platform !== PLATFORM.DESKTOP ? (
-                                        <VideoStep
-                                            dragging={dragging}
-                                            expanded={expanded}
-                                            video={translateVideo(steps[step].video, locale)}
-                                        />
-                                    ) : ( // Else show the deck image and title
-                                        <ImageStep
-                                            image={content[activeDeckId].img}
-                                            title={content[activeDeckId].name}
-                                        />
-                                    )
+                                    platform === PLATFORM.DESKTOP ?
+                                    // Assume user is offline and don't attempt to
+                                    // download videos
+                                        (
+                                            <ImageStep
+                                                image={content[activeDeckId].img}
+                                                title={content[activeDeckId].name}
+                                            />
+                                        ) : (
+                                            <VideoStep
+                                                dragging={dragging}
+                                                expanded={expanded}
+                                                video={translateVideo(steps[step].video, locale)}
+                                            />
+                                        )
                                 ) : (
                                     <ImageStep
                                         image={translateImage(steps[step].image, locale)}

@@ -73,7 +73,9 @@ class TipsLibrary extends React.PureComponent {
                 const isProjectTutorial = Object.prototype.hasOwnProperty.call(deck, 'requiredProjectId');
                 const isVideoOnlyTutorial = decksLibraryContent[id].steps.filter(s => s.title).length === 0;
 
-                if (isProjectTutorial && (this.props.hideTutorialProjects || this.props.platform === PLATFORM.DESKTOP)) {
+                if (isProjectTutorial &&
+                    (this.props.hideTutorialProjects || this.props.platform === PLATFORM.DESKTOP)
+                ) {
                     return false;
                 }
 
