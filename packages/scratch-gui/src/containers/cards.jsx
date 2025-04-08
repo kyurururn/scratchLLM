@@ -33,14 +33,21 @@ class Cards extends React.Component {
         }
     }
     render () {
+        const props = {
+            ...this.props,
+            // Assume user is offline and don't attempt to
+            // download and show videos
+            showVideos: this.props.platform !== PLATFORM.DESKTOP
+        };
         return (
-            <CardsComponent {...this.props} />
+            <CardsComponent {...props} />
         );
     }
 }
 
 Cards.propTypes = {
     locale: PropTypes.string.isRequired,
+    platform: PropTypes.oneOf(Object.keys(PLATFORM))
 };
 
 const mapStateToProps = state => ({
@@ -54,9 +61,7 @@ const mapStateToProps = state => ({
     isRtl: state.locales.isRtl,
     locale: state.locales.locale,
     dragging: state.scratchGui.cards.dragging,
-    // Assume user is offline and don't attempt to
-    // download and show videos
-    showVideos: state.scratchGui.platform.platform !== PLATFORM.DESKTOP
+    platform: state.scratchGui.platform.platform
 });
 
 const mapDispatchToProps = dispatch => ({
