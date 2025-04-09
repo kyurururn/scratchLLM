@@ -17,7 +17,8 @@ const ModalComponent = props => (
     <ReactModal
         isOpen
         className={classNames(styles.modalContent, props.className, {
-            [styles.fullScreen]: props.fullScreen
+            [styles.fullScreen]: props.fullScreen,
+            'no-global-reset': true
         })}
         contentLabel={props.contentLabel}
         overlayClassName={styles.modalOverlay}
