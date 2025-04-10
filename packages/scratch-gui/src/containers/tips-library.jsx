@@ -74,12 +74,15 @@ class TipsLibrary extends React.PureComponent {
                 const isVideoOnlyTutorial = decksLibraryContent[id].steps.filter(s => s.title).length === 0;
 
                 if (isProjectTutorial &&
-                    (this.props.hideTutorialProjects || this.props.platform === PLATFORM.DESKTOP || this.props.platform === PLATFORM.ANDROID)
+                    (this.props.hideTutorialProjects ||
+                        this.props.platform === PLATFORM.DESKTOP ||
+                        this.props.platform === PLATFORM.ANDROID)
                 ) {
                     return false;
                 }
 
-                if (isVideoOnlyTutorial && (this.props.platform === PLATFORM.DESKTOP || this.props.platform === PLATFORM.ANDROID)) {
+                if (isVideoOnlyTutorial &&
+                    (this.props.platform === PLATFORM.DESKTOP || this.props.platform === PLATFORM.ANDROID)) {
                     return false;
                 }
 
