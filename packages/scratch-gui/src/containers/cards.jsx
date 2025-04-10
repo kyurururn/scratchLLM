@@ -37,7 +37,8 @@ class Cards extends React.Component {
             ...this.props,
             // Assume user is offline and don't attempt to
             // download and show videos
-            showVideos: this.props.platform !== PLATFORM.DESKTOP
+            showVideos: this.props.platform !== PLATFORM.DESKTOP &&
+                this.props.platform !== PLATFORM.ANDROID
         };
         return (
             <CardsComponent {...props} />
