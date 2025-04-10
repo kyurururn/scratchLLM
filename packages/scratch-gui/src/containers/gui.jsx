@@ -136,6 +136,7 @@ GUI.propTypes = {
     telemetryModalVisible: PropTypes.bool,
     username: PropTypes.string,
     userOwnsProject: PropTypes.bool,
+    // TODO: Is this unused?
     hideTutorialProjects: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
