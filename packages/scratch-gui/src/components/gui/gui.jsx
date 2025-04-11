@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import omit from 'lodash.omit';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, {useCallback} from 'react';
 import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-intl';
 import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
@@ -86,6 +86,8 @@ const GUIComponent = props => {
         costumeLibraryVisible,
         costumesTabVisible,
         debugModalVisible,
+        onDebugModalClose,
+        onTutorialSelect,
         enableCommunity,
         intl,
         isCreating,
@@ -147,6 +149,13 @@ const GUIComponent = props => {
         tabSelected: classNames(tabStyles.reactTabsTabSelected, styles.isSelected)
     };
 
+    const onCloseDebugModal = useCallback(() => {
+        if (onDebugModalClose) {
+            onDebugModalClose();
+        }
+        onRequestCloseDebugModal();
+    }, [onDebugModalClose, onRequestCloseDebugModal]);
+
     if (isRendererSupported === null) {
         isRendererSupported = Renderer.isSupported();
     }
@@ -194,7 +203,10 @@ const GUIComponent = props => {
                     <WebGlModal isRtl={isRtl} />
                 )}
                 {tipsLibraryVisible ? (
-                    <TipsLibrary hideTutorialProjects={hideTutorialProjects} />
+                    <TipsLibrary
+                        hideTutorialProjects={hideTutorialProjects}
+                        onTutorialSelect={onTutorialSelect}
+                    />
                 ) : null}
                 {cardsVisible ? (
                     <Cards />
@@ -215,7 +227,7 @@ const GUIComponent = props => {
                 ) : null}
                 {<DebugModal
                     isOpen={debugModalVisible}
-                    onClose={onRequestCloseDebugModal}
+                    onClose={onCloseDebugModal}
                 />}
                 {backdropLibraryVisible ? (
                     <BackdropLibrary
@@ -414,6 +426,8 @@ GUIComponent.propTypes = {
     costumeLibraryVisible: PropTypes.bool,
     costumesTabVisible: PropTypes.bool,
     debugModalVisible: PropTypes.bool,
+    onDebugModalClose: PropTypes.func,
+    onTutorialSelect: PropTypes.func,
     enableCommunity: PropTypes.bool,
     intl: intlShape.isRequired,
     isCreating: PropTypes.bool,
