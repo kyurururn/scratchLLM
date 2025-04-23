@@ -8,6 +8,8 @@ const DOMPurify = require('isomorphic-dompurify');
 
 const sanitizeSvg = {};
 
+const isInternalRef = ref => ref.startsWith('#') || ref.startsWith('data:');
+
 DOMPurify.addHook(
     'beforeSanitizeAttributes',
     currentNode => {
@@ -15,7 +17,7 @@ DOMPurify.addHook(
         if (currentNode && currentNode.href && currentNode.href.baseVal) {
             const href = currentNode.href.baseVal.replace(/\s/g, '');
             // "data:" and "#" are valid hrefs
-            if ((href.slice(0, 5) !== 'data:') && (href.slice(0, 1) !== '#')) {
+            if (!isInternalRef(href)) {
 
                 if (currentNode.attributes.getNamedItem('xlink:href')) {
                     currentNode.attributes.removeNamedItem('xlink:href');
@@ -27,6 +29,24 @@ DOMPurify.addHook(
                 }
             }
         }
+
+        // Remove url(...) usages with external references
+        if (currentNode && currentNode.attributes) {
+            for (let i = currentNode.attributes.length - 1; i >= 0; i--) {
+                const attr = currentNode.attributes[i];
+                const rawValue = attr.value || '';
+                const value = rawValue.toLowerCase().replace(/\s/g, '');
+        
+                const urlMatch = value.match(/url\((.+?)\)/);
+                if (urlMatch) {
+                    const ref = urlMatch[1].replace(/['"]/g, '');
+                    if (!isInternalRef(ref)) {
+                        currentNode.removeAttribute(attr.name);
+                    }
+                }
+            }
+        }
+    
         return currentNode;
     }
 );
@@ -37,13 +57,29 @@ DOMPurify.addHook(
         if (data.tagName === 'style') {
             const ast = parse(node.textContent);
             let isModified = false;
-            // Remove any @import rules as it could leak HTTP requests
+
             walk(ast, (astNode, item, list) => {
-                if (astNode.type === 'Atrule' && astNode.name === 'import') {
+                // @import rules
+                if (astNode.type === 'Atrule' && astNode.name.toLowerCase() === 'import') {
                     list.remove(item);
                     isModified = true;
                 }
+                
+                // Elements using url(...) for external resources
+                if (astNode.type === 'Declaration' && astNode.value) {
+                    walk(astNode.value, valueNode => {
+                        if (valueNode.type === 'Url') {
+                            const urlValue = (valueNode.value.value || '').trim().replace(/['"]/g, '');
+    
+                            if (!isInternalRef(urlValue)) {
+                                list.remove(item);
+                                isModified = true;
+                            }
+                        }
+                    });
+                }
             });
+
             if (isModified) {
                 node.textContent = generate(ast);
             }
