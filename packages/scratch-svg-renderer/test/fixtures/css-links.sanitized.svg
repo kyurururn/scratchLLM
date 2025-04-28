@@ -11,6 +11,12 @@
 
     <circle mask="url(#myMask)"></circle>
 
+    <circle></circle>
+    <circle></circle>
+
+    <rect></rect>
+    <rect></rect>
+
     <style>.url{fill:url(#myMask);stroke:url(#myMask);background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA")}.url .inner-2{}</style>
 
     <rect class="url"></rect>

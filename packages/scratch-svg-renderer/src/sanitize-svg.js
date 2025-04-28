@@ -18,7 +18,7 @@ DOMPurify.addHook(
             const href = currentNode.href.baseVal.replace(/\s/g, '');
             // "data:" and "#" are valid hrefs
             if (!isInternalRef(href)) {
-
+                // TODO: Those can be in different namespaces than `xlink:`
                 if (currentNode.attributes.getNamedItem('xlink:href')) {
                     currentNode.attributes.removeNamedItem('xlink:href');
                     delete currentNode['xlink:href'];
@@ -67,16 +67,21 @@ DOMPurify.addHook(
                 
                 // Elements using url(...) for external resources
                 if (astNode.type === 'Declaration' && astNode.value) {
+                    let shouldRemove = false;
                     walk(astNode.value, valueNode => {
                         if (valueNode.type === 'Url') {
                             const urlValue = (valueNode.value.value || '').trim().replace(/['"]/g, '');
     
                             if (!isInternalRef(urlValue)) {
-                                list.remove(item);
-                                isModified = true;
+                                shouldRemove = true;
                             }
                         }
                     });
+
+                    if (shouldRemove) {
+                        list.remove(item);
+                        isModified = true;
+                    }
                 }
             });
 

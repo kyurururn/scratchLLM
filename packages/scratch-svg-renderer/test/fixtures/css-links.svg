@@ -11,6 +11,12 @@
 
     <circle mask="url(#myMask)" />
 
+    <circle fill="url(https://example.com/using-circle-fill-attribute)" />
+    <circle style="fill: url(https://example.com/using-circle-fill-inline-style)" />
+
+    <rect stroke="url(https://example.com/using-rect-stroke-attribute)" />
+    <rect style="stroke: url(https://example.com/using-rect-fill-inline-style)" />
+
     <style>
         .url {
             fill: url(#myMask);
@@ -32,7 +38,7 @@
     <style>
         @font-face {
             font-family: 'ExternalFont';
-            src: url("https://example.com/fonts/ExternalFont.woff2") format('woff2');
+            src: url(https://example.com/using-font-face.woff) format(woff), url(https://example.com/using-font-face.woff2) format(woff2);
         }
         @font-face {
             font-family: 'DataFont';
