@@ -138,7 +138,7 @@ ScratchImage.ImageSourcePropType = PropTypes.oneOfType([
         assetServiceUri: PropTypes.string.isRequired
     }),
     PropTypes.shape({
-        rawUrl: PropTypes.string.isRequired
+        uri: PropTypes.string.isRequired
     })
 ]);
 

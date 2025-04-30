@@ -29,7 +29,7 @@ class LibraryItemComponent extends React.PureComponent {
         // we don't have the assets locally and want to directly download them from
         // the assets service.
         // TODO: Abstract this logic in the `ScratchImage` component itself.
-        const url = imageSource.rawUrl ?? imageSource.assetServiceUri;
+        const url = imageSource.uri ?? imageSource.assetServiceUri;
 
         if (this.props.platform === PLATFORM.ANDROID ||
             this.props.platform === PLATFORM.DESKTOP) {
