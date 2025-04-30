@@ -1,5 +1,6 @@
 import React from 'react';
 import {mountWithIntl} from '../../helpers/intl-helpers.jsx';
+import {PLATFORM} from '../../../src/lib/platform.js';
 
 // Mock this utility because it uses dynamic imports that do not work with jest
 jest.mock('../../../src/lib/libraries/decks/translate-image.js', () => {});
@@ -39,6 +40,7 @@ describe('Cards component', () => {
         const component = mountWithIntl(
             <Cards
                 {...defaultProps()}
+                platform={PLATFORM.WEB}
                 showVideos
             />
         );

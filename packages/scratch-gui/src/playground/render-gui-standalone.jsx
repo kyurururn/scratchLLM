@@ -1,5 +1,6 @@
 import {EditorState, createStandaloneRoot, setAppElement} from '../index-standalone';
 import HashParserHOC from '../lib/hash-parser-hoc.jsx';
+import {PLATFORM} from '../lib/platform.js';
 
 import log from '../lib/log.js';
 
@@ -60,7 +61,7 @@ export default appTarget => {
     if (simulateScratchDesktop) {
         gui.render({
             canEditTitle: true,
-            isScratchDesktop: true,
+            platform: PLATFORM.DESKTOP,
             showTelemetryModal: true,
             canSave: false,
             onTelemetryModalCancel: handleTelemetryModalCancel,

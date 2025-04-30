@@ -196,23 +196,6 @@ describe('Working with costumes', () => {
         await expect(logs).toEqual([]);
     });
 
-    // TODO: This sometimes results in a stack overflow error in the GitHub Actions workflow - flaky test.
-    //       Seems like at random another costume is shown. Need to debug
-    test.skip('Costumes animate on mouseover', async () => {
-        await loadUri(uri);
-        await clickXpath('//button[@aria-label="Choose a Sprite"]');
-        const searchElement = await findByXpath("//input[@placeholder='Search']");
-        await searchElement.sendKeys('abb');
-        const abbyElement = await findByXpath('//*[span[text()="Abby"]]');
-        driver.actions()
-            .mouseMove(abbyElement)
-            .perform();
-        // wait for one of Abby's alternate costumes to appear
-        await findByXpath('//img[@src="https://cdn.assets.scratch.mit.edu/internalapi/asset/45de34b47a2ce22f6f5d28bb35a44ff5.svg/get/"]');
-        const logs = await getLogs();
-        await expect(logs).toEqual([]);
-    });
-
     test('Adding multiple costumes at the same time', async () => {
         const files = [
             path.resolve(__dirname, '../fixtures/gh-3582-png.png'),
