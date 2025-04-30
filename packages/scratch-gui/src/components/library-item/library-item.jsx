@@ -1,5 +1,6 @@
 import {FormattedMessage} from 'react-intl';
 import PropTypes from 'prop-types';
+import bindAll from 'lodash.bindall';
 import React from 'react';
 
 import Box from '../box/box.jsx';
@@ -15,26 +16,34 @@ import {PLATFORM} from '../../lib/platform.js';
 
 /* eslint-disable react/prefer-stateless-function */
 class LibraryItemComponent extends React.PureComponent {
-    render () {
-        const renderImage = (className, imageSource) => {
-            // Scratch Android and Scratch Desktop assume the user is offline and has
-            // local access to the image assets. In those cases we use the `ScratchImage`
-            // component which loads the local assets by using a queue. In Scratch Web
-            // we don't have the assets locally and want to directly download them from
-            // the assets service.
-            // TODO: Abstract this logic in the `ScratchImage` component itself.
-            const url = imageSource.rawUrl ?? imageSource.assetServiceUri;
-            return this.props.platform === PLATFORM.ANDROID ||
-                this.props.platform === PLATFORM.DESKTOP ?
-                <ScratchImage
-                    className={className}
-                    imageSource={imageSource}
-                /> :
-                <img
-                    className={className}
-                    src={url}
-                />
+    constructor (props) {
+        super(props);
+        bindAll(this, [
+            'renderImage'
+        ]);
+    }
+    renderImage (className, imageSource) {
+        // Scratch Android and Scratch Desktop assume the user is offline and has
+        // local access to the image assets. In those cases we use the `ScratchImage`
+        // component which loads the local assets by using a queue. In Scratch Web
+        // we don't have the assets locally and want to directly download them from
+        // the assets service.
+        // TODO: Abstract this logic in the `ScratchImage` component itself.
+        const url = imageSource.rawUrl ?? imageSource.assetServiceUri;
+
+        if (this.props.platform === PLATFORM.ANDROID ||
+            this.props.platform === PLATFORM.DESKTOP) {
+            return (<ScratchImage
+                className={className}
+                imageSource={imageSource}
+            />);
         }
+        return (<img
+            className={className}
+            src={url}
+        />);
+    }
+    render () {
         return this.props.featured ? (
             <div
                 className={classNames(
@@ -59,7 +68,7 @@ class LibraryItemComponent extends React.PureComponent {
                         </div>
                     ) : null}
                     {this.props.iconSource ? (
-                        renderImage(styles.featuredImage, this.props.iconSource)
+                        this.renderImage(styles.featuredImage, this.props.iconSource)
                     ) : null}
                 </div>
                 {this.props.insetIconURL ? (
@@ -148,7 +157,7 @@ class LibraryItemComponent extends React.PureComponent {
                         onMouseEnter={this.props.showPlayButton ? this.props.onMouseEnter : null}
                         onMouseLeave={this.props.showPlayButton ? this.props.onMouseLeave : null}
                     >
-                        {renderImage(styles.libraryItemImage, this.props.iconSource)}
+                        {this.renderImage(styles.libraryItemImage, this.props.iconSource)}
                     </Box>
                 </Box>
                 <span className={styles.libraryItemName}>{this.props.name}</span>

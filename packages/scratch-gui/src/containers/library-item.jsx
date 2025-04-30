@@ -140,11 +140,9 @@ class LibraryItem extends React.PureComponent {
     }
 }
 
-const mapStateToProps = (state) => {
-    return {
-        platform: state.scratchGui.platform.platform,
-    };
-};
+const mapStateToProps = state => ({
+    platform: state.scratchGui.platform.platform
+});
 
 LibraryItem.propTypes = {
     bluetoothRequired: PropTypes.bool,
