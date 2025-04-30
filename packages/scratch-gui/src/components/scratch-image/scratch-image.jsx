@@ -3,7 +3,6 @@ import React from 'react';
 import VisibilitySensor from 'react-visibility-sensor';
 
 import {legacyConfig} from '../../legacy-config';
-import {PLATFORM} from '../../lib/platform';
 
 class ScratchImage extends React.PureComponent {
     static init () {
@@ -25,7 +24,8 @@ class ScratchImage extends React.PureComponent {
                 nextImage = image;
                 break;
             } else {
-                // nextImage = nextImage || image;
+                // TODO: Why was this commented out on native branch?
+                nextImage = nextImage || image;
             }
         }
 
@@ -56,7 +56,7 @@ class ScratchImage extends React.PureComponent {
     constructor (props) {
         super(props);
         this.state = {};
-        Object.assign(this.state, this._loadImageSource(props.imageSource, props.platform));
+        Object.assign(this.state, this._loadImageSource(props.imageSource));
     }
     componentWillReceiveProps (nextProps) {
         const newState = this._loadImageSource(nextProps.imageSource);
@@ -95,6 +95,7 @@ class ScratchImage extends React.PureComponent {
     }
     render () {
         const {
+            // TODO: Does this cause issues for desktop?
             src: _src, // eslint-disable-line react/prop-types
             imageSource: _imageSource,
 
@@ -111,7 +112,7 @@ class ScratchImage extends React.PureComponent {
                         ScratchImage.loadPendingImages();
                         return (
                             <img
-                                src={this.props.platform === PLATFORM.ANDROID ? `file:///android_asset/www${this.state.imageURI}` : this.state.imageURI}
+                                src={this.state.imageURI}
                                 style={{
                                     minWidth: '1px',
                                     minHeight: '1px'
@@ -129,7 +130,11 @@ class ScratchImage extends React.PureComponent {
 ScratchImage.ImageSourcePropType = PropTypes.oneOfType([
     PropTypes.shape({
         assetId: PropTypes.string.isRequired,
-        assetType: PropTypes.oneOf(Object.values(legacyConfig.storage.scratchStorage.AssetType)).isRequired
+        assetType: PropTypes.oneOf(
+            Object.values(
+                legacyConfig.storage.scratchStorage.AssetType
+            )
+        ).isRequired
     }),
     PropTypes.shape({
         uri: PropTypes.string.isRequired
@@ -137,8 +142,7 @@ ScratchImage.ImageSourcePropType = PropTypes.oneOfType([
 ]);
 
 ScratchImage.propTypes = {
-    imageSource: ScratchImage.ImageSourcePropType.isRequired,
-    platform: PropTypes.string
+    imageSource: ScratchImage.ImageSourcePropType.isRequired
 };
 
 ScratchImage.init();

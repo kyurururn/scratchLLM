@@ -2,7 +2,6 @@ import bindAll from 'lodash.bindall';
 import PropTypes from 'prop-types';
 import React from 'react';
 import {injectIntl} from 'react-intl';
-import {connect} from 'react-redux';
 
 import LibraryItemComponent from '../components/library-item/library-item.jsx';
 
@@ -22,6 +21,7 @@ class LibraryItem extends React.PureComponent {
             'startRotatingIcons',
             'stopRotatingIcons'
         ]);
+        this.hasIconsArray = Array.isArray(props.icons);
         this.state = {
             iconIndex: 0,
             isRotatingIcon: false
@@ -53,7 +53,7 @@ class LibraryItem extends React.PureComponent {
     handleMouseEnter () {
         if (!this.props.showPlayButton) {
             this.props.onMouseEnter(this.props.id);
-            if (this.props.icons && this.props.icons.length) {
+            if (this.hasIconsArray) {
                 this.stopRotatingIcons();
                 this.setState({
                     isRotatingIcon: true
@@ -64,7 +64,7 @@ class LibraryItem extends React.PureComponent {
     handleMouseLeave () {
         if (!this.props.showPlayButton) {
             this.props.onMouseLeave(this.props.id);
-            if (this.props.icons && this.props.icons.length) {
+            if (this.hasIconsArray) {
                 this.setState({
                     isRotatingIcon: false
                 }, this.stopRotatingIcons);
@@ -91,13 +91,18 @@ class LibraryItem extends React.PureComponent {
         this.setState({iconIndex: nextIconIndex});
     }
     curIconSource () {
-        if (this.props.icons &&
-            this.state.isRotatingIcon &&
-            this.state.iconIndex < this.props.icons.length &&
-            this.props.icons[this.state.iconIndex]) {
-            return this.props.icons[this.state.iconIndex];
+        if (this.hasIconsArray) {
+            if (this.state.isRotatingIcon &&
+                this.state.iconIndex < this.props.icons.length &&
+                this.props.icons[this.state.iconIndex]) {
+                // multiple icons, currently animating: show current frame
+                return this.props.icons[this.state.iconIndex];
+            }
+            // multiple icons, not currently animating: show first frame
+            return this.props.icons[0];
         }
-        return this.props.iconSource;
+        // single icon
+        return this.props.icons;
     }
     render () {
         const iconSource = this.curIconSource();
@@ -116,7 +121,6 @@ class LibraryItem extends React.PureComponent {
                 internetConnectionRequired={this.props.internetConnectionRequired}
                 isPlaying={this.props.isPlaying}
                 name={this.props.name}
-                platform={this.props.platform}
                 showPlayButton={this.props.showPlayButton}
                 onBlur={this.handleBlur}
                 onClick={this.handleClick}
@@ -131,10 +135,6 @@ class LibraryItem extends React.PureComponent {
     }
 }
 
-const mapStateToProps = state => ({
-    platform: state.scratchGui.platform.platform
-});
-
 LibraryItem.propTypes = {
     bluetoothRequired: PropTypes.bool,
     collaborator: PropTypes.string,
@@ -146,9 +146,11 @@ LibraryItem.propTypes = {
     extensionId: PropTypes.string,
     featured: PropTypes.bool,
     hidden: PropTypes.bool,
-    iconSource: LibraryItemComponent.propTypes.iconSource, // single icon
-    icons: PropTypes.arrayOf(LibraryItemComponent.propTypes.iconSource), // rotating icons
-    id: PropTypes.number.isRequired,
+    icons: PropTypes.oneOfType([
+        LibraryItemComponent.propTypes.iconSource, // single icon
+        PropTypes.arrayOf(LibraryItemComponent.propTypes.iconSource) // rotating icons
+    ]),
+    id: PropTypes.string.isRequired,
     insetIconURL: PropTypes.string,
     internetConnectionRequired: PropTypes.bool,
     isPlaying: PropTypes.bool,
@@ -159,8 +161,7 @@ LibraryItem.propTypes = {
     onMouseEnter: PropTypes.func.isRequired,
     onMouseLeave: PropTypes.func.isRequired,
     onSelect: PropTypes.func.isRequired,
-    platform: PropTypes.string,
     showPlayButton: PropTypes.bool
 };
 
-export default connect(mapStateToProps)(injectIntl(LibraryItem));
+export default injectIntl(LibraryItem);

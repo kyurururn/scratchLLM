@@ -73,21 +73,35 @@ const getAssetTypeForFileExtension = function (fileExtension) {
 };
 
 /**
- * Figure out an `imageSource` (URI or asset ID & type) for a library item's icon.
+ * Figure out one or more icon(s) for a library item.
+ * If it's an animated thumbnail, this will return an array of `imageSource`.
+ * Otherwise it'll return just one `imageSource`.
  * @param {object} item - either a library item or one of a library item's costumes.
- * @returns {object} - an `imageSource` ready to be passed to a `ScratchImage`.
+ *   The latter is used internally as part of processing an animated thumbnail.
+ * @returns {LibraryItem.PropTypes.icons} - an `imageSource` or array of them, ready for `LibraryItem` & `ScratchImage`
  */
-const getItemImageSource = function (item) {
+const getItemIcons = function (item) {
+    const costumes = (item.json && item.json.costumes) || item.costumes;
+    if (costumes) {
+        return costumes.map(getItemIcons);
+    }
+
     if (item.rawURL) {
         return {
             uri: item.rawURL
         };
     }
 
-    // TODO: adjust libraries to be more storage-friendly; don't use split() here.
-    const md5 = item.costumes ? item.costumes[0].md5ext : item.md5ext;
-    if (md5) {
-        const [assetId, fileExtension] = md5.split('.');
+    if (item.assetId && item.dataFormat) {
+        return {
+            assetId: item.assetId,
+            assetType: getAssetTypeForFileExtension(item.dataFormat)
+        };
+    }
+
+    const md5ext = item.md5ext || item.md5 || item.baseLayerMD5;
+    if (md5ext) {
+        const [assetId, fileExtension] = md5ext.split('.');
         return {
             assetId: assetId,
             assetType: getAssetTypeForFileExtension(fileExtension)
@@ -233,9 +247,7 @@ class LibraryComponent extends React.Component {
     }
     renderElement (data) {
         const key = this.constructKey(data);
-        const iconSource = getItemImageSource(data);
-        const icons = data.json && data.json.costumes.map(getItemImageSource);
-
+        const icons = getItemIcons(data);
         return (<LibraryItem
             bluetoothRequired={data.bluetoothRequired}
             collaborator={data.collaborator}
@@ -244,9 +256,6 @@ class LibraryComponent extends React.Component {
             extensionId={data.extensionId}
             featured={data.featured}
             hidden={data.hidden}
-            iconMd5={data.costumes ? data.costumes[0].md5ext : data.md5ext}
-            iconRawURL={data.rawURL}
-            iconSource={iconSource}
             icons={icons}
             id={key}
             insetIconURL={data.insetIconURL}
@@ -265,7 +274,12 @@ class LibraryComponent extends React.Component {
             return data.map(item => this.renderElement(item));
         }
 
-        const dataByCategory = Object.groupBy(data, el => el.category);
+        // Object.groupBy is not available on older versions of javascript
+        const dataByCategory = data.reduce((acc, el) => {
+            acc[el.category] = acc[el.category] || [];
+            acc[el.category].push(el);
+            return acc;
+        }, {});
         const categoriesOrder = Object.values(CATEGORIES);
 
         return Object.entries(dataByCategory)

@@ -18,8 +18,6 @@ import closeIcon from './icon--close.svg';
 import {translateVideo} from '../../lib/libraries/decks/translate-video.js';
 import {translateImage} from '../../lib/libraries/decks/translate-image.js';
 
-import {PLATFORM} from '../../lib/platform.js';
-
 const CardHeader = ({onCloseCards, onShrinkExpandCards, onShowAll, totalSteps, step, expanded}) => (
     <div className={expanded ? styles.headerButtons : classNames(styles.headerButtons, styles.headerButtonsHidden)}>
         <div
@@ -151,7 +149,7 @@ VideoStep.propTypes = {
     video: PropTypes.string.isRequired
 };
 
-const ImageStep = ({title, image, platform}) => (<Fragment>
+const ImageStep = ({title, image}) => (<Fragment>
     <div className={styles.stepTitle}>
         {title}
     </div>
@@ -160,7 +158,7 @@ const ImageStep = ({title, image, platform}) => (<Fragment>
             className={styles.stepImage}
             draggable={false}
             key={image} /* Use src as key to prevent hanging around on slow connections */
-            src={platform === PLATFORM.ANDROID ? `file:///android_asset/www${image}` : image}
+            src={image}
         />
     </div>
 </Fragment>
@@ -168,8 +166,7 @@ const ImageStep = ({title, image, platform}) => (<Fragment>
 
 ImageStep.propTypes = {
     image: PropTypes.string.isRequired,
-    title: PropTypes.node.isRequired,
-    platform: PropTypes.string
+    title: PropTypes.node.isRequired
 };
 
 const NextPrevButtons = ({isRtl, onNextStep, onPrevStep, expanded}) => (
@@ -220,7 +217,7 @@ CardHeader.propTypes = {
     totalSteps: PropTypes.number
 };
 
-const PreviewsStep = ({deckIds, content, onActivateDeckFactory, onShowAll, platform}) => (
+const PreviewsStep = ({deckIds, content, onActivateDeckFactory, onShowAll}) => (
     <Fragment>
         <div className={styles.stepTitle}>
             <FormattedMessage
@@ -239,7 +236,7 @@ const PreviewsStep = ({deckIds, content, onActivateDeckFactory, onShowAll, platf
                     <img
                         className={styles.deckImage}
                         draggable={false}
-                        src={platform === PLATFORM.ANDROID ? `file:///android_asset/www${content[id].img}` : content[id].img}
+                        src={content[id].img}
                     />
                     <div className={styles.deckName}>{content[id].name}</div>
                 </div>
@@ -275,8 +272,7 @@ PreviewsStep.propTypes = {
     }).isRequired,
     deckIds: PropTypes.arrayOf(PropTypes.string).isRequired,
     onActivateDeckFactory: PropTypes.func.isRequired,
-    onShowAll: PropTypes.func.isRequired,
-    platform: PropTypes.string
+    onShowAll: PropTypes.func.isRequired
 };
 
 const Cards = props => {
@@ -295,10 +291,9 @@ const Cards = props => {
         onShowAll,
         onNextStep,
         onPrevStep,
-        showVideos,
         step,
         expanded,
-        platform,
+        showVideos,
         ...posProps
     } = props;
     let {x, y} = posProps;
@@ -362,28 +357,26 @@ const Cards = props => {
                                     deckIds={steps[step].deckIds}
                                     onActivateDeckFactory={onActivateDeckFactory}
                                     onShowAll={onShowAll}
-                                    platform={platform}
                                 />
                             ) : (
                                 steps[step].video ? (
-                                    (platform === PLATFORM.WEB || platform === PLATFORM.ANDROID) && showVideos ? (
-                                        <VideoStep
-                                            dragging={dragging}
-                                            expanded={expanded}
-                                            video={translateVideo(steps[step].video, locale)}
-                                        />
-                                    ) : ( // Else show the deck image and title
-                                        <ImageStep
-                                            image={content[activeDeckId].img}
-                                            title={content[activeDeckId].name}
-                                            platform={platform}
-                                        />
-                                    )
+                                    showVideos ?
+                                        (
+                                            <VideoStep
+                                                dragging={dragging}
+                                                expanded={expanded}
+                                                video={translateVideo(steps[step].video, locale)}
+                                            />
+                                        ) : (
+                                            <ImageStep
+                                                image={content[activeDeckId].img}
+                                                title={content[activeDeckId].name}
+                                            />
+                                        )
                                 ) : (
                                     <ImageStep
                                         image={translateImage(steps[step].image, locale)}
                                         title={steps[step].title}
-                                        platform={platform}
                                     />
                                 )
                             )}
@@ -430,14 +423,9 @@ Cards.propTypes = {
     onShrinkExpandCards: PropTypes.func.isRequired,
     onStartDrag: PropTypes.func,
     showVideos: PropTypes.bool,
-    platform: PropTypes.string,
     step: PropTypes.number.isRequired,
     x: PropTypes.number,
     y: PropTypes.number
-};
-
-Cards.defaultProps = {
-    showVideos: true
 };
 
 export {

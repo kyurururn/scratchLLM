@@ -19,6 +19,7 @@ import {
 
 import CardsComponent from '../components/cards/cards.jsx';
 import {loadImageData} from '../lib/libraries/decks/translate-image.js';
+import {PLATFORM} from '../lib/platform.js';
 
 class Cards extends React.Component {
     componentDidMount () {
@@ -32,15 +33,22 @@ class Cards extends React.Component {
         }
     }
     render () {
+        const props = {
+            ...this.props,
+            // Assume user is offline and don't attempt to
+            // download and show videos
+            showVideos: this.props.platform !== PLATFORM.DESKTOP &&
+                this.props.platform !== PLATFORM.ANDROID
+        };
         return (
-            <CardsComponent {...this.props} />
+            <CardsComponent {...props} />
         );
     }
 }
 
 Cards.propTypes = {
     locale: PropTypes.string.isRequired,
-    platform: PropTypes.string
+    platform: PropTypes.oneOf(Object.keys(PLATFORM))
 };
 
 const mapStateToProps = state => ({

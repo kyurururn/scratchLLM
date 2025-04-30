@@ -7,7 +7,7 @@ import decksLibraryContent from '../lib/libraries/decks/index.jsx';
 import tutorialTags from '../lib/libraries/tutorial-tags';
 
 import analytics from '../lib/analytics';
-import {isScratchDesktop} from '../lib/isScratchDesktop';
+import {PLATFORM} from '../lib/platform.js';
 
 import LibraryComponent from '../components/library/library.jsx';
 
@@ -58,6 +58,9 @@ class TipsLibrary extends React.PureComponent {
             return window.open(window.location.origin + urlParams, '_blank');
         }
 
+        if (this.props.onTutorialSelect) {
+            this.props.onTutorialSelect();
+        }
         this.props.onActivateDeck(item.id);
     }
     render () {
@@ -73,11 +76,16 @@ class TipsLibrary extends React.PureComponent {
                 const isProjectTutorial = Object.prototype.hasOwnProperty.call(deck, 'requiredProjectId');
                 const isVideoOnlyTutorial = decksLibraryContent[id].steps.filter(s => s.title).length === 0;
 
-                if (isProjectTutorial && (this.props.hideTutorialProjects || isScratchDesktop())) {
+                if (isProjectTutorial &&
+                    (this.props.hideTutorialProjects ||
+                        this.props.platform === PLATFORM.DESKTOP ||
+                        this.props.platform === PLATFORM.ANDROID)
+                ) {
                     return false;
                 }
 
-                if (isVideoOnlyTutorial && isScratchDesktop()) {
+                if (isVideoOnlyTutorial &&
+                    (this.props.platform === PLATFORM.DESKTOP || this.props.platform === PLATFORM.ANDROID)) {
                     return false;
                 }
 
@@ -113,17 +121,20 @@ class TipsLibrary extends React.PureComponent {
 }
 
 TipsLibrary.propTypes = {
+    onTutorialSelect: PropTypes.func,
     intl: intlShape.isRequired,
     onActivateDeck: PropTypes.func.isRequired,
     onRequestClose: PropTypes.func,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    platform: PropTypes.oneOf(Object.keys(PLATFORM)),
     visible: PropTypes.bool,
     hideTutorialProjects: PropTypes.bool
 };
 
 const mapStateToProps = state => ({
     visible: state.scratchGui.modals.tipsLibrary,
-    projectId: state.scratchGui.projectState.projectId
+    projectId: state.scratchGui.projectState.projectId,
+    platform: state.scratchGui.platform.platform
 });
 
 const mapDispatchToProps = dispatch => ({

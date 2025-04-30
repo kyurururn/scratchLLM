@@ -1,5 +1,8 @@
 import {defineMessages} from 'react-intl';
 
+// TODO: These are not detected by the `i18n:src` script if the file is with `.ts` extension.
+// This issue might be affecting other .ts files as well.
+// https://scratchfoundation.atlassian.net/browse/UEPR-221
 export const messages = defineMessages({
     readAloudTitle: {
         id: 'gui.debugModal.readAloud.title',

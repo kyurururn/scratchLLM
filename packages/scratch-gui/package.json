@@ -1,6 +1,6 @@
 {
   "name": "@scratch/scratch-gui",
-  "version": "11.0.0",
+  "version": "11.1.0",
   "description": "Graphical User Interface for creating and running Scratch 3.0 projects",
   "author": "Massachusetts Institute of Technology",
   "license": "AGPL-3.0-only",
@@ -15,6 +15,18 @@
     ".": {
       "types": "./dist/types/index.d.ts",
       "default": "./dist/scratch-gui.js"
+    },
+    "./costumes": {
+      "default": "./src/lib/libraries/costumes.json"
+    },
+    "./sprites": {
+      "default": "./src/lib/libraries/sprites.json"
+    },
+    "./sounds": {
+      "default": "./src/lib/libraries/sounds.json"
+    },
+    "./backdrops": {
+      "default": "./src/lib/libraries/backdrops.json"
     },
     "./standalone": {
       "types": "./dist/types/index-standalone.d.ts",
@@ -43,9 +55,9 @@
   },
   "dependencies": {
     "@microbit/microbit-universal-hex": "0.2.2",
-    "@scratch/scratch-render": "11.0.0",
-    "@scratch/scratch-svg-renderer": "11.0.0",
-    "@scratch/scratch-vm": "11.0.0",
+    "@scratch/scratch-render": "11.1.0",
+    "@scratch/scratch-svg-renderer": "11.1.0",
+    "@scratch/scratch-vm": "11.1.0",
     "arraybuffer-loader": "1.0.8",
     "autoprefixer": "9.8.8",
     "balance-text": "3.3.1",
@@ -94,12 +106,12 @@
     "react-virtualized": "9.22.6",
     "react-visibility-sensor": "5.0.2",
     "redux-throttle": "0.1.1",
-    "scratch-audio": "2.0.110",
-    "scratch-blocks": "1.1.206",
-    "scratch-l10n": "5.0.184",
-    "scratch-paint": "3.0.196",
-    "scratch-render-fonts": "1.0.180",
-    "scratch-storage": "4.0.95",
+    "scratch-audio": "2.0.119",
+    "scratch-blocks": "1.1.209",
+    "scratch-l10n": "5.0.198",
+    "scratch-paint": "3.0.207",
+    "scratch-render-fonts": "1.0.182",
+    "scratch-storage": "4.0.106",
     "startaudiocontext": "1.2.1",
     "style-loader": "4.0.0",
     "to-style": "1.3.3",
@@ -137,7 +149,7 @@
     "eslint-import-resolver-webpack": "0.11.1",
     "eslint-plugin-import": "2.31.0",
     "eslint-plugin-jest": "22.21.0",
-    "eslint-plugin-react": "7.37.4",
+    "eslint-plugin-react": "7.37.5",
     "file-loader": "6.2.0",
     "gh-pages": "3.2.3",
     "html-webpack-plugin": "5.6.3",
