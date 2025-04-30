@@ -11,9 +11,30 @@ import classNames from 'classnames';
 import bluetoothIconURL from './bluetooth.svg';
 import internetConnectionIconURL from './internet-connection.svg';
 
+import {PLATFORM} from '../../lib/platform.js';
+
 /* eslint-disable react/prefer-stateless-function */
 class LibraryItemComponent extends React.PureComponent {
     render () {
+        const renderImage = (className, imageSource) => {
+            // Scratch Android and Scratch Desktop assume the user is offline and has
+            // local access to the image assets. In those cases we use the `ScratchImage`
+            // component which loads the local assets by using a queue. In Scratch Web
+            // we don't have the assets locally and want to directly download them from
+            // the assets service.
+            // TODO: Abstract this logic in the `ScratchImage` component itself.
+            const url = imageSource.rawUrl ?? imageSource.assetServiceUri;
+            return this.props.platform === PLATFORM.ANDROID ||
+                this.props.platform === PLATFORM.DESKTOP ?
+                <ScratchImage
+                    className={className}
+                    imageSource={imageSource}
+                /> :
+                <img
+                    className={className}
+                    src={url}
+                />
+        }
         return this.props.featured ? (
             <div
                 className={classNames(
@@ -38,10 +59,7 @@ class LibraryItemComponent extends React.PureComponent {
                         </div>
                     ) : null}
                     {this.props.iconSource ? (
-                        <ScratchImage
-                            className={styles.featuredImage}
-                            imageSource={this.props.iconSource}
-                        />
+                        renderImage(styles.featuredImage, this.props.iconSource)
                     ) : null}
                 </div>
                 {this.props.insetIconURL ? (
@@ -130,10 +148,7 @@ class LibraryItemComponent extends React.PureComponent {
                         onMouseEnter={this.props.showPlayButton ? this.props.onMouseEnter : null}
                         onMouseLeave={this.props.showPlayButton ? this.props.onMouseLeave : null}
                     >
-                        <ScratchImage
-                            className={styles.libraryItemImage}
-                            imageSource={this.props.iconSource}
-                        />
+                        {renderImage(styles.libraryItemImage, this.props.iconSource)}
                     </Box>
                 </Box>
                 <span className={styles.libraryItemName}>{this.props.name}</span>
@@ -178,6 +193,7 @@ LibraryItemComponent.propTypes = {
     onMouseLeave: PropTypes.func.isRequired,
     onPlay: PropTypes.func.isRequired,
     onStop: PropTypes.func.isRequired,
+    platform: PropTypes.oneOf(Object.keys(PLATFORM)),
     showPlayButton: PropTypes.bool
 };
 

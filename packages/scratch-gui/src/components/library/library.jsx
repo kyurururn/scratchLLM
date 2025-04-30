@@ -78,7 +78,7 @@ const getAssetTypeForFileExtension = function (fileExtension) {
  * Otherwise it'll return just one `imageSource`.
  * @param {object} item - either a library item or one of a library item's costumes.
  *   The latter is used internally as part of processing an animated thumbnail.
- * @returns {LibraryItem.PropTypes.icons} - an `imageSource` or array of them, ready for `LibraryItem` & `ScratchImage`
+ * @returns {LibraryItem.PropTypes.icons} - an `imageSource` or array of them
  */
 const getItemIcons = function (item) {
     const costumes = (item.json && item.json.costumes) || item.costumes;
@@ -95,7 +95,8 @@ const getItemIcons = function (item) {
     if (item.assetId && item.dataFormat) {
         return {
             assetId: item.assetId,
-            assetType: getAssetTypeForFileExtension(item.dataFormat)
+            assetType: getAssetTypeForFileExtension(item.dataFormat),
+            assetServiceUri: `https://cdn.assets.scratch.mit.edu/internalapi/asset/${item.assetId}.${item.dataFormat}/get/`
         };
     }
 
@@ -104,7 +105,8 @@ const getItemIcons = function (item) {
         const [assetId, fileExtension] = md5ext.split('.');
         return {
             assetId: assetId,
-            assetType: getAssetTypeForFileExtension(fileExtension)
+            assetType: getAssetTypeForFileExtension(fileExtension),
+            assetServiceUri: `https://cdn.assets.scratch.mit.edu/internalapi/asset/${md5ext}/get/`
         };
     }
 };

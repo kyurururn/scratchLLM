@@ -1,9 +1,13 @@
 import bindAll from 'lodash.bindall';
 import PropTypes from 'prop-types';
 import React from 'react';
+import {connect} from 'react-redux';
+import {compose} from 'redux';
 import {injectIntl} from 'react-intl';
 
 import LibraryItemComponent from '../components/library-item/library-item.jsx';
+import {PLATFORM} from '../lib/platform.js';
+
 
 class LibraryItem extends React.PureComponent {
     constructor (props) {
@@ -122,6 +126,7 @@ class LibraryItem extends React.PureComponent {
                 isPlaying={this.props.isPlaying}
                 name={this.props.name}
                 showPlayButton={this.props.showPlayButton}
+                platform={this.props.platform}
                 onBlur={this.handleBlur}
                 onClick={this.handleClick}
                 onFocus={this.handleFocus}
@@ -134,6 +139,12 @@ class LibraryItem extends React.PureComponent {
         );
     }
 }
+
+const mapStateToProps = (state) => {
+    return {
+        platform: state.scratchGui.platform.platform,
+    };
+};
 
 LibraryItem.propTypes = {
     bluetoothRequired: PropTypes.bool,
@@ -161,7 +172,11 @@ LibraryItem.propTypes = {
     onMouseEnter: PropTypes.func.isRequired,
     onMouseLeave: PropTypes.func.isRequired,
     onSelect: PropTypes.func.isRequired,
+    platform: PropTypes.oneOf(Object.keys(PLATFORM)),
     showPlayButton: PropTypes.bool
 };
 
-export default injectIntl(LibraryItem);
+export default compose(
+    injectIntl,
+    connect(mapStateToProps)
+)(LibraryItem);
