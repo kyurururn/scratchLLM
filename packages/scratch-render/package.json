@@ -60,10 +60,10 @@
     "scratch-render-fonts": "^1.0.0"
   },
   "devDependencies": {
-    "@babel/core": "7.26.10",
-    "@babel/eslint-parser": "7.27.0",
+    "@babel/core": "7.27.1",
+    "@babel/eslint-parser": "7.27.1",
     "@babel/polyfill": "7.12.1",
-    "@babel/preset-env": "7.26.9",
+    "@babel/preset-env": "7.27.1",
     "@scratch/scratch-vm": "11.2.0-feature-parity.2",
     "babel-loader": "9.2.1",
     "copy-webpack-plugin": "6.4.1",
