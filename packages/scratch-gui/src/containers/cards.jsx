@@ -19,28 +19,36 @@ import {
 
 import CardsComponent from '../components/cards/cards.jsx';
 import {loadImageData} from '../lib/libraries/decks/translate-image.js';
-import {notScratchDesktop} from '../lib/isScratchDesktop';
+import {PLATFORM} from '../lib/platform.js';
 
 class Cards extends React.Component {
     componentDidMount () {
         if (this.props.locale !== 'en') {
-            loadImageData(this.props.locale);
+            loadImageData(this.props.locale, this.props.platform);
         }
     }
     componentDidUpdate (prevProps) {
         if (this.props.locale !== prevProps.locale) {
-            loadImageData(this.props.locale);
+            loadImageData(this.props.locale, this.props.platform);
         }
     }
     render () {
+        const props = {
+            ...this.props,
+            // Assume user is offline and don't attempt to
+            // download and show videos
+            showVideos: this.props.platform !== PLATFORM.DESKTOP &&
+                this.props.platform !== PLATFORM.ANDROID
+        };
         return (
-            <CardsComponent {...this.props} />
+            <CardsComponent {...props} />
         );
     }
 }
 
 Cards.propTypes = {
-    locale: PropTypes.string.isRequired
+    locale: PropTypes.string.isRequired,
+    platform: PropTypes.oneOf(Object.keys(PLATFORM))
 };
 
 const mapStateToProps = state => ({
@@ -54,7 +62,7 @@ const mapStateToProps = state => ({
     isRtl: state.locales.isRtl,
     locale: state.locales.locale,
     dragging: state.scratchGui.cards.dragging,
-    showVideos: notScratchDesktop()
+    platform: state.scratchGui.platform.platform
 });
 
 const mapDispatchToProps = dispatch => ({

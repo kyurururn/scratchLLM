@@ -18,6 +18,7 @@ import {GUIStoragePropType} from '../gui-config';
 import {connect} from 'react-redux';
 import VM from '@scratch/scratch-vm';
 
+
 const dragTypes = [DragConstants.COSTUME, DragConstants.SOUND, DragConstants.SPRITE];
 const DroppableBackpack = DropAreaHOC(dragTypes)(BackpackComponent);
 

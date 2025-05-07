@@ -9,6 +9,7 @@ import Modal from '../../containers/modal.jsx';
 import Divider from '../divider/divider.jsx';
 import Filter from '../filter/filter.jsx';
 import TagButton from '../../containers/tag-button.jsx';
+import {legacyConfig} from '../../legacy-config';
 import Spinner from '../spinner/spinner.jsx';
 import {CATEGORIES} from '../../../src/lib/libraries/decks/index.jsx';
 
@@ -51,6 +52,64 @@ const messages = defineMessages({
 
 const ALL_TAG = {tag: 'all', intlLabel: messages.allTag};
 const tagListPrefix = [ALL_TAG];
+
+/**
+ * Find the AssetType which corresponds to a particular file extension. For example, 'png' => AssetType.ImageBitmap.
+ * @param {string} fileExtension - the file extension to look up.
+ * @returns {AssetType} - the AssetType corresponding to the extension, if any.
+ */
+const getAssetTypeForFileExtension = function (fileExtension) {
+    const compareOptions = {
+        sensitivity: 'accent',
+        usage: 'search'
+    };
+    const storage = legacyConfig.storage.scratchStorage;
+    for (const assetTypeId in storage.AssetType) {
+        const assetType = storage.AssetType[assetTypeId];
+        if (fileExtension.localeCompare(assetType.runtimeFormat, compareOptions) === 0) {
+            return assetType;
+        }
+    }
+};
+
+/**
+ * Figure out one or more icon(s) for a library item.
+ * If it's an animated thumbnail, this will return an array of `imageSource`.
+ * Otherwise it'll return just one `imageSource`.
+ * @param {object} item - either a library item or one of a library item's costumes.
+ *   The latter is used internally as part of processing an animated thumbnail.
+ * @returns {LibraryItem.PropTypes.icons} - an `imageSource` or array of them
+ */
+const getItemIcons = function (item) {
+    const costumes = (item.json && item.json.costumes) || item.costumes;
+    if (costumes) {
+        return costumes.map(getItemIcons);
+    }
+
+    if (item.rawURL) {
+        return {
+            uri: item.rawURL
+        };
+    }
+
+    if (item.assetId && item.dataFormat) {
+        return {
+            assetId: item.assetId,
+            assetType: getAssetTypeForFileExtension(item.dataFormat),
+            assetServiceUri: `https://cdn.assets.scratch.mit.edu/internalapi/asset/${item.assetId}.${item.dataFormat}/get/`
+        };
+    }
+
+    const md5ext = item.md5ext || item.md5 || item.baseLayerMD5;
+    if (md5ext) {
+        const [assetId, fileExtension] = md5ext.split('.');
+        return {
+            assetId: assetId,
+            assetType: getAssetTypeForFileExtension(fileExtension),
+            assetServiceUri: `https://cdn.assets.scratch.mit.edu/internalapi/asset/${md5ext}/get/`
+        };
+    }
+};
 
 class LibraryComponent extends React.Component {
     constructor (props) {
@@ -190,6 +249,7 @@ class LibraryComponent extends React.Component {
     }
     renderElement (data) {
         const key = this.constructKey(data);
+        const icons = getItemIcons(data);
         return (<LibraryItem
             bluetoothRequired={data.bluetoothRequired}
             collaborator={data.collaborator}
@@ -198,9 +258,7 @@ class LibraryComponent extends React.Component {
             extensionId={data.extensionId}
             featured={data.featured}
             hidden={data.hidden}
-            iconMd5={data.costumes ? data.costumes[0].md5ext : data.md5ext}
-            iconRawURL={data.rawURL}
-            icons={data.costumes}
+            icons={icons}
             id={key}
             insetIconURL={data.insetIconURL}
             internetConnectionRequired={data.internetConnectionRequired}
@@ -218,7 +276,12 @@ class LibraryComponent extends React.Component {
             return data.map(item => this.renderElement(item));
         }
 
-        const dataByCategory = Object.groupBy(data, el => el.category);
+        // Object.groupBy is not available on older versions of javascript
+        const dataByCategory = data.reduce((acc, el) => {
+            acc[el.category] = acc[el.category] || [];
+            acc[el.category].push(el);
+            return acc;
+        }, {});
         const categoriesOrder = Object.values(CATEGORIES);
 
         return Object.entries(dataByCategory)

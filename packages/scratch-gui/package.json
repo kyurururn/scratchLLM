@@ -1,6 +1,6 @@
 {
   "name": "@scratch/scratch-gui",
-  "version": "11.1.0",
+  "version": "11.2.0-feature-parity.2",
   "description": "Graphical User Interface for creating and running Scratch 3.0 projects",
   "author": "Massachusetts Institute of Technology",
   "license": "AGPL-3.0-only",
@@ -15,6 +15,18 @@
     ".": {
       "types": "./dist/types/index.d.ts",
       "default": "./dist/scratch-gui.js"
+    },
+    "./costumes": {
+      "default": "./src/lib/libraries/costumes.json"
+    },
+    "./sprites": {
+      "default": "./src/lib/libraries/sprites.json"
+    },
+    "./sounds": {
+      "default": "./src/lib/libraries/sounds.json"
+    },
+    "./backdrops": {
+      "default": "./src/lib/libraries/backdrops.json"
     },
     "./standalone": {
       "types": "./dist/types/index-standalone.d.ts",
@@ -43,9 +55,9 @@
   },
   "dependencies": {
     "@microbit/microbit-universal-hex": "0.2.2",
-    "@scratch/scratch-render": "11.1.0",
-    "@scratch/scratch-svg-renderer": "11.1.0",
-    "@scratch/scratch-vm": "11.1.0",
+    "@scratch/scratch-render": "11.2.0-feature-parity.2",
+    "@scratch/scratch-svg-renderer": "11.2.0-feature-parity.2",
+    "@scratch/scratch-vm": "11.2.0-feature-parity.2",
     "arraybuffer-loader": "1.0.8",
     "autoprefixer": "9.8.8",
     "balance-text": "3.3.1",
@@ -92,16 +104,18 @@
     "react-tabs": "2.3.1",
     "react-tooltip": "4.5.1",
     "react-virtualized": "9.22.6",
+    "react-visibility-sensor": "5.1.1",
     "redux-throttle": "0.1.1",
-    "scratch-audio": "2.0.119",
-    "scratch-blocks": "1.1.209",
-    "scratch-l10n": "5.0.198",
-    "scratch-paint": "3.0.207",
-    "scratch-render-fonts": "1.0.182",
-    "scratch-storage": "4.0.106",
+    "scratch-audio": "2.0.139",
+    "scratch-blocks": "1.1.210",
+    "scratch-l10n": "5.0.231",
+    "scratch-paint": "3.0.239",
+    "scratch-render-fonts": "1.0.190",
+    "scratch-storage": "4.0.130",
     "startaudiocontext": "1.2.1",
     "style-loader": "4.0.0",
     "to-style": "1.3.3",
+    "text-encoding": "0.7.0",
     "wav-encoder": "1.3.0",
     "xhr": "2.6.0"
   },
@@ -112,14 +126,14 @@
     "redux": "^3.7.2"
   },
   "devDependencies": {
-    "@babel/cli": "7.27.0",
-    "@babel/core": "7.26.10",
-    "@babel/eslint-parser": "7.27.0",
+    "@babel/cli": "7.27.1",
+    "@babel/core": "7.27.1",
+    "@babel/eslint-parser": "7.27.1",
     "@babel/plugin-proposal-object-rest-spread": "7.20.7",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
-    "@babel/plugin-transform-async-to-generator": "7.25.9",
-    "@babel/preset-env": "7.26.9",
-    "@babel/preset-react": "7.26.3",
+    "@babel/plugin-transform-async-to-generator": "7.27.1",
+    "@babel/preset-env": "7.27.1",
+    "@babel/preset-react": "7.27.1",
     "@types/prop-types": "15.7.14",
     "@types/react-modal": "3.16.3",
     "@typescript-eslint/eslint-plugin": "8.7.0",
@@ -141,9 +155,8 @@
     "html-webpack-plugin": "5.6.3",
     "jest": "21.2.1",
     "jest-junit": "7.0.0",
+    "mkdirp": "1.0.4",
     "raf": "3.4.1",
-    "react": "16.14.0",
-    "react-dom": "16.14.0",
     "react-test-renderer": "16.14.0",
     "redux-mock-store": "1.5.5",
     "rimraf": "2.7.1",
@@ -156,7 +169,7 @@
     "ts-loader": "9.5.2",
     "url-loader": "4.1.1",
     "web-audio-test-api": "0.5.2",
-    "webpack": "5.98.0",
+    "webpack": "5.99.7",
     "webpack-cli": "5.1.4",
     "webpack-dev-server": "5.2.1",
     "yauzl": "2.10.0"

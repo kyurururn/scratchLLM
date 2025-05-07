@@ -149,20 +149,19 @@ VideoStep.propTypes = {
     video: PropTypes.string.isRequired
 };
 
-const ImageStep = ({title, image}) => (
-    <Fragment>
-        <div className={styles.stepTitle}>
-            {title}
-        </div>
-        <div className={styles.stepImageContainer}>
-            <img
-                className={styles.stepImage}
-                draggable={false}
-                key={image} /* Use src as key to prevent hanging around on slow connections */
-                src={image}
-            />
-        </div>
-    </Fragment>
+const ImageStep = ({title, image}) => (<Fragment>
+    <div className={styles.stepTitle}>
+        {title}
+    </div>
+    <div className={styles.stepImageContainer}>
+        <img
+            className={styles.stepImage}
+            draggable={false}
+            key={image} /* Use src as key to prevent hanging around on slow connections */
+            src={image}
+        />
+    </div>
+</Fragment>
 );
 
 ImageStep.propTypes = {
@@ -292,9 +291,9 @@ const Cards = props => {
         onShowAll,
         onNextStep,
         onPrevStep,
-        showVideos,
         step,
         expanded,
+        showVideos,
         ...posProps
     } = props;
     let {x, y} = posProps;
@@ -361,18 +360,19 @@ const Cards = props => {
                                 />
                             ) : (
                                 steps[step].video ? (
-                                    showVideos ? (
-                                        <VideoStep
-                                            dragging={dragging}
-                                            expanded={expanded}
-                                            video={translateVideo(steps[step].video, locale)}
-                                        />
-                                    ) : ( // Else show the deck image and title
-                                        <ImageStep
-                                            image={content[activeDeckId].img}
-                                            title={content[activeDeckId].name}
-                                        />
-                                    )
+                                    showVideos ?
+                                        (
+                                            <VideoStep
+                                                dragging={dragging}
+                                                expanded={expanded}
+                                                video={translateVideo(steps[step].video, locale)}
+                                            />
+                                        ) : (
+                                            <ImageStep
+                                                image={content[activeDeckId].img}
+                                                title={content[activeDeckId].name}
+                                            />
+                                        )
                                 ) : (
                                     <ImageStep
                                         image={translateImage(steps[step].image, locale)}
@@ -426,10 +426,6 @@ Cards.propTypes = {
     step: PropTypes.number.isRequired,
     x: PropTypes.number,
     y: PropTypes.number
-};
-
-Cards.defaultProps = {
-    showVideos: true
 };
 
 export {
