@@ -126,13 +126,13 @@
     "redux": "^3.7.2"
   },
   "devDependencies": {
-    "@babel/cli": "7.27.1",
+    "@babel/cli": "7.27.2",
     "@babel/core": "7.27.1",
     "@babel/eslint-parser": "7.27.1",
     "@babel/plugin-proposal-object-rest-spread": "7.20.7",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
     "@babel/plugin-transform-async-to-generator": "7.27.1",
-    "@babel/preset-env": "7.27.1",
+    "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@types/prop-types": "15.7.14",
     "@types/react-modal": "3.16.3",
