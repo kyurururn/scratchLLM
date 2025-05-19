@@ -1,7 +1,7 @@
 const SvgElement = require('./svg-element');
 const convertFonts = require('./font-converter');
 const transformStrokeWidths = require('./transform-applier');
-const { sanitizeSvgText } = require('./sanitize-svg');
+const {sanitizeSvgText} = require('./sanitize-svg');
 
 /**
  * @param {SVGElement} svgTag the tag to search within
