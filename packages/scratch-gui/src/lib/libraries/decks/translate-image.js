@@ -3,6 +3,7 @@
  * Utility functions for handling tutorial images in multiple languages
  */
 
+import {PLATFORM} from '../../platform.js';
 import {enImages as defaultImages} from './en-steps.js';
 
 let savedImages = {};
@@ -74,8 +75,8 @@ const translations = {
     'ja-Hira': () => loadJapanese()
 };
 
-const loadImageData = locale => {
-    if (Object.prototype.hasOwnProperty.call(translations, locale)) {
+const loadImageData = (locale, platform) => {
+    if (platform !== PLATFORM.ANDROID && Object.prototype.hasOwnProperty.call(translations, locale)) {
         translations[locale]()
             .then(newImages => {
                 savedImages = newImages;

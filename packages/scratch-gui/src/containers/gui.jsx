@@ -26,6 +26,8 @@ import {
     closeDebugModal
 } from '../reducers/modals';
 
+import {setPlatform} from '../reducers/platform';
+
 import FontLoaderHOC from '../lib/font-loader-hoc.jsx';
 import LocalizationHOC from '../lib/localization-hoc.jsx';
 import SBFileUploaderHOC from '../lib/sb-file-uploader-hoc.jsx';
@@ -37,18 +39,20 @@ import vmListenerHOC from '../lib/vm-listener-hoc.jsx';
 import vmManagerHOC from '../lib/vm-manager-hoc.jsx';
 import cloudManagerHOC from '../lib/cloud-manager-hoc.jsx';
 import systemPreferencesHOC from '../lib/system-preferences-hoc.jsx';
+import {PLATFORM} from '../lib/platform.js';
 
 import GUIComponent from '../components/gui/gui.jsx';
-import {setIsScratchDesktop} from '../lib/isScratchDesktop.js';
 import {GUIStoragePropType} from '../gui-config';
 import {AccountMenuOptionsPropTypes} from '../lib/account-menu-options';
 
 class GUI extends React.Component {
     componentDidMount () {
-        setIsScratchDesktop(this.props.isScratchDesktop);
         this.props.onStorageInit(this.props.storage.scratchStorage);
         this.props.onVmInit(this.props.vm);
         this.props.storage.setProjectMetadata?.(this.props.projectId);
+        if (this.props.platform) {
+            this.props.setPlatform(this.props.platform);
+        }
     }
     componentDidUpdate (prevProps) {
         if (this.props.projectId !== prevProps.projectId) {
@@ -78,7 +82,6 @@ class GUI extends React.Component {
             cloudHost,
             error,
             isError,
-            isScratchDesktop,
             isShowingProject,
             onProjectLoaded,
             onStorageInit,
@@ -93,6 +96,7 @@ class GUI extends React.Component {
             loadingStateVisible,
             ...componentProps
         } = this.props;
+
 
         return (
             <GUIComponent
@@ -116,7 +120,6 @@ GUI.propTypes = {
     intl: intlShape,
     isError: PropTypes.bool,
     isLoading: PropTypes.bool,
-    isScratchDesktop: PropTypes.bool,
     isShowingProject: PropTypes.bool,
     isTotallyNormal: PropTypes.bool,
     loadingStateVisible: PropTypes.bool,
@@ -125,18 +128,20 @@ GUI.propTypes = {
     onStorageInit: PropTypes.func,
     onUpdateProjectId: PropTypes.func,
     onVmInit: PropTypes.func,
+    platform: PropTypes.oneOf(Object.keys(PLATFORM)),
+    setPlatform: PropTypes.func.isRequired,
     projectHost: PropTypes.string,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     shouldStopProject: PropTypes.bool,
     telemetryModalVisible: PropTypes.bool,
     username: PropTypes.string,
     userOwnsProject: PropTypes.bool,
+    // TODO: Is this unused?
     hideTutorialProjects: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 
 GUI.defaultProps = {
-    isScratchDesktop: false,
     isTotallyNormal: false,
     onStorageInit: () => {},
     onProjectLoaded: () => {},
@@ -144,7 +149,7 @@ GUI.defaultProps = {
     onVmInit: (/* vm */) => {}
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state, ownProps) => {
     const loadingState = state.scratchGui.projectState.loadingState;
     return {
         storage: state.scratchGui.config.storage,
@@ -164,6 +169,7 @@ const mapStateToProps = state => {
         isRtl: state.locales.isRtl,
         isShowingProject: getIsShowingProject(loadingState),
         loadingStateVisible: state.scratchGui.modals.loadingProject,
+        platform: ownProps.platform,
         projectId: state.scratchGui.projectState.projectId,
         soundsTabVisible: state.scratchGui.editorTab.activeTabIndex === SOUNDS_TAB_INDEX,
         targetIsStage: (
@@ -181,6 +187,7 @@ const mapDispatchToProps = dispatch => ({
     onActivateTab: tab => dispatch(activateTab(tab)),
     onActivateCostumesTab: () => dispatch(activateTab(COSTUMES_TAB_INDEX)),
     onActivateSoundsTab: () => dispatch(activateTab(SOUNDS_TAB_INDEX)),
+    setPlatform: platform => dispatch(setPlatform(platform)),
     onRequestCloseBackdropLibrary: () => dispatch(closeBackdropLibrary()),
     onRequestCloseCostumeLibrary: () => dispatch(closeCostumeLibrary()),
     onRequestCloseDebugModal: () => dispatch(closeDebugModal()),
