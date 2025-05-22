@@ -51,7 +51,7 @@
   "devDependencies": {
     "@babel/core": "7.27.1",
     "@babel/eslint-parser": "7.27.1",
-    "@babel/preset-env": "7.27.1",
+    "@babel/preset-env": "7.27.2",
     "babel-loader": "9.2.1",
     "copy-webpack-plugin": "6.4.1",
     "eslint": "8.57.1",
@@ -61,12 +61,12 @@
     "json": "9.0.6",
     "mkdirp": "2.1.6",
     "rimraf": "3.0.2",
-    "scratch-render-fonts": "1.0.190",
+    "scratch-render-fonts": "1.0.195",
     "scratch-semantic-release-config": "3.0.0",
     "scratch-webpack-configuration": "3.0.0",
     "semantic-release": "19.0.5",
     "tap": "16.3.10",
-    "webpack": "5.99.7",
+    "webpack": "5.99.8",
     "webpack-cli": "5.1.4",
     "webpack-dev-server": "5.2.1",
     "xmldom": "0.1.31"
