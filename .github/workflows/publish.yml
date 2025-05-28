@@ -72,6 +72,9 @@ jobs:
           npm version "$NEW_VERSION" --no-git-tag-version
           git add package* && git commit -m "chore(release): $NEW_VERSION [skip ci]"
 
+      - name: Install packages
+        run: npm install
+
       - name: Build packages
         run: npm run build
 
