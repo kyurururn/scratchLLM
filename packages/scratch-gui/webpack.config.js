@@ -136,7 +136,7 @@ const buildConfig = baseConfig.clone()
     .enableDevServer(process.env.PORT || 8601)
     .merge({
         devServer: {
-            server: 'https',
+            server: 'http',
             proxy: [
                 {
                     context: ['/cdn-assets'],
