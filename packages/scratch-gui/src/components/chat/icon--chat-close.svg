@@ -1,0 +1,11 @@
+<!-- Sidebar hide button: left chevron ('<') -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="false" role="img">
+  <title>Sidebar Hide — Chevron Left</title>
+  <desc>サイドバーを隠すための左向きチェブロン／山型矢印（アウトライン）。CSS変数で色や太さを調整できます。</desc>
+  <defs>
+    <style>
+      .stroke { fill: none; stroke: var(--icon-stroke, #ffffff); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+  <path class="stroke" d="M15 6l-6 6 6 6" />
+</svg>

@@ -317,3 +317,37 @@ $fade-out-distance: 15px;
 :global(.ReactModal__Body--open) {
     overflow: hidden;
 }
+
+.chat-pane {
+    width: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.is-dragging {
+    transition: none;
+}
+
+.visible {
+    width: 300px;
+}
+
+.chat-pane-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 10;
+    background-color: transparent;
+}
+
+.chat-pane-handle:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}

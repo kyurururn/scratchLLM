@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import {compose} from 'redux';
-import {connect} from 'react-redux';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
 import ReactModal from 'react-modal';
 import VM from '@scratch/scratch-vm';
-import {injectIntl, intlShape} from 'react-intl';
+import { injectIntl, intlShape } from 'react-intl';
 
 import ErrorBoundaryHOC from '../lib/error-boundary-hoc.jsx';
 import {
@@ -23,10 +23,12 @@ import {
     closeBackdropLibrary,
     closeTelemetryModal,
     openExtensionLibrary,
-    closeDebugModal
+    closeDebugModal,
+    openChatModal,
+    closeChat
 } from '../reducers/modals';
 
-import {setPlatform} from '../reducers/platform';
+import { setPlatform } from '../reducers/platform';
 
 import FontLoaderHOC from '../lib/font-loader-hoc.jsx';
 import LocalizationHOC from '../lib/localization-hoc.jsx';
@@ -39,14 +41,14 @@ import vmListenerHOC from '../lib/vm-listener-hoc.jsx';
 import vmManagerHOC from '../lib/vm-manager-hoc.jsx';
 import cloudManagerHOC from '../lib/cloud-manager-hoc.jsx';
 import systemPreferencesHOC from '../lib/system-preferences-hoc.jsx';
-import {PLATFORM} from '../lib/platform.js';
+import { PLATFORM } from '../lib/platform.js';
 
 import GUIComponent from '../components/gui/gui.jsx';
-import {GUIStoragePropType} from '../gui-config';
-import {AccountMenuOptionsPropTypes} from '../lib/account-menu-options';
+import { GUIStoragePropType } from '../gui-config';
+import { AccountMenuOptionsPropTypes } from '../lib/account-menu-options';
 
 class GUI extends React.Component {
-    componentDidMount () {
+    componentDidMount() {
         this.props.onStorageInit(this.props.storage.scratchStorage);
         this.props.onVmInit(this.props.vm);
         this.props.storage.setProjectMetadata?.(this.props.projectId);
@@ -54,7 +56,7 @@ class GUI extends React.Component {
             this.props.setPlatform(this.props.platform);
         }
     }
-    componentDidUpdate (prevProps) {
+    componentDidUpdate(prevProps) {
         if (this.props.projectId !== prevProps.projectId) {
             if (this.props.projectId !== null) {
                 this.props.onUpdateProjectId(this.props.projectId);
@@ -71,7 +73,7 @@ class GUI extends React.Component {
             this.props.vm.stopAll();
         }
     }
-    render () {
+    render() {
         if (this.props.isError) {
             throw new Error(
                 `Error in Scratch GUI [location=${window.location}]: ${this.props.error}`);
@@ -143,10 +145,10 @@ GUI.propTypes = {
 
 GUI.defaultProps = {
     isTotallyNormal: false,
-    onStorageInit: () => {},
-    onProjectLoaded: () => {},
-    onUpdateProjectId: () => {},
-    onVmInit: (/* vm */) => {}
+    onStorageInit: () => { },
+    onProjectLoaded: () => { },
+    onUpdateProjectId: () => { },
+    onVmInit: (/* vm */) => { }
 };
 
 const mapStateToProps = (state, ownProps) => {
@@ -162,6 +164,7 @@ const mapStateToProps = (state, ownProps) => {
         costumeLibraryVisible: state.scratchGui.modals.costumeLibrary,
         costumesTabVisible: state.scratchGui.editorTab.activeTabIndex === COSTUMES_TAB_INDEX,
         debugModalVisible: state.scratchGui.modals.debugModal,
+        chatModalVisible: state.scratchGui.modals.chatModal,
         error: state.scratchGui.projectState.error,
         isError: getIsError(loadingState),
         isFullScreen: state.scratchGui.mode.isFullScreen,
@@ -191,12 +194,29 @@ const mapDispatchToProps = dispatch => ({
     onRequestCloseBackdropLibrary: () => dispatch(closeBackdropLibrary()),
     onRequestCloseCostumeLibrary: () => dispatch(closeCostumeLibrary()),
     onRequestCloseDebugModal: () => dispatch(closeDebugModal()),
-    onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal())
+    onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal()),
+    onOpenChatModal: () => dispatch(openChatModal()),
+    onRequestCloseChatModal: () => dispatch(closeChat())
+});
+
+const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+    ...ownProps,
+    ...stateProps,
+    ...dispatchProps,
+    onOpenChatModal: () => (
+        stateProps.chatModalVisible ?
+            dispatchProps.onRequestCloseChatModal() :
+            dispatchProps.onOpenChatModal()
+    ),
+    onDockToSidebar: () => {
+        dispatchProps.onOpenChatModal();
+    }
 });
 
 const ConnectedGUI = injectIntl(connect(
     mapStateToProps,
-    mapDispatchToProps
+    mapDispatchToProps,
+    mergeProps
 )(GUI));
 
 // note that redux's 'compose' function is just being used as a general utility to make

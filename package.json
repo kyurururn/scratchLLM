@@ -36,5 +36,8 @@
     "husky": "8.0.3",
     "npm": "10.9.2",
     "ts-node": "10.9.2"
+  },
+  "dependencies": {
+    "scratchblocks": "^3.6.4"
   }
 }

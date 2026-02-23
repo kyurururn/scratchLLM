@@ -1,0 +1,15 @@
+<!-- Filled chat bubble with three dots -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="false" role="img">
+  <title>Chat Icon — Filled</title>
+  <desc>丸みのある吹き出しと3つの点のチャットアイコン（塗りつぶし）</desc>
+  <defs>
+    <style>
+      .fill { fill: var(--icon-fill, #ffffff); }
+      .dots { fill: var(--icon-dots, #ffffff); }
+    </style>
+  </defs>
+  <path class="fill" d="M4 5.5C4 4.119 5.12 3 6.5 3h11C19.88 3 21 4.12 21 5.5v6c0 1.38-1.12 2.5-2.5 2.5H15l-3.5 3.5c-.2.2-.51.3-.78.22-.28-.08-.47-.32-.47-.61V14H6.5C5.12 14 4 12.88 4 11.5v-6z"/>
+  <circle class="dots" cx="9.5" cy="9.5" r="0.9"/>
+  <circle class="dots" cx="12" cy="9.5" r="0.9"/>
+  <circle class="dots" cx="14.5" cy="9.5" r="0.9"/>
+</svg>
