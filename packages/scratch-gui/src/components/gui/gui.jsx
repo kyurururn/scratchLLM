@@ -1,11 +1,11 @@
 import classNames from 'classnames';
 import omit from 'lodash.omit';
 import PropTypes from 'prop-types';
-import React, {useEffect, useCallback} from 'react';
-import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-intl';
-import {connect} from 'react-redux';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { defineMessages, FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { connect } from 'react-redux';
 import MediaQuery from 'react-responsive';
-import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import tabStyles from 'react-tabs/style/react-tabs.css';
 import VM from '@scratch/scratch-vm';
 import Renderer from '@scratch/scratch-render';
@@ -31,10 +31,10 @@ import DragLayer from '../../containers/drag-layer.jsx';
 import ConnectionModal from '../../containers/connection-modal.jsx';
 import TelemetryModal from '../telemetry-modal/telemetry-modal.jsx';
 
-import layout, {STAGE_SIZE_MODES} from '../../lib/layout-constants';
-import {resolveStageSize} from '../../lib/screen-utils';
-import {themeMap} from '../../lib/themes';
-import {AccountMenuOptionsPropTypes} from '../../lib/account-menu-options';
+import layout, { STAGE_SIZE_MODES } from '../../lib/layout-constants';
+import { resolveStageSize } from '../../lib/screen-utils';
+import { themeMap } from '../../lib/themes';
+import { AccountMenuOptionsPropTypes } from '../../lib/account-menu-options';
 
 import styles from './gui.css';
 import addExtensionIcon from './icon--extensions.svg';
@@ -42,8 +42,11 @@ import codeIcon from './icon--code.svg';
 import costumesIcon from './icon--costumes.svg';
 import soundsIcon from './icon--sounds.svg';
 import DebugModal from '../debug-modal/debug-modal.jsx';
-import {setPlatform} from '../../reducers/platform.js';
-import {PLATFORM} from '../../lib/platform.js';
+import { setPlatform } from '../../reducers/platform.js';
+import { PLATFORM } from '../../lib/platform.js';
+import ExpandableChat from '../chat/expandable-chat.jsx';
+import ChatModal from '../chat/chat.jsx';
+import ConsentModal from '../consent-modal/consent-modal.jsx';
 
 const messages = defineMessages({
     addExtension: {
@@ -88,6 +91,7 @@ const GUIComponent = props => {
         costumeLibraryVisible,
         costumesTabVisible,
         debugModalVisible,
+        chatModalVisible,
         onDebugModalClose,
         onTutorialSelect,
         enableCommunity,
@@ -140,6 +144,8 @@ const GUIComponent = props => {
         userOwnsProject,
         hideTutorialProjects,
         vm,
+        onRequestCloseChatModal,
+        onDockToSidebar,
         ...componentProps
     } = omit(props, 'dispatch', 'setPlatform');
     if (children) {
@@ -151,6 +157,112 @@ const GUIComponent = props => {
             setPlatform(props.platform);
         }
     }, [props.platform]);
+
+    const [chatPaneWidth, setChatPaneWidth] = useState(300);
+    const [isDragging, setIsDragging] = useState(false);
+    const [undockPosition, setUndockPosition] = useState(null);
+    const dragStartX = useRef(null);
+    const dragStartWidth = useRef(null);
+    const editorWrapperRef = useRef(null);
+
+    const handleMouseDown = useCallback(e => {
+        setIsDragging(true);
+        dragStartX.current = e.clientX;
+        dragStartWidth.current = chatPaneWidth;
+        document.body.style.cursor = 'col-resize';
+        e.preventDefault();
+    }, [chatPaneWidth]);
+
+    const handleUndock = useCallback(e => {
+        e.preventDefault();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const headerRect = e.currentTarget.getBoundingClientRect();
+        const offsetX = startX - headerRect.left;
+        const offsetY = startY - headerRect.top;
+
+        const handleMouseMove = moveEvent => {
+            const dx = moveEvent.clientX - startX;
+            const dy = moveEvent.clientY - startY;
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                cleanup();
+
+                const newPos = {
+                    left: moveEvent.clientX - offsetX,
+                    bottom: window.innerHeight - moveEvent.clientY,
+                    mouseX: moveEvent.clientX,
+                    mouseY: moveEvent.clientY,
+                    offsetX: offsetX,
+                    offsetY: offsetY
+                };
+                setUndockPosition(newPos);
+                if (onRequestCloseChatModal) onRequestCloseChatModal();
+            }
+        };
+
+        const handleMouseUp = () => {
+            cleanup();
+        };
+
+        const cleanup = () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+    }, [onRequestCloseChatModal]);
+
+    const handleDock = useCallback(() => {
+        setUndockPosition(null);
+        if (onDockToSidebar) {
+            onDockToSidebar();
+        }
+    }, [onDockToSidebar]);
+
+    const handleCloseChatModal = useCallback(() => {
+        setUndockPosition(null);
+        if (onRequestCloseChatModal) {
+            onRequestCloseChatModal();
+        }
+    }, [onRequestCloseChatModal]);
+
+    useEffect(() => {
+        if (!isDragging) return;
+
+        const handleMouseMove = e => {
+            const deltaX = e.clientX - dragStartX.current;
+            const newWidth = Math.max(200, Math.min(600, dragStartWidth.current + deltaX));
+            setChatPaneWidth(newWidth);
+        };
+
+        const handleMouseUp = () => {
+            setIsDragging(false);
+            document.body.style.cursor = '';
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging]);
+
+    useEffect(() => {
+        if (!editorWrapperRef.current) return;
+
+        const observer = new ResizeObserver(() => {
+            window.dispatchEvent(new Event('resize'));
+        });
+
+        observer.observe(editorWrapperRef.current);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, []);
 
     const tabClassNames = {
         tabs: styles.tabs,
@@ -286,7 +398,25 @@ const GUIComponent = props => {
                 />
                 <Box className={styles.bodyWrapper}>
                     <Box className={styles.flexWrapper}>
-                        <Box className={styles.editorWrapper}>
+                        <Box
+                            className={classNames(styles.chatPane, { [styles.visible]: chatModalVisible, [styles.isDragging]: isDragging })}
+                            style={chatModalVisible ? { width: chatPaneWidth } : {}}
+                        >
+                            <ChatModal
+                                onClose={handleCloseChatModal}
+                                onDragHeader={handleUndock}
+                            />
+                            <div
+                                className={styles.chatPaneHandle}
+                                onMouseDown={handleMouseDown}
+                            />
+                        </Box>
+                        <Box
+                            className={styles.editorWrapper}
+                            componentRef={ref => {
+                                editorWrapperRef.current = ref;
+                            }}
+                        >
                             <Tabs
                                 forceRenderTabPanel
                                 className={tabClassNames.tabs}
@@ -358,6 +488,12 @@ const GUIComponent = props => {
                                             theme={theme}
                                             vm={vm}
                                         />
+                                        <ExpandableChat
+                                            vm={vm}
+                                            chatModalVisible={chatModalVisible}
+                                            onDock={handleDock}
+                                            undockPosition={undockPosition}
+                                        />
                                     </Box>
                                     <Box className={styles.extensionButtonContainer}>
                                         <button
@@ -387,9 +523,9 @@ const GUIComponent = props => {
                                     {soundsTabVisible ? <SoundTab vm={vm} /> : null}
                                 </TabPanel>
                             </Tabs>
-                            {backpackVisible ? (
+                            {/* {backpackVisible ? (
                                 <Backpack host={backpackHost} />
-                            ) : null}
+                            ) : null} */}
                         </Box>
 
                         <Box className={classNames(styles.stageAndTargetWrapper, styles[stageSize])}>
@@ -412,6 +548,7 @@ const GUIComponent = props => {
                     </Box>
                 </Box>
                 <DragLayer />
+                <ConsentModal />
             </Box>
         );
     }}</MediaQuery>);
@@ -445,6 +582,7 @@ GUIComponent.propTypes = {
     costumeLibraryVisible: PropTypes.bool,
     costumesTabVisible: PropTypes.bool,
     debugModalVisible: PropTypes.bool,
+    chatModalVisible: PropTypes.bool,
     onDebugModalClose: PropTypes.func,
     onTutorialSelect: PropTypes.func,
     enableCommunity: PropTypes.bool,

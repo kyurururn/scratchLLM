@@ -135,6 +135,20 @@ const distStandaloneConfig = baseConfig.clone()
 const buildConfig = baseConfig.clone()
     .enableDevServer(process.env.PORT || 8601)
     .merge({
+        devServer: {
+            server: 'https',
+            proxy: [
+                {
+                    context: ['/cdn-assets'],
+                    target: 'https://cdn.assets.scratch.mit.edu',
+                    changeOrigin: true,
+                    pathRewrite: { '^/cdn-assets': '' },
+                    secure: false
+                }
+            ]
+        }
+    })
+    .merge({
         entry: {
             gui: './src/playground/index.jsx',
             guistandalone: './src/playground/standalone.jsx',
@@ -156,7 +170,7 @@ const buildConfig = baseConfig.clone()
         ...commonHtmlWebpackPluginOptions,
         chunks: ['gui'],
         template: 'src/playground/index.ejs',
-        title: 'Scratch 3.0 GUI'
+        title: 'ScrAIch'
     }))
     .addPlugin(new HtmlWebpackPlugin({
         ...commonHtmlWebpackPluginOptions,
@@ -208,9 +222,9 @@ const buildDist = process.env.NODE_ENV === 'production' || process.env.BUILD_MOD
 
 let config;
 switch (process.env.BUILD_TYPE) {
-case 'dist': config = distConfig.get(); break;
-case 'dist-standalone': config = distStandaloneConfig.get(); break;
-default: config = buildConfig.get(); break;
+    case 'dist': config = distConfig.get(); break;
+    case 'dist-standalone': config = distStandaloneConfig.get(); break;
+    default: config = buildConfig.get(); break;
 }
 
 module.exports = buildDist ? config : buildConfig.get();

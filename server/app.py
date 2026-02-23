@@ -1,0 +1,351 @@
+import os
+import uuid
+import json
+import queue
+import argparse
+import threading
+from flask import Flask, request, jsonify, Response, send_from_directory
+from flask_cors import CORS
+from dotenv import load_dotenv
+from threading import Lock
+
+load_dotenv()
+
+# --- Argument Parsing ---
+parser = argparse.ArgumentParser(description='Scratch LLM Server')
+parser.add_argument(
+    '--no-approval',
+    action='store_true',
+    default=False,
+    help='起動時に承認モードをオフにする'
+)
+args = parser.parse_args()
+
+app = Flask(__name__, static_folder='.')
+CORS(app)
+
+# --- Global State ---
+state_lock = Lock()
+app_state = {
+    "approval_mode": not args.no_approval,
+    "ai_enabled": True,
+}
+
+# id -> {
+#   "input": str,
+#   "output": str | None,   # None = AI応答待ち
+#   "status": "waiting" | "ready",
+#   "student_queue": Queue
+# }
+pending_responses = {}
+pending_lock = Lock()
+
+admin_queues = []
+admin_queues_lock = Lock()
+
+
+# ─────────────────────────────────────────────
+# 管理者全員に通知
+# ─────────────────────────────────────────────
+def notify_admin(event_type: str, data: dict):
+    msg = f"event: {event_type}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+    with admin_queues_lock:
+        for q in list(admin_queues):
+            try:
+                q.put_nowait(msg)
+            except queue.Full:
+                pass
+
+
+# ─────────────────────────────────────────────
+# 管理者 SSE
+# ─────────────────────────────────────────────
+@app.route('/api/admin/events')
+def admin_events():
+    q = queue.Queue(maxsize=50)
+    with admin_queues_lock:
+        admin_queues.append(q)
+
+    with state_lock:
+        initial = dict(app_state)
+    with pending_lock:
+        initial["pending"] = [
+            {
+                "id": rid,
+                "input": v["input"],
+                "output": v["output"],
+                "status": v["status"]
+            }
+            for rid, v in pending_responses.items()
+        ]
+
+    def stream():
+        yield f"event: init\ndata: {json.dumps(initial, ensure_ascii=False)}\n\n"
+        try:
+            while True:
+                try:
+                    msg = q.get(timeout=25)
+                    yield msg
+                except queue.Empty:
+                    yield ": heartbeat\n\n"
+        finally:
+            with admin_queues_lock:
+                if q in admin_queues:
+                    admin_queues.remove(q)
+
+    return Response(stream(), mimetype='text/event-stream',
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+# ─────────────────────────────────────────────
+# 生徒側 SSE
+# ─────────────────────────────────────────────
+@app.route('/api/events/<request_id>')
+def student_events(request_id):
+    def stream():
+        with pending_lock:
+            entry = pending_responses.get(request_id)
+            if entry is None:
+                yield f"event: error\ndata: {json.dumps({'error': 'Not found'})}\n\n"
+                return
+            q = entry["student_queue"]
+        try:
+            while True:
+                try:
+                    msg = q.get(timeout=30)
+                    yield msg
+                    return
+                except queue.Empty:
+                    yield ": heartbeat\n\n"
+        finally:
+            pass
+
+    return Response(stream(), mimetype='text/event-stream',
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+# ─────────────────────────────────────────────
+# 状態取得
+# ─────────────────────────────────────────────
+@app.route('/api/status')
+def get_status():
+    with state_lock:
+        return jsonify(dict(app_state))
+
+
+# ─────────────────────────────────────────────
+# 承認モードのトグル
+# ─────────────────────────────────────────────
+@app.route('/api/admin/toggle-approval', methods=['POST'])
+def toggle_approval():
+    with state_lock:
+        app_state['approval_mode'] = not app_state['approval_mode']
+        new_val = app_state['approval_mode']
+    notify_admin('state_changed', {'approval_mode': new_val})
+    return jsonify({'approval_mode': new_val})
+
+
+# ─────────────────────────────────────────────
+# AI on/off トグル
+# ─────────────────────────────────────────────
+@app.route('/api/admin/toggle-ai', methods=['POST'])
+def toggle_ai():
+    with state_lock:
+        app_state['ai_enabled'] = not app_state['ai_enabled']
+        new_val = app_state['ai_enabled']
+    notify_admin('state_changed', {'ai_enabled': new_val})
+    return jsonify({'ai_enabled': new_val})
+
+
+# ─────────────────────────────────────────────
+# 承認
+# ─────────────────────────────────────────────
+@app.route('/api/admin/approve/<request_id>', methods=['POST'])
+def approve_response(request_id):
+    with pending_lock:
+        entry = pending_responses.pop(request_id, None)
+    if entry is None:
+        return jsonify({'error': 'Not found'}), 404
+    if entry['status'] != 'ready':
+        return jsonify({'error': 'AI response not ready yet'}), 409
+
+    msg = f"event: approved\ndata: {json.dumps({'response': entry['output']}, ensure_ascii=False)}\n\n"
+    entry['student_queue'].put_nowait(msg)
+    notify_admin('removed', {'id': request_id})
+    return jsonify({'status': 'approved'})
+
+
+# ─────────────────────────────────────────────
+# 拒否
+# ─────────────────────────────────────────────
+@app.route('/api/admin/reject/<request_id>', methods=['POST'])
+def reject_response(request_id):
+    data = request.json or {}
+    reason = data.get('reason', '先生がこの回答の表示を許可しませんでした。別の質問をしてみてください。')
+
+    with pending_lock:
+        entry = pending_responses.pop(request_id, None)
+    if entry is None:
+        return jsonify({'error': 'Not found'}), 404
+
+    msg = f"event: rejected\ndata: {json.dumps({'reason': reason}, ensure_ascii=False)}\n\n"
+    entry['student_queue'].put_nowait(msg)
+    notify_admin('removed', {'id': request_id})
+    return jsonify({'status': 'rejected'})
+
+
+# ─────────────────────────────────────────────
+# 管理者画面
+# ─────────────────────────────────────────────
+@app.route('/admin')
+def admin_ui():
+    return send_from_directory('.', 'admin.html')
+
+
+# ─────────────────────────────────────────────
+# バックグラウンドでOpenAI呼び出し
+# ─────────────────────────────────────────────
+def call_openai_async(request_id: str, messages: list, model: str):
+    """OpenAI APIを非同期で呼び出し、結果をpendingに保存して管理者へ通知"""
+    try:
+        api_key = os.environ.get('OPENAI_API_KEY')
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+
+        response = client.chat.completions.create(model=model, messages=messages)
+        response_content = response.choices[0].message.content
+
+        # 出力モデレーション
+        if response_content:
+            mod_res = client.moderations.create(input=response_content)
+            if mod_res.results[0].flagged:
+                print(f"Output Moderation Flagged for {request_id}")
+                # 拒否扱いにする
+                with pending_lock:
+                    entry = pending_responses.pop(request_id, None)
+                if entry:
+                    msg = f"event: rejected\ndata: {json.dumps({'reason': 'AIが不適切なコンテンツを生成したため、自動的にブロックされました。'}, ensure_ascii=False)}\n\n"
+                    entry['student_queue'].put_nowait(msg)
+                    notify_admin('removed', {'id': request_id})
+                return
+
+        # 応答をpendingに保存してstatusをreadyに更新
+        with pending_lock:
+            if request_id not in pending_responses:
+                return  # 既に拒否済み
+            pending_responses[request_id]['output'] = response_content
+            pending_responses[request_id]['status'] = 'ready'
+
+        # 管理者へ「応答準備完了」を通知
+        notify_admin('response_ready', {
+            'id': request_id,
+            'output': response_content
+        })
+
+    except Exception as e:
+        print(f"Background OpenAI error for {request_id}: {e}")
+        with pending_lock:
+            entry = pending_responses.pop(request_id, None)
+        if entry:
+            msg = f"event: rejected\ndata: {json.dumps({'reason': f'AIとの通信でエラーが発生しました: {str(e)}'}, ensure_ascii=False)}\n\n"
+            entry['student_queue'].put_nowait(msg)
+            notify_admin('removed', {'id': request_id})
+
+
+# ─────────────────────────────────────────────
+# LLM プロキシ (メイン)
+# ─────────────────────────────────────────────
+@app.route('/api/llm', methods=['POST'])
+def llm_proxy():
+    try:
+        with state_lock:
+            ai_enabled = app_state['ai_enabled']
+            approval_mode = app_state['approval_mode']
+
+        if not ai_enabled:
+            return jsonify({"error": "AI機能は現在オフになっています。", "disabled": True}), 503
+
+        data = request.json
+        messages = data.get('messages')
+        model = data.get('model', 'gpt-5.2')
+        # フロントから送られた生のユーザー入力（JSONを含まない）
+        user_input_display = data.get('userInput') or '(不明な入力)'
+
+        api_key = os.environ.get('OPENAI_API_KEY')
+        if not api_key:
+            return jsonify({"error": "OpenAI API key is not set."}), 500
+
+        # 入力モデレーション
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+        last_user_message = next(
+            (msg['content'] for msg in reversed(messages) if msg['role'] == 'user'), None
+        )
+
+        if last_user_message:
+            mod_res = client.moderations.create(input=last_user_message)
+            output = mod_res.results[0]
+            if output.flagged:
+                return jsonify({
+                    "error": "This content violates our safety policies.",
+                    "flagged": True,
+                    "categories": output.categories.model_dump()
+                }), 400
+
+        # 承認モード
+        if approval_mode:
+            request_id = str(uuid.uuid4())
+            student_q = queue.Queue(maxsize=1)
+            input_text = user_input_display
+
+            # ① 即座にpendingに登録（status=waiting, output=None）
+            with pending_lock:
+                pending_responses[request_id] = {
+                    "input": input_text,
+                    "output": None,
+                    "status": "waiting",
+                    "student_queue": student_q
+                }
+
+            # ② 管理者へ即座に通知（入力のみ、まだ出力なし）
+            notify_admin('new_request', {
+                "id": request_id,
+                "input": input_text,
+                "output": None,
+                "status": "waiting"
+            })
+
+            # ③ バックグラウンドでOpenAI呼び出し開始
+            t = threading.Thread(
+                target=call_openai_async,
+                args=(request_id, messages, model),
+                daemon=True
+            )
+            t.start()
+
+            # ④ 生徒にはrequest_idだけ返す
+            return jsonify({"pending": True, "request_id": request_id})
+
+        # 通常モード: 同期で処理
+        response = client.chat.completions.create(model=model, messages=messages)
+        response_content = response.choices[0].message.content
+
+        if response_content:
+            mod_out = client.moderations.create(input=response_content)
+            if mod_out.results[0].flagged:
+                return jsonify({
+                    "error": "The AI generated content that violates safety policies.",
+                    "flagged": True
+                }), 500
+
+        return jsonify(response.model_dump())
+
+    except Exception as e:
+        print(f"Error in llm_proxy: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+if __name__ == '__main__':
+    mode_str = "ON" if app_state['approval_mode'] else "OFF"
+    print(f"[Server] 承認モード: {mode_str}  (--no-approval で起動時OFF)")
+    app.run(port=3001, debug=True, threaded=True)

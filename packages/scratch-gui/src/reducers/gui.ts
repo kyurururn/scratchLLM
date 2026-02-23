@@ -2,6 +2,7 @@ import {applyMiddleware, compose, combineReducers} from 'redux';
 import alertsReducer, {alertsInitialState} from './alerts';
 import assetDragReducer, {assetDragInitialState} from './asset-drag';
 import cardsReducer, {cardsInitialState} from './cards';
+import chatHistoryReducer, {chatHistoryInitialState} from './chat-history';
 import colorPickerReducer, {colorPickerInitialState} from './color-picker';
 import connectionModalReducer, {connectionModalInitialState} from './connection-modal';
 import customProceduresReducer, {customProceduresInitialState} from './custom-procedures';
@@ -41,6 +42,7 @@ const buildInitialState = (config: GUIConfig) => ({
     assetDrag: assetDragInitialState,
     blockDrag: blockDragInitialState,
     cards: cardsInitialState,
+    chatHistory: chatHistoryInitialState,
     colorPicker: colorPickerInitialState,
     config,
     connectionModal: connectionModalInitialState,
@@ -150,6 +152,7 @@ const guiReducer = combineReducers({
     assetDrag: assetDragReducer,
     blockDrag: blockDragReducer,
     cards: cardsReducer,
+    chatHistory: chatHistoryReducer,
     colorPicker: colorPickerReducer,
     connectionModal: connectionModalReducer,
     config: configReducer,

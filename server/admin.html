@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIアシスタント 管理者モニター</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #22263a;
+            --border: #2e3250;
+            --accent: #4f6ef7;
+            --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+            --text: #e2e8f0;
+            --text-muted: #8892b0;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            flex: 1;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge.connected {
+            background: #14532d44;
+            color: var(--green);
+            border: 1px solid #22c55e55;
+        }
+
+        .badge.disconnected {
+            background: #7f1d1d44;
+            color: var(--red);
+            border: 1px solid #ef444455;
+        }
+
+        /* ── Toggle ── */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .toggle-label {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: #374151;
+            border-radius: 12px;
+            transition: .25s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            top: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: .25s;
+        }
+
+        .toggle input:checked+.toggle-slider {
+            background: var(--accent);
+        }
+
+        .toggle input:checked+.toggle-slider::before {
+            transform: translateX(20px);
+        }
+
+        .toggle-value {
+            font-size: 0.78rem;
+            font-weight: 700;
+            min-width: 22px;
+        }
+
+        .toggle-value.on {
+            color: var(--green);
+        }
+
+        .toggle-value.off {
+            color: var(--red);
+        }
+
+        /* ── Main ── */
+        main {
+            max-width: 940px;
+            margin: 0 auto;
+            padding: 24px 18px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .section-header h2 {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .count-badge {
+            background: var(--accent);
+            color: #fff;
+            font-size: .7rem;
+            font-weight: 700;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* ── Empty ── */
+        #empty-state {
+            text-align: center;
+            padding: 56px 20px;
+            color: var(--text-muted);
+        }
+
+        #empty-state .icon {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 14px;
+            overflow: hidden;
+            animation: fadeIn .3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.77rem;
+            color: var(--text-muted);
+        }
+
+        .dot-waiting {
+            width: 8px;
+            height: 8px;
+            background: var(--yellow);
+            border-radius: 50%;
+            animation: pulse 1.2s infinite;
+        }
+
+        .dot-ready {
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .3
+            }
+        }
+
+        .status-label {
+            font-size: .72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 99px;
+        }
+
+        .status-label.waiting {
+            background: #713f1244;
+            color: var(--yellow);
+            border: 1px solid #f59e0b55;
+        }
+
+        .status-label.ready {
+            background: #14532d44;
+            color: var(--green);
+            border: 1px solid #22c55e55;
+        }
+
+        /* ── Panes ── */
+        .card-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .pane {
+            padding: 14px;
+        }
+
+        .pane:first-child {
+            border-right: 1px solid var(--border);
+        }
+
+        .pane-label {
+            font-size: .69rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .pane-content {
+            font-size: .85rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .pane-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .pane-content::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        .ai-loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: .82rem;
+        }
+
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        /* ── Footer / Buttons ── */
+        .card-footer {
+            padding: 10px 14px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 7px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform .1s, opacity .2s;
+        }
+
+        .btn:active {
+            transform: scale(.97);
+        }
+
+        .btn:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        .btn-approve {
+            background: var(--green);
+            color: #fff;
+        }
+
+        .btn-approve:hover:not(:disabled) {
+            background: #16a34a;
+        }
+
+        .btn-reject {
+            background: var(--surface2);
+            color: var(--red);
+            border: 1px solid #ef444444;
+        }
+
+        .btn-reject:hover:not(:disabled) {
+            background: #7f1d1d55;
+        }
+
+        /* ── Toast ── */
+        #toast-container {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            z-index: 999;
+        }
+
+        .toast {
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: .82rem;
+            font-weight: 600;
+            animation: toastIn .2s ease;
+            box-shadow: 0 4px 18px #0006;
+        }
+
+        .toast.success {
+            background: #14532d;
+            color: var(--green);
+            border: 1px solid #22c55e55;
+        }
+
+        .toast.error {
+            background: #7f1d1d;
+            color: var(--red);
+            border: 1px solid #ef444455;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(16px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0)
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🖥 AIアシスタント 管理者モニター</h1>
+        <span id="conn-badge" class="badge disconnected">● 未接続</span>
+
+        <div class="toggle-group">
+            <span class="toggle-label">AI機能</span>
+            <label class="toggle"><input type="checkbox" id="ai-toggle" checked /><span
+                    class="toggle-slider"></span></label>
+            <span class="toggle-value on" id="ai-val">ON</span>
+        </div>
+
+        <div class="toggle-group">
+            <span class="toggle-label">承認モード</span>
+            <label class="toggle"><input type="checkbox" id="approval-toggle" checked /><span
+                    class="toggle-slider"></span></label>
+            <span class="toggle-value on" id="approval-val">ON</span>
+        </div>
+    </header>
+
+    <main>
+        <div class="section-header">
+            <h2>承認待ち一覧</h2>
+            <span class="count-badge" id="count">0</span>
+        </div>
+        <div id="empty-state">
+            <div class="icon">✅</div>
+            <p>現在、承認待ちのリクエストはありません。</p>
+        </div>
+        <div id="card-list"></div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script>
+        const SERVER = 'http://localhost:3001';
+        const cards = {}; // id -> { el, status }
+
+        // ── SSE 接続 ──
+        let evtSource;
+        function connect() {
+            if (evtSource) evtSource.close();
+            evtSource = new EventSource(`${SERVER}/api/admin/events`);
+
+            evtSource.addEventListener('init', e => {
+                const data = JSON.parse(e.data);
+                setAiEnabled(data.ai_enabled);
+                setApprovalMode(data.approval_mode);
+                (data.pending || []).forEach(item => addCard(item.id, item.input, item.output, item.status));
+                setBadge(true);
+            });
+
+            evtSource.addEventListener('state_changed', e => {
+                const d = JSON.parse(e.data);
+                if (d.ai_enabled !== undefined) setAiEnabled(d.ai_enabled);
+                if (d.approval_mode !== undefined) setApprovalMode(d.approval_mode);
+            });
+
+            // フェーズ①: 入力が来た（AIはまだ処理中）
+            evtSource.addEventListener('new_request', e => {
+                const d = JSON.parse(e.data);
+                addCard(d.id, d.input, d.output, d.status);
+            });
+
+            // フェーズ②: AIの応答が出た → カードに出力を追加して承認ボタンを有効化
+            evtSource.addEventListener('response_ready', e => {
+                const d = JSON.parse(e.data);
+                updateCardReady(d.id, d.output);
+            });
+
+            evtSource.addEventListener('removed', e => {
+                const d = JSON.parse(e.data);
+                removeCard(d.id);
+            });
+
+            evtSource.onerror = () => { setBadge(false); setTimeout(connect, 3000); };
+        }
+        connect();
+
+        // ── UI 状態 ──
+        function setBadge(online) {
+            const el = document.getElementById('conn-badge');
+            el.textContent = online ? '● 接続中' : '● 未接続';
+            el.className = 'badge ' + (online ? 'connected' : 'disconnected');
+        }
+        function setAiEnabled(val) {
+            document.getElementById('ai-toggle').checked = val;
+            const v = document.getElementById('ai-val');
+            v.textContent = val ? 'ON' : 'OFF';
+            v.className = 'toggle-value ' + (val ? 'on' : 'off');
+        }
+        function setApprovalMode(val) {
+            document.getElementById('approval-toggle').checked = val;
+            const v = document.getElementById('approval-val');
+            v.textContent = val ? 'ON' : 'OFF';
+            v.className = 'toggle-value ' + (val ? 'on' : 'off');
+        }
+
+        // ── トグル操作 ──
+        document.getElementById('ai-toggle').addEventListener('change', async () => {
+            const res = await fetch(`${SERVER}/api/admin/toggle-ai`, { method: 'POST' });
+            const d = await res.json(); setAiEnabled(d.ai_enabled);
+        });
+        document.getElementById('approval-toggle').addEventListener('change', async () => {
+            const res = await fetch(`${SERVER}/api/admin/toggle-approval`, { method: 'POST' });
+            const d = await res.json(); setApprovalMode(d.approval_mode);
+        });
+
+        // ── カード管理 ──
+        function updateEmptyState() {
+            const isEmpty = Object.keys(cards).length === 0;
+            document.getElementById('empty-state').style.display = isEmpty ? 'block' : 'none';
+            document.getElementById('count').textContent = Object.keys(cards).length;
+        }
+
+        function addCard(id, input, output, status) {
+            if (cards[id]) return;
+            status = status || 'waiting';
+
+            const isReady = status === 'ready' && output;
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.id = `card-${id}`;
+
+            card.innerHTML = `
+    <div class="card-header">
+      <span class="${isReady ? 'dot-ready' : 'dot-waiting'}"></span>
+      <span class="status-label ${isReady ? 'ready' : 'waiting'}" id="status-${id}">
+        ${isReady ? '✅ 応答あり' : '🔄 AI生成中...'}
+      </span>
+      &nbsp;|&nbsp; ID: ${id.slice(0, 8)}…
+    </div>
+    <div class="card-body">
+      <div class="pane">
+        <div class="pane-label">📝 生徒の入力</div>
+        <div class="pane-content">${escapeHtml(input)}</div>
+      </div>
+      <div class="pane">
+        <div class="pane-label">🤖 AIの出力</div>
+        <div class="pane-content" id="output-${id}">
+          ${isReady
+                    ? escapeHtml(output)
+                    : '<div class="ai-loading"><span class="spinner"></span><span>AIが生成中...</span></div>'}
+        </div>
+      </div>
+    </div>
+    <div class="card-footer" id="footer-${id}">
+      <button class="btn btn-reject" onclick="reject('${id}',this)">❌ 拒否</button>
+      <button class="btn btn-approve" id="approve-btn-${id}"
+        onclick="approve('${id}',this)"
+        ${isReady ? '' : 'disabled title="AI応答待ち"'}>
+        ✅ 承認
+      </button>
+    </div>
+  `;
+
+            document.getElementById('card-list').prepend(card);
+            cards[id] = { el: card, status };
+            updateEmptyState();
+        }
+
+        // AIの応答が来たら出力欄を更新して承認ボタンを有効化
+        function updateCardReady(id, output) {
+            if (!cards[id]) return;
+            cards[id].status = 'ready';
+
+            // ヘッダー更新
+            const statusEl = document.getElementById(`status-${id}`);
+            if (statusEl) {
+                statusEl.className = 'status-label ready';
+                statusEl.textContent = '✅ 応答あり';
+                const dot = statusEl.previousElementSibling;
+                if (dot) { dot.className = 'dot-ready'; }
+            }
+
+            // 出力欄更新
+            const outputEl = document.getElementById(`output-${id}`);
+            if (outputEl) outputEl.innerHTML = escapeHtml(output);
+
+            // 承認ボタン有効化（アニメーション付き）
+            const approveBtn = document.getElementById(`approve-btn-${id}`);
+            if (approveBtn) {
+                approveBtn.disabled = false;
+                approveBtn.removeAttribute('title');
+                approveBtn.style.animation = 'none';
+                approveBtn.offsetHeight; // reflow
+                approveBtn.style.animation = 'fadeIn .4s ease';
+            }
+        }
+
+        function removeCard(id) {
+            const entry = cards[id];
+            if (!entry) return;
+            entry.el.style.opacity = '0';
+            entry.el.style.transition = 'opacity .3s';
+            setTimeout(() => { entry.el.remove(); }, 300);
+            delete cards[id];
+            updateEmptyState();
+        }
+
+        // ── 承認 / 拒否 ──
+        async function approve(id, btn) {
+            disableFooter(id);
+            const res = await fetch(`${SERVER}/api/admin/approve/${id}`, { method: 'POST' });
+            if (res.ok) {
+                showToast('✅ 承認しました', 'success');
+                removeCard(id);
+            } else {
+                showToast('承認に失敗しました', 'error');
+                enableFooter(id);
+            }
+        }
+
+        async function reject(id, btn) {
+            disableFooter(id);
+            const res = await fetch(`${SERVER}/api/admin/reject/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: '先生がこの回答の表示を許可しませんでした。別の質問をしてみてください。' })
+            });
+            if (res.ok) {
+                showToast('❌ 拒否しました', 'error');
+                removeCard(id);
+            } else {
+                showToast('拒否に失敗しました', 'error');
+                enableFooter(id);
+            }
+        }
+
+        function disableFooter(id) {
+            document.getElementById(`footer-${id}`)?.querySelectorAll('.btn').forEach(b => b.disabled = true);
+        }
+        function enableFooter(id) {
+            const entry = cards[id];
+            document.getElementById(`footer-${id}`)?.querySelectorAll('.btn').forEach(b => {
+                if (b.id === `approve-btn-${id}` && entry?.status !== 'ready') return;
+                b.disabled = false;
+            });
+        }
+
+        // ── トースト ──
+        function showToast(message, type = 'success') {
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.textContent = message;
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        updateEmptyState();
+    </script>
+</body>
+
+</html>
