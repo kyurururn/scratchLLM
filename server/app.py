@@ -267,7 +267,7 @@ def llm_proxy():
 
         data = request.json
         messages = data.get('messages')
-        model = data.get('model', 'gpt-5.2')
+        model = data.get('model', 'gpt-5.4')
         # フロントから送られた生のユーザー入力（JSONを含まない）
         user_input_display = data.get('userInput') or '(不明な入力)'
 
