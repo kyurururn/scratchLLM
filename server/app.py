@@ -12,14 +12,14 @@ from threading import Lock
 load_dotenv()
 
 # --- Argument Parsing ---
-parser = argparse.ArgumentParser(description='Scratch LLM Server')
-parser.add_argument(
-    '--no-approval',
-    action='store_true',
-    default=False,
-    help='起動時に承認モードをオフにする'
-)
-args = parser.parse_args()
+# parser = argparse.ArgumentParser(description='Scratch LLM Server')
+# parser.add_argument(
+#     '--no-approval',
+#     action='store_true',
+#     default=False,
+#     help='起動時に承認モードをオフにする'
+# )
+# args = parser.parse_args()
 
 app = Flask(__name__, static_folder='.')
 CORS(app)
@@ -27,7 +27,8 @@ CORS(app)
 # --- Global State ---
 state_lock = Lock()
 app_state = {
-    "approval_mode": not args.no_approval,
+    # "approval_mode": not args.no_approval,
+    "approval_mode": False,
     "ai_enabled": True,
 }
 
@@ -347,5 +348,6 @@ def llm_proxy():
 
 if __name__ == '__main__':
     mode_str = "ON" if app_state['approval_mode'] else "OFF"
-    print(f"[Server] 承認モード: {mode_str}  (--no-approval で起動時OFF)")
+    # print(f"[Server] 承認モード: {mode_str}  (--no-approval で起動時OFF)")
+    print(f"[Server] 承認モード: {mode_str}")
     app.run(port=3001, debug=True, threaded=True)
