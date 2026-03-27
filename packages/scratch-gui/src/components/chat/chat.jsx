@@ -54,7 +54,7 @@ const renderMessageContent = text => {
 // For example, in a Vite or Create React App project, you can use a .env file:
 // VITE_GEMINI_API_KEY=YOUR_API_KEY_HERE
 // Then, access it using `import.meta.env.VITE_GEMINI_API_KEY` or `process.env.REACT_APP_GEMINI_API_KEY`.
-const API_URL = 'http://localhost:3001/api/llm';
+const API_URL = process.env.NODE_ENV === 'production' ? '/api/llm' : 'http://localhost:3001/api/llm';
 
 /* eslint-disable max-len */
 const SYSTEM_PROMPT = `
