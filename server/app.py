@@ -293,38 +293,38 @@ def llm_proxy():
                 }), 400
 
         # 承認モード
-        if approval_mode:
-            request_id = str(uuid.uuid4())
-            student_q = queue.Queue(maxsize=1)
-            input_text = user_input_display
+        # if approval_mode:
+        #     request_id = str(uuid.uuid4())
+        #     student_q = queue.Queue(maxsize=1)
+        #     input_text = user_input_display
 
-            # ① 即座にpendingに登録（status=waiting, output=None）
-            with pending_lock:
-                pending_responses[request_id] = {
-                    "input": input_text,
-                    "output": None,
-                    "status": "waiting",
-                    "student_queue": student_q
-                }
+        #     # ① 即座にpendingに登録（status=waiting, output=None）
+        #     with pending_lock:
+        #         pending_responses[request_id] = {
+        #             "input": input_text,
+        #             "output": None,
+        #             "status": "waiting",
+        #             "student_queue": student_q
+        #         }
 
-            # ② 管理者へ即座に通知（入力のみ、まだ出力なし）
-            notify_admin('new_request', {
-                "id": request_id,
-                "input": input_text,
-                "output": None,
-                "status": "waiting"
-            })
+        #     # ② 管理者へ即座に通知（入力のみ、まだ出力なし）
+        #     notify_admin('new_request', {
+        #         "id": request_id,
+        #         "input": input_text,
+        #         "output": None,
+        #         "status": "waiting"
+        #     })
 
-            # ③ バックグラウンドでOpenAI呼び出し開始
-            t = threading.Thread(
-                target=call_openai_async,
-                args=(request_id, messages, model),
-                daemon=True
-            )
-            t.start()
+        #     # ③ バックグラウンドでOpenAI呼び出し開始
+        #     t = threading.Thread(
+        #         target=call_openai_async,
+        #         args=(request_id, messages, model),
+        #         daemon=True
+        #     )
+        #     t.start()
 
-            # ④ 生徒にはrequest_idだけ返す
-            return jsonify({"pending": True, "request_id": request_id})
+        #     # ④ 生徒にはrequest_idだけ返す
+        #     return jsonify({"pending": True, "request_id": request_id})
 
         # 通常モード: 同期で処理
         response = client.chat.completions.create(model=model, messages=messages)
