@@ -198,7 +198,7 @@ const buildConfig = baseConfig.clone()
         chunks: ['player'],
         filename: 'player.html',
         template: 'src/playground/index.ejs',
-        title: 'Scratch 3.0 GUI: Player Example'
+        title: 'Scratch-LLM: Player Example'
     }))
     .addPlugin(new CopyWebpackPlugin({
         patterns: [
