@@ -8,7 +8,7 @@ import chatIcon from './icon--chat.svg';
 import ChatComponent from './chat.jsx';
 
 const ExpandableChat = props => {
-    const [expanded, setExpanded] = useState(false);
+    const [expanded, setExpanded] = useState(true);
     const [dimensions, setDimensions] = useState({ width: 325, height: 500, left: 328, bottom: 16, opacity: 1 });
     const [lastPosition, setLastPosition] = useState(null);
     const [resizingDirection, setResizingDirection] = useState(null);
@@ -16,6 +16,14 @@ const ExpandableChat = props => {
     const [isHoveringDock, setIsHoveringDock] = useState(false); // [NEW] Track dock zone hover
     const [isVisible, setIsVisible] = useState(true); // Track if component should be visible
     const [noTransition, setNoTransition] = useState(false); // Disable transitions during reset
+    const [hasBeenDocked, setHasBeenDocked] = useState(false);
+
+    // Track if it has ever been docked
+    React.useEffect(() => {
+        if (props.chatModalVisible) {
+            setHasBeenDocked(true);
+        }
+    }, [props.chatModalVisible]);
 
     // Watch for undock position updates from GUI
     React.useLayoutEffect(() => {
@@ -125,15 +133,25 @@ const ExpandableChat = props => {
                 left: 328,
                 bottom: 16
             }));
-        } else if (lastPosition) {
+            setExpanded(false);
+        } else {
+            // If it was previously docked in the sidebar (and not manually undocked),
+            // restore it to the sidebar mode.
+            if (hasBeenDocked && !props.undockPosition && props.onDock) {
+                props.onDock();
+                return;
+            }
+
             // Restore last position when expanding
-            setDimensions(prev => ({
-                ...prev,
-                left: lastPosition.left,
-                bottom: lastPosition.bottom
-            }));
+            if (lastPosition) {
+                setDimensions(prev => ({
+                    ...prev,
+                    left: lastPosition.left,
+                    bottom: lastPosition.bottom
+                }));
+            }
+            setExpanded(true);
         }
-        setExpanded(!expanded);
     };
 
     const startResize = useCallback((direction) => (e) => {
