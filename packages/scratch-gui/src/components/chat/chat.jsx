@@ -709,13 +709,17 @@ export class ChatComponent extends React.Component {
         if (!hasConsented) {
             return (
                 <div className={styles.container}>
-                    <div className={styles.header}>
-                        <div className={styles.headerTitle}>{'保護者の方へ (To Parents)'}</div>
+                    <div 
+                        className={styles.header}
+                        onMouseDown={this.props.onDragHeader}
+                        style={{ cursor: 'move' }}
+                    >
+                        <div className={styles.headerTitle}>{'AIチャットを使う前に'}</div>
                     </div>
                     <div className={styles.body} style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#575E75' }}>
                         <p style={{ fontSize: '0.9rem', lineHeight: '1.5', marginBottom: '20px' }}>
                             このAIチャット機能は、OpenAI社のサービスを利用しています。<br />
-                            お子様が安全に利用できるよう対策を行っていますが、保護者の監督のもとでご利用ください。<br />
+                            お子様が安全に利用できるよう対策を行っていますが、未成年の方は保護者の方の監修の上でご利用ください。<br />
                             <br />
                             <strong>個人情報（名前、住所、電話番号など）は絶対に入力しないでください。</strong>
                         </p>
