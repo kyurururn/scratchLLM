@@ -49,12 +49,10 @@ const renderMessageContent = text => {
     });
 };
 
-// IMPORTANT: Set your Gemini API Key in a secure environment variable.
-// Do not hardcode the key in this file.
-// For example, in a Vite or Create React App project, you can use a .env file:
-// VITE_GEMINI_API_KEY=YOUR_API_KEY_HERE
-// Then, access it using `import.meta.env.VITE_GEMINI_API_KEY` or `process.env.REACT_APP_GEMINI_API_KEY`.
-const API_URL = "https://scratchllm.kyurururn.net/api/llm";
+// API base URL is loaded from the .env file via REACT_APP_API_BASE_URL.
+// Create a .env file in packages/scratch-gui/ with:
+//   REACT_APP_API_BASE_URL=https://your-domain.example.com
+const API_URL = `${process.env.REACT_APP_API_BASE_URL}/api/llm`;
 
 /* eslint-disable max-len */
 const SYSTEM_PROMPT = `

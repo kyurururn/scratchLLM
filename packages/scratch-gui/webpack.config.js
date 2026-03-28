@@ -1,5 +1,9 @@
 const path = require('path');
 const webpack = require('webpack');
+const dotenv = require('dotenv');
+
+// Load .env file
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 // Plugins
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -56,7 +60,8 @@ const baseConfig = new ScratchWebpackConfigBuilder(
         'process.env.DEBUG': Boolean(process.env.DEBUG),
         'process.env.GA_ID': `"${process.env.GA_ID || 'UA-000000-01'}"`,
         'process.env.GTM_ENV_AUTH': `"${process.env.GTM_ENV_AUTH || ''}"`,
-        'process.env.GTM_ID': process.env.GTM_ID ? `"${process.env.GTM_ID}"` : null
+        'process.env.GTM_ID': process.env.GTM_ID ? `"${process.env.GTM_ID}"` : null,
+        'process.env.REACT_APP_API_BASE_URL': `"${process.env.REACT_APP_API_BASE_URL || ''}"` 
     }))
     .addPlugin(new CopyWebpackPlugin({
         patterns: [
