@@ -198,9 +198,9 @@ def reject_response(request_id):
 # ─────────────────────────────────────────────
 # 管理者画面
 # ─────────────────────────────────────────────
-@app.route('/admin')
-def admin_ui():
-    return send_from_directory('.', 'admin.html')
+# @app.route('/admin')
+# def admin_ui():
+#     return send_from_directory('.', 'admin.html')
 
 
 # ─────────────────────────────────────────────
